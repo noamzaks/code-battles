@@ -18,7 +18,7 @@ After cloning your fork, make sure to install all of the dependencies by running
 Initializing Firebase
 +++++++++++++++++++++
 
-To do that, head on over to the `Firebase Console <https://console.firebase.google.com/>`_, and do the following:
+To initialize a Firebase project for your game, head on over to the `Firebase Console <https://console.firebase.google.com/>`_, and do the following:
 
 - Add a new project, name it however you like. You don't need analytics, but you can enable them if you'd like.
 - Enable Cloud Firestore.
@@ -30,7 +30,7 @@ After following the above steps, you can run ``yarn dev`` to test your app local
 Setting Up Firebase Hosting
 +++++++++++++++++++++++++++
 
-Firebase Hosting makes it easy to host your code battles at a domain such as `code-battles.web.app`, and update it by running `yarn deploy`.
+Firebase Hosting makes it easy to host your code battles at a domain such as `code-battles.web.app`, and update it by running ``yarn deploy``.
 Inside the repository's root directory:
 
 - Install firebase tools by running ``npm i -g firebase-tools``. 

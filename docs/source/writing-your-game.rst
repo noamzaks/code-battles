@@ -22,7 +22,7 @@ The files you need to edit are:
 Game State
 ++++++++++
 
-Your `GameState` class **must** contain an ``is_over()`` method which returns a ``bool``, a ``time`` property which is a ``float`` in seconds, and a ``active_player_indices`` property which is a list of the indices of the active players.
+Your ``GameState`` class **must** contain an ``is_over()`` method which returns a ``bool``, a ``time`` property which is a ``float`` in seconds, and a ``active_player_indices`` property which is a list of the indices of the active players.
 
 Game Simulator
 ++++++++++++++
