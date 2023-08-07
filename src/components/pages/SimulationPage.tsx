@@ -151,7 +151,7 @@ const Simulation = () => {
         </h1>
         <h2 style={{ fontSize: "6vmin", margin: 0 }}>
           {
-            getLocalStorage("Cached tournament/info").teams.find(
+            getLocalStorage("Cached tournament/info")?.teams?.find(
               (t: any) => t.name === winner
             )?.members
           }

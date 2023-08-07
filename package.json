@@ -1,6 +1,6 @@
 {
   "name": "code-battles-components",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "React components for Code Battles, a fun group coding experience",
   "repository": "https://github.com/noamzaks/code-battles-components",
   "author": "Noam Zaks <imnoamzaks@gmail.com>",

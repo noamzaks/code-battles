@@ -14,3 +14,4 @@ This library enables you to create such an activity **without** having to do any
 
     getting-started
     writing-your-game
+    setting-up-event
