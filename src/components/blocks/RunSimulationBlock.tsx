@@ -18,8 +18,8 @@ const RunSimulationBlock = () => {
     key: "Player Count",
     defaultValue: 2,
   })
-  const [playerAPIs, setPlayerAPIs] = useLocalStorage<string[]>({
-    key: "Player APIs",
+  const [playerBots, setPlayerBots] = useLocalStorage<string[]>({
+    key: "Player Bots",
     defaultValue: ["None", "None"],
   })
   const [runningNoUI, setRunningNoUI] = useState(false)
@@ -27,7 +27,7 @@ const RunSimulationBlock = () => {
   const navigate = useNavigate()
 
   const run = () => {
-    navigate(`/simulation/${map.replaceAll(" ", "-")}/${playerAPIs.join("-")}`)
+    navigate(`/simulation/${map.replaceAll(" ", "-")}/${playerBots.join("-")}`)
   }
 
   const runNoUI = () => {
@@ -36,11 +36,11 @@ const RunSimulationBlock = () => {
       return
     }
     setRunningNoUI(true)
-    const players = playerAPIs.map((api) => (api === "None" ? "" : apis[api]))
+    const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
     pyscript.run(
       `run_noui_simulation("${map}", ${JSON.stringify(
         players
-      )}, ${JSON.stringify(playerAPIs)})`
+      )}, ${JSON.stringify(playerBots)})`
     )
   }
 
@@ -73,8 +73,8 @@ const RunSimulationBlock = () => {
       <BotSelector
         playerCount={playerCount}
         setPlayerCount={setPlayerCount}
-        playerAPIs={playerAPIs}
-        setPlayerAPIs={setPlayerAPIs}
+        playerBots={playerBots}
+        setPlayerBots={setPlayerBots}
         apis={apis}
       />
 

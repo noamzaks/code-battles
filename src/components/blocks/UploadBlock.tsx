@@ -19,7 +19,7 @@ const UploadBlock = () => {
   const navigate = useNavigate()
 
   return (
-    <Block title="APIs" logo="fa-solid fa-code-merge">
+    <Block title="Bots" logo="fa-solid fa-code-merge">
       <Autocomplete
         label="Name"
         icon={<i className="fa-solid fa-tag" />}
@@ -56,7 +56,7 @@ const UploadBlock = () => {
               setDoc(
                 doc(
                   firestore,
-                  `/apis/${authentication?.currentUser?.email?.split("@")[0]}`
+                  `/bots/${authentication?.currentUser?.email?.split("@")[0]}`
                 ),
                 userAPIs,
                 { merge: true }
@@ -101,7 +101,7 @@ const UploadBlock = () => {
                 setDoc(
                   doc(
                     firestore,
-                    `/apis/${authentication?.currentUser?.email?.split("@")[0]}`
+                    `/bots/${authentication?.currentUser?.email?.split("@")[0]}`
                   ),
                   userAPIs
                 ).then(() => {

@@ -4,16 +4,16 @@ import React from "react"
 interface Props {
   playerCount: number
   setPlayerCount: React.Dispatch<React.SetStateAction<number>>
-  playerAPIs: string[]
-  setPlayerAPIs: React.Dispatch<React.SetStateAction<string[]>>
+  playerBots: string[]
+  setPlayerBots: React.Dispatch<React.SetStateAction<string[]>>
   apis: any[]
 }
 
 const BotSelector: React.FC<Props> = ({
   playerCount,
   setPlayerCount,
-  playerAPIs,
-  setPlayerAPIs,
+  playerBots,
+  setPlayerBots,
   apis,
 }) => {
   return (
@@ -26,13 +26,13 @@ const BotSelector: React.FC<Props> = ({
         onChange={(c) => {
           if (c) {
             setPlayerCount(c)
-            while (playerAPIs.length < c) {
-              playerAPIs.push("None")
+            while (playerBots.length < c) {
+              playerBots.push("None")
             }
-            while (playerAPIs.length > c) {
-              playerAPIs.pop()
+            while (playerBots.length > c) {
+              playerBots.pop()
             }
-            setPlayerAPIs([...playerAPIs])
+            setPlayerBots([...playerBots])
           }
         }}
         icon={<i className="fa-solid fa-user-group" />}
@@ -43,12 +43,12 @@ const BotSelector: React.FC<Props> = ({
           key={index}
           mt="xs"
           icon={<i className="fa-solid fa-robot" />}
-          label={`Player ${index + 1} API`}
-          value={playerAPIs[index]}
+          label={`Player ${index + 1} Bot`}
+          value={playerBots[index]}
           onChange={(api) => {
             if (api) {
-              playerAPIs[index] = api
-              setPlayerAPIs([...playerAPIs])
+              playerBots[index] = api
+              setPlayerBots([...playerBots])
             }
           }}
           data={["None", ...Object.keys(apis).sort()]}

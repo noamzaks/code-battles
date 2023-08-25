@@ -14,12 +14,12 @@ const fetchPlayer = async (name: string, firestore: Firestore, auth: Auth) => {
     doc(firestore, "/tournament/" + name.toLowerCase())
   )
   const pick = selection.data()?.pick
-  const apis = await getDoc(doc(firestore, "/apis/" + name))
+  const apis = await getDoc(doc(firestore, "/bots/" + name))
   const api = apis.data()![pick]
 
   if (api !== undefined) {
     await setDoc(
-      doc(firestore, `/apis/admin`),
+      doc(firestore, `/bots/admin`),
       { [name[0].toUpperCase() + name.substring(1)]: api },
       { merge: true }
     )
@@ -74,7 +74,7 @@ const AdminBlock = () => {
 
   const publish = async () => {
     await setDoc(
-      doc(firestore, "/apis/public"),
+      doc(firestore, "/bots/public"),
       { [chosenBot]: apis[chosenBot] },
       { merge: true }
     )

@@ -28,8 +28,8 @@ const Round = () => {
     key: "Player Count",
     defaultValue: 2,
   })
-  const [playerAPIs, setPlayerAPIs] = useLocalStorage<string[]>({
-    key: "Player APIs",
+  const [playerBots, setPlayerBots] = useLocalStorage<string[]>({
+    key: "Player Bots",
     defaultValue: ["None", "None"],
   })
   const [map, setMap] = useLocalStorage<string>({
@@ -149,8 +149,8 @@ const Round = () => {
                 <BotSelector
                   playerCount={playerCount}
                   setPlayerCount={setPlayerCount}
-                  playerAPIs={playerAPIs}
-                  setPlayerAPIs={setPlayerAPIs}
+                  playerBots={playerBots}
+                  setPlayerBots={setPlayerBots}
                   apis={apis}
                 />
                 <Button
@@ -171,7 +171,7 @@ const Round = () => {
                   onClick={() => {
                     setRounds((rounds) => [
                       ...rounds,
-                      { players: playerAPIs, map },
+                      { players: playerBots, map },
                     ])
                   }}
                   style={{ width: "45%" }}

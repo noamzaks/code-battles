@@ -39,12 +39,12 @@ going inside Firestore to the Rules tab, and setting the rules to the following:
     rules_version = '2';
     service cloud.firestore {
         match /databases/{database}/documents {
-            match /apis/public {
+            match /bots/public {
                 allow read: if request.auth.uid != null;
-            allow write: if request.auth.token.email == "admin@gmail.com";
+                allow write: if request.auth.token.email == "admin@gmail.com";
             }
             
-            match /apis/{user} {
+            match /bots/{user} {
                 allow read, write: if request.auth.token.email == user + "@gmail.com" || request.auth.token.email == "admin@gmail.com";
             }
             
@@ -57,7 +57,7 @@ going inside Firestore to the Rules tab, and setting the rules to the following:
             }
         
             match /{document=**} {
-            allow read, write: if false;
+                allow read, write: if false;
             }
         }
     }
