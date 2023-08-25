@@ -54,7 +54,10 @@ const UploadBlock = () => {
               const result = e.target?.result as string
               userAPIs[name] = result
               setDoc(
-                doc(firestore, `/apis/${authentication?.currentUser?.uid}`),
+                doc(
+                  firestore,
+                  `/apis/${authentication?.currentUser?.email?.split("@")[0]}`
+                ),
                 userAPIs,
                 { merge: true }
               )
@@ -96,7 +99,10 @@ const UploadBlock = () => {
               if (name) {
                 delete userAPIs[name]
                 setDoc(
-                  doc(firestore, `/apis/${authentication?.currentUser?.uid}`),
+                  doc(
+                    firestore,
+                    `/apis/${authentication?.currentUser?.email?.split("@")[0]}`
+                  ),
                   userAPIs
                 ).then(() => {
                   setName("")

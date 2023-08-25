@@ -5,7 +5,6 @@ import { createContext, useContext } from "react"
 interface CodeBattlesRequiredConfiguration {
   firebase: any
   maps: string[]
-  players: Record<string, string>
 }
 
 interface CodeBattlesOptionalConfiguration {

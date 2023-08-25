@@ -30,10 +30,8 @@ Then, at each round, you should open the round page to the audience and simulate
 Firestore Security Rules
 ++++++++++++++++++++++++
 
-You can make sure your competition is secure against teams trying to get each other bots or changing their scores by doing the following:
-
-- Get the user id of your `admin` user.
-- Inside Firestore, go to the Rules tab. Set the rules to the following, where UID is **your** admin ID.
+You can make sure your competition is secure against teams trying to get each other's bots or changing their scores by simply
+going inside Firestore to the Rules tab, and setting the rules to the following:
 
 .. code-block::
     :linenos:
@@ -41,13 +39,13 @@ You can make sure your competition is secure against teams trying to get each ot
     rules_version = '2';
     service cloud.firestore {
         match /databases/{database}/documents {
-            match /apis/admin {
+            match /apis/public {
                 allow read: if request.auth.uid != null;
-                allow write: if false;
+            allow write: if request.auth.token.email == "admin@gmail.com";
             }
-        
+            
             match /apis/{user} {
-                allow read, write: if request.auth.uid == user || request.auth.uid == "UID";
+                allow read, write: if request.auth.token.email == user + "@gmail.com" || request.auth.token.email == "admin@gmail.com";
             }
             
             match /tournament/info {
@@ -55,11 +53,11 @@ You can make sure your competition is secure against teams trying to get each ot
             }
             
             match /tournament/{user} {
-                allow read, write: if request.auth.token.email == user + "@gmail.com" || request.auth.uid == "UID";
+                allow read, write: if request.auth.token.email == user + "@gmail.com" || request.auth.token.email == "admin@gmail.com";
             }
         
             match /{document=**} {
-                allow read, write: if false;
+            allow read, write: if false;
             }
         }
     }

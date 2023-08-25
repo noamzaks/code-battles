@@ -1,5 +1,6 @@
 import { Badge, Button, Loader, NumberInput, Slider } from "@mantine/core"
 import { useColorScheme } from "@mantine/hooks"
+import { notifications } from "@mantine/notifications"
 import React, { useCallback, useEffect, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Particles from "react-tsparticles"
@@ -72,6 +73,13 @@ const Simulation = () => {
           audio.volume = 1
           audio.play()
         }, 700)
+      } else {
+        notifications.show({
+          title: `${winner} won!`,
+          message: "They finished in 1st place!",
+          color: "green",
+          icon: <i className="fa-solid fa-crown" />,
+        })
       }
     }
   }, [])

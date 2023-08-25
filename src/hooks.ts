@@ -83,10 +83,10 @@ export const useAPIs = () => {
   const authentication = useAuthentication()
 
   const [adminAPIs, loadingAdminAPIs] = useCachedDocumentData(
-    doc(firestore, "/apis/admin")
+    doc(firestore, "/apis/public")
   )
   const [userAPIs, loadingUserAPIs] = useCachedDocumentData(
-    doc(firestore, `/apis/${authentication?.currentUser?.uid}`)
+    doc(firestore, `/apis/${authentication?.currentUser?.email?.split("@")[0]}`)
   )
 
   return [
@@ -104,7 +104,7 @@ export const useUserAPIs = () => {
   const authentication = useAuthentication()
 
   const [userAPIs, loadingUserAPIs] = useCachedDocumentData(
-    doc(firestore, `/apis/${authentication?.currentUser?.uid}`)
+    doc(firestore, `/apis/${authentication?.currentUser?.email?.split("@")[0]}`)
   )
 
   return [userAPIs, loadingUserAPIs]

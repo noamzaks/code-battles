@@ -7,6 +7,7 @@ import Login from "./Login"
 import HomePage from "./pages/HomePage"
 import NotFoundPage from "./pages/NotFoundPage"
 import RoundPage from "./pages/RoundPage"
+import SettingsPage from "./pages/SettingsPage"
 import SimulationPage from "./pages/SimulationPage"
 import ViewAPIPage from "./pages/ViewAPIPage"
 
@@ -42,6 +43,7 @@ const App: React.FC<Props> = ({ routes, blocks }) => {
           element={<SimulationPage />}
         />
         <Route path="/round" element={<RoundPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
         {Object.keys(routes)
           .sort()

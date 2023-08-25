@@ -9,23 +9,18 @@ import { useConfiguration, useFirestore } from "../../configuration"
 import { useUserAPIs } from "../../hooks"
 import Block from "./Block"
 
-const fetchPlayer = async (
-  name: string,
-  id: string,
-  firestore: Firestore,
-  auth: Auth
-) => {
+const fetchPlayer = async (name: string, firestore: Firestore, auth: Auth) => {
   const selection = await getDoc(
     doc(firestore, "/tournament/" + name.toLowerCase())
   )
   const pick = selection.data()?.pick
-  const apis = await getDoc(doc(firestore, "/apis/" + id))
+  const apis = await getDoc(doc(firestore, "/apis/" + name))
   const api = apis.data()![pick]
 
   if (api !== undefined) {
     await setDoc(
-      doc(firestore, `/apis/${auth.currentUser?.uid}`),
-      { [name]: api },
+      doc(firestore, `/apis/admin`),
+      { [name[0].toUpperCase() + name.substring(1)]: api },
       { merge: true }
     )
 
@@ -54,14 +49,15 @@ const AdminBlock = () => {
   const timeRef = useRef<HTMLInputElement>(null)
   const configuration = useConfiguration()
 
-  const fetchLatestAPIs = () => {
+  const fetchLatestAPIs = async () => {
     setLoading(true)
 
     const promises: Promise<void>[] = []
-    for (const name in configuration.players) {
+    const info = doc(firestore, "/tournament/info")
+    const d = (await getDoc(info)).data() as any
+    for (const team of d.teams) {
       const promise = fetchPlayer(
-        name,
-        configuration.players[name],
+        team.name.toLowerCase(),
         firestore,
         configuration.authentication
       )
@@ -78,7 +74,7 @@ const AdminBlock = () => {
 
   const publish = async () => {
     await setDoc(
-      doc(firestore, "/apis/admin"),
+      doc(firestore, "/apis/public"),
       { [chosenBot]: apis[chosenBot] },
       { merge: true }
     )
@@ -112,20 +108,29 @@ const AdminBlock = () => {
         mt="xs"
         fullWidth
         variant="white"
-        leftIcon={<i className="fa-solid fa-edit" />}
-        onClick={() => navigate("/round?edit=true")}
+        leftIcon={<i className="fa-solid fa-gear" />}
+        onClick={() => navigate("/settings")}
       >
-        Edit Round
+        Settings
       </Button>
-      <Button
-        mt="xs"
-        fullWidth
-        variant="white"
-        leftIcon={<i className="fa-solid fa-gamepad" />}
-        onClick={() => navigate("/round")}
-      >
-        View Round
-      </Button>
+      <Button.Group mt="xs">
+        <Button
+          style={{ width: "50%" }}
+          variant="white"
+          leftIcon={<i className="fa-solid fa-edit" />}
+          onClick={() => navigate("/round?edit=true")}
+        >
+          Edit Round
+        </Button>
+        <Button
+          style={{ width: "50%" }}
+          variant="white"
+          leftIcon={<i className="fa-solid fa-gamepad" />}
+          onClick={() => navigate("/round")}
+        >
+          View Round
+        </Button>
+      </Button.Group>
       <Button
         mt="xs"
         fullWidth
