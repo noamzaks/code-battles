@@ -49,10 +49,22 @@ const UploadBlock = () => {
           const file = (e.currentTarget.files ?? [])[0]
           if (file) {
             setLoading(true)
+
+            let n = name
+            if (n === "") {
+              let index = 0
+
+              while (userAPIs["auto" + index] !== undefined) {
+                index++
+              }
+
+              n = "auto" + index
+            }
+
             const reader = new FileReader()
             reader.onload = (e) => {
               const result = e.target?.result as string
-              userAPIs[name] = result
+              userAPIs[n] = result
               setDoc(
                 doc(
                   firestore,
@@ -64,7 +76,7 @@ const UploadBlock = () => {
                 .then(() => {
                   notifications.show({
                     title: "Upload successful!",
-                    message: `Your '${name}' API has been uploaded succesfully!`,
+                    message: `Your '${n}' API has been uploaded succesfully!`,
                     color: "green",
                     icon: <i className="fa-solid fa-check" />,
                   })
