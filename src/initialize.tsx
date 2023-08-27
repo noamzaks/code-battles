@@ -61,6 +61,17 @@ const initialize = () => {
     // @ts-ignore
     window.showWinner(playerNames[places[0]])
   }
+
+  // @ts-ignore
+  window.downloadJson = (filename: string, contents: string) => {
+    const a = document.createElement("a")
+    a.style.display = "none"
+    document.body.appendChild(a)
+    a.href = "data:text/json;charset=utf-8," + contents
+    a.download = filename
+    a.click()
+    document.body.removeChild(a)
+  }
 }
 
 export default initialize

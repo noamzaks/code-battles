@@ -10,6 +10,7 @@ import { parallax } from "../../particles"
 import {
   RoundInfo,
   getLocalStorage,
+  runNoUI,
   setLocalStorage,
   shuffle,
   updatePointModifier,
@@ -23,7 +24,7 @@ const Round = () => {
   const configuration = useConfiguration()
   const location = useLocation()
   const navigate = useNavigate()
-  const [apis] = useAPIs()
+  const [apis, loadingAPIs] = useAPIs()
   const [playerCount, setPlayerCount] = useLocalStorage<number>({
     key: "Player Count",
     defaultValue: 2,
@@ -44,7 +45,7 @@ const Round = () => {
     await loadFull(engine)
   }, [])
 
-  const results = getLocalStorage("Results", {})
+  const [results] = useLocalStorage<any>({ key: "Results" })
   const pointModifier: Record<string, number> =
     getLocalStorage("Point Modifier")
 
@@ -113,26 +114,41 @@ const Round = () => {
                           )}
                       </td>
                       <td>
-                        <Button
-                          leftIcon={<i className="fa-solid fa-play" />}
-                          compact
-                          onClick={() =>
-                            navigate(
-                              `/simulation/${round.map.replaceAll(
-                                " ",
-                                "-"
-                              )}/${round.players.join("-")}`
-                            )
-                          }
-                        >
-                          Simulate
-                        </Button>
+                        <Button.Group orientation="vertical">
+                          <Button
+                            leftIcon={<i className="fa-solid fa-play" />}
+                            compact
+                            onClick={() =>
+                              navigate(
+                                `/simulation/${round.map.replaceAll(
+                                  " ",
+                                  "-"
+                                )}/${round.players.join("-")}`
+                              )
+                            }
+                          >
+                            Simulate
+                          </Button>
+                          <Button
+                            leftIcon={<i className="fa-solid fa-forward" />}
+                            compact
+                            onClick={() =>
+                              runNoUI(round.map, apis, round.players)
+                            }
+                          >
+                            Simulate (No UI)
+                          </Button>
+                        </Button.Group>
                       </td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
+            <p
+              style={{ textAlign: "center", display: "none" }}
+              id="noui-progress"
+            />
             {location.search.includes("edit") && (
               <>
                 <Select

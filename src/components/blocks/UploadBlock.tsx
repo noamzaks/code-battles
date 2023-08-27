@@ -52,7 +52,7 @@ const UploadBlock = () => {
 
             let n = name
             if (n === "") {
-              let index = 0
+              let index = 1
 
               while (userAPIs["auto" + index] !== undefined) {
                 index++

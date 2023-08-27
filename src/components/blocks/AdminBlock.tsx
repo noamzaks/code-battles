@@ -1,26 +1,25 @@
 import { Button, Select } from "@mantine/core"
 import { TimeInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
-import { Auth } from "firebase/auth"
 import { Firestore, Timestamp, doc, getDoc, setDoc } from "firebase/firestore"
 import React, { useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useConfiguration, useFirestore } from "../../configuration"
+import { useFirestore } from "../../configuration"
 import { useUserAPIs } from "../../hooks"
 import Block from "./Block"
 
-const fetchPlayer = async (name: string, firestore: Firestore, auth: Auth) => {
+const fetchPlayer = async (name: string, firestore: Firestore) => {
   const selection = await getDoc(
     doc(firestore, "/tournament/" + name.toLowerCase())
   )
   const pick = selection.data()?.pick
-  const apis = await getDoc(doc(firestore, "/bots/" + name))
+  const apis = await getDoc(doc(firestore, "/bots/" + name.toLowerCase()))
   const api = apis.data()![pick]
 
   if (api !== undefined) {
     await setDoc(
       doc(firestore, `/bots/admin`),
-      { [name[0].toUpperCase() + name.substring(1)]: api },
+      { [name]: api },
       { merge: true }
     )
 
@@ -47,7 +46,6 @@ const AdminBlock = () => {
   const [apis] = useUserAPIs()
   const [chosenBot, setChosenBot] = useState("")
   const timeRef = useRef<HTMLInputElement>(null)
-  const configuration = useConfiguration()
 
   const fetchLatestAPIs = async () => {
     setLoading(true)
@@ -56,11 +54,7 @@ const AdminBlock = () => {
     const info = doc(firestore, "/tournament/info")
     const d = (await getDoc(info)).data() as any
     for (const team of d.teams) {
-      const promise = fetchPlayer(
-        team.name.toLowerCase(),
-        firestore,
-        configuration.authentication
-      )
+      const promise = fetchPlayer(team.name, firestore)
       promises.push(promise)
     }
 

@@ -1,3 +1,5 @@
+import * as pyscript from "./pyscript"
+
 export interface RoundInfo {
   players: string[]
   map: string
@@ -109,4 +111,17 @@ export const zeroPad = (s: string, l: number) => {
   }
 
   return s
+}
+
+export const runNoUI = (
+  map: string,
+  apis: Record<string, any>,
+  playerBots: string[]
+) => {
+  const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
+  pyscript.run(
+    `run_noui_simulation("${map}", ${JSON.stringify(players)}, ${JSON.stringify(
+      playerBots
+    )})`
+  )
 }

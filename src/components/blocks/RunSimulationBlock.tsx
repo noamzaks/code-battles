@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useConfiguration } from "../../configuration"
 import { useAPIs, useLocalStorage } from "../../hooks"
-import * as pyscript from "../../pyscript"
+import { runNoUI } from "../../utilities"
 import Block from "./Block"
 import BotSelector from "./BotSelector"
 
@@ -30,18 +30,13 @@ const RunSimulationBlock = () => {
     navigate(`/simulation/${map.replaceAll(" ", "-")}/${playerBots.join("-")}`)
   }
 
-  const runNoUI = () => {
+  const startRunNoUI = () => {
     if (loading) {
       console.error("Loading APIs, cannot run simulation yet!")
       return
     }
     setRunningNoUI(true)
-    const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
-    pyscript.run(
-      `run_noui_simulation("${map}", ${JSON.stringify(
-        players
-      )}, ${JSON.stringify(playerBots)})`
-    )
+    runNoUI(map, apis, playerBots)
   }
 
   useEffect(() => {
@@ -91,7 +86,7 @@ const RunSimulationBlock = () => {
           variant="default"
           w="50%"
           leftIcon={<i className="fa-solid fa-forward" />}
-          onClick={runNoUI}
+          onClick={startRunNoUI}
           loading={runningNoUI}
         >
           Run (No UI)
