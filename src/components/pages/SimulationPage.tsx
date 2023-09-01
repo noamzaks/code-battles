@@ -9,6 +9,7 @@ import { useAPIs, useAdmin } from "../../hooks"
 import { confetti } from "../../particles"
 import * as pyscript from "../../pyscript"
 import { getLocalStorage, getRank, toPlacing } from "../../utilities"
+import LogViewer from "../LogViewer"
 
 const PlayPauseButton = () => {
   const [playing, setPlaying] = useState(false)
@@ -87,15 +88,13 @@ const Simulation = () => {
   map = map?.split("&")[0].replaceAll("-", " ")
   playerapis = playerapis?.split("&")[0]
 
-  const players = playerapis
-    ?.split("-")
-    .map((api) => (api === "None" ? "" : apis[api]))
-  // const { ref, width, height } = useElementSize()
+  const playerNames = playerapis?.split("-") ?? []
+
+  const players = playerNames.map((api) => (api === "None" ? "" : apis[api]))
+  const hideLog = location.search.includes("log=false")
 
   useEffect(() => {
     if (!loading && players && playerapis) {
-      console.log(apis)
-      console.log("Here", players)
       pyscript.run(
         `initialize_simulation("${map}", ${JSON.stringify(
           players
@@ -216,76 +215,100 @@ const Simulation = () => {
         </div>
       )}
       {!loading && (
-        <>
-          {!location.search.includes("background=true") && (
-            <>
-              <div style={{ textAlign: "center" }}>
-                <NumberInput
-                  id="breakpoint"
-                  label="Breakpoint"
-                  min={0}
-                  icon={<i className="fa-solid fa-stopwatch" />}
-                  display="inline-block"
-                  maw="35%"
-                  mr="xs"
-                />
-                <Button
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            maxWidth: "100%",
+            height: "100%",
+            maxHeight: "100%",
+          }}
+        >
+          <div style={{ flexGrow: 1, textAlign: "center" }}>
+            {!location.search.includes("background=true") && (
+              <>
+                <div style={{ textAlign: "center", flexGrow: 1 }}>
+                  <NumberInput
+                    id="breakpoint"
+                    label="Breakpoint"
+                    min={0}
+                    icon={<i className="fa-solid fa-stopwatch" />}
+                    display="inline-block"
+                    maw="35%"
+                    mr="xs"
+                  />
+                  <Button
+                    style={{ flex: "none" }}
+                    my="xs"
+                    w={100}
+                    leftIcon={<i className="fa-solid fa-wand-magic" />}
+                    color={"grape"}
+                    id="step"
+                    mr="xs"
+                    radius="20px"
+                  >
+                    Step
+                  </Button>
+                  <PlayPauseButton />
+                </div>
+                <p style={{ margin: 0 }}>Playback Speed</p>
+                <Slider
                   style={{ flex: "none" }}
-                  my="xs"
-                  w={100}
-                  leftIcon={<i className="fa-solid fa-wand-magic" />}
-                  color={"grape"}
-                  id="step"
-                  mr="xs"
-                  radius="20px"
-                >
-                  Step
-                </Button>
-                <PlayPauseButton />
-              </div>
-              <p style={{ margin: 0 }}>Playback Speed</p>
-              <Slider
-                style={{ flex: "none" }}
-                mb={30}
-                w={500}
-                maw="85%"
-                min={-2}
-                defaultValue={0}
-                marks={[
-                  { value: -2, label: "1/4" },
-                  { value: -1, label: "1/2" },
-                  { value: 0, label: "1" },
-                  { value: 1, label: "2" },
-                  { value: 2, label: "4" },
-                  { value: 3, label: "8" },
-                  { value: 4, label: "16" },
-                  { value: 5, label: "32" },
-                  { value: 6, label: "64" },
-                ]}
-                max={6}
-                step={0.05}
-                mx="auto"
-                id="timescale"
-                label={(n) => Math.round(Math.pow(2, n) * 100) / 100}
-              />
-            </>
-          )}
-          <div
-            id="loader"
-            style={{
-              width: "100%",
-              height: "70%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <p id="loadingText">Initializing simulator...</p>
-            <Loader />
+                  mb={30}
+                  w={500}
+                  maw="85%"
+                  min={-2}
+                  defaultValue={0}
+                  marks={[
+                    { value: -2, label: "1/4" },
+                    { value: -1, label: "1/2" },
+                    { value: 0, label: "1" },
+                    { value: 1, label: "2" },
+                    { value: 2, label: "4" },
+                    { value: 3, label: "8" },
+                    { value: 4, label: "16" },
+                    { value: 5, label: "32" },
+                    { value: 6, label: "64" },
+                  ]}
+                  max={6}
+                  step={0.05}
+                  mx="auto"
+                  id="timescale"
+                  label={(n) => Math.round(Math.pow(2, n) * 100) / 100}
+                />
+              </>
+            )}
+            <div
+              id="loader"
+              style={{
+                width: "100%",
+                height: "70%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <p id="loadingText">Initializing simulator...</p>
+              <Loader />
+            </div>
+            <canvas id="simulation" style={{ borderRadius: 10 }} />
           </div>
-          <canvas id="simulation" style={{ borderRadius: 10 }} />
-        </>
+
+          {!hideLog && (
+            <div
+              style={{
+                flex: "none",
+                width: 400,
+                padding: 10,
+                maxHeight: "90%",
+              }}
+            >
+              <LogViewer playerNames={playerNames} />
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

@@ -123,7 +123,7 @@ const Round = () => {
                                 `/simulation/${round.map.replaceAll(
                                   " ",
                                   "-"
-                                )}/${round.players.join("-")}`
+                                )}/${round.players.join("-")}?log=false`
                               )
                             }
                           >

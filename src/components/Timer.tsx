@@ -21,13 +21,7 @@ const renderer = ({
 const Timer = () => {
   const firestore = useFirestore()
 
-  let d
-  try {
-    d = doc(firestore, "/tournament/info")
-  } catch (e) {
-    console.log("Error", e)
-    return
-  }
+  const d = doc(firestore, "/tournament/info")
   const [info] = useCachedDocumentData(d)
 
   if (!info?.next?.seconds) {
