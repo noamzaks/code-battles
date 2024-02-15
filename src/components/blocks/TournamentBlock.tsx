@@ -19,7 +19,7 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
   return (
     <Block
       title={title ?? "Tournament"}
-      logo="fa-solid fa-tree"
+      logo="fa-solid fa-ranking-star"
       inline={inline}
     >
       <Table>

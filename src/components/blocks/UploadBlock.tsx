@@ -24,12 +24,25 @@ const UploadBlock = () => {
         label="Name"
         icon={<i className="fa-solid fa-tag" />}
         value={name}
-        onChange={setName}
+        onChange={(s: string) => {
+          if (s.includes("-")) {
+            notifications.show({
+              title: `Invalid bot name!`,
+              message: `You can't use dashes in your bot names, since they are used for URLs. Competition bot names are not susceptible to such tomfoolery, but please do not test this.`,
+              icon: <i className="fa-solid fa-exclamation" />,
+              color: "yellow",
+              autoClose: 8000,
+            })
+          } else {
+            setName(s)
+          }
+        }}
+        limit={20}
+        maxDropdownHeight={250}
         data={Object.keys(apis)}
       />
       {!(apis && userAPIs && apis[name] && !userAPIs[name]) && (
         <Button
-          // variant="white"
           mt="xs"
           leftIcon={<i className="fa-solid fa-upload" />}
           fullWidth

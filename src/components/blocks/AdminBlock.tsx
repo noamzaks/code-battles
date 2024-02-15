@@ -101,7 +101,7 @@ const AdminBlock = () => {
       <Button
         mt="xs"
         fullWidth
-        variant="white"
+        variant="default"
         leftIcon={<i className="fa-solid fa-gear" />}
         onClick={() => navigate("/settings")}
       >
@@ -110,7 +110,7 @@ const AdminBlock = () => {
       <Button.Group mt="xs">
         <Button
           style={{ width: "50%" }}
-          variant="white"
+          variant="default"
           leftIcon={<i className="fa-solid fa-edit" />}
           onClick={() => navigate("/round?edit=true")}
         >
@@ -118,7 +118,7 @@ const AdminBlock = () => {
         </Button>
         <Button
           style={{ width: "50%" }}
-          variant="white"
+          variant="default"
           leftIcon={<i className="fa-solid fa-gamepad" />}
           onClick={() => navigate("/round")}
         >
@@ -128,7 +128,7 @@ const AdminBlock = () => {
       <Button
         mt="xs"
         fullWidth
-        variant="white"
+        variant="default"
         leftIcon={<i className="fa-solid fa-download" />}
         onClick={fetchLatestAPIs}
         loading={loading}
@@ -144,7 +144,7 @@ const AdminBlock = () => {
       <Button
         mt="xs"
         fullWidth
-        variant="white"
+        variant="default"
         leftIcon={<i className="fa-solid fa-save" />}
         onClick={saveRoundTime}
       >
@@ -168,7 +168,7 @@ const AdminBlock = () => {
       <Button
         mt="xs"
         fullWidth
-        variant="white"
+        variant="default"
         leftIcon={<i className="fa-solid fa-globe" />}
         onClick={publish}
       >

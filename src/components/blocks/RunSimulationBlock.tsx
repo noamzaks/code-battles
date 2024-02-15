@@ -10,9 +10,10 @@ import BotSelector from "./BotSelector"
 
 const RunSimulationBlock = () => {
   const [apis, loading] = useAPIs()
+  const configuration = useConfiguration()
   const [map, setMap] = useLocalStorage<string>({
     key: "Map",
-    defaultValue: "Cards",
+    defaultValue: configuration.maps[0],
   })
   const [playerCount, setPlayerCount] = useLocalStorage<number>({
     key: "Player Count",
@@ -23,7 +24,6 @@ const RunSimulationBlock = () => {
     defaultValue: ["None", "None"],
   })
   const [runningNoUI, setRunningNoUI] = useState(false)
-  const configuration = useConfiguration()
   const navigate = useNavigate()
 
   const run = () => {
@@ -55,7 +55,7 @@ const RunSimulationBlock = () => {
   return (
     <Block title="Run Simulation" logo="fa-solid fa-display">
       <Select
-        icon={<i className="fa-solid fa-map" />}
+        icon={<i className="fa-solid fa-earth-americas" />}
         label="Map"
         data={configuration.maps}
         value={map}

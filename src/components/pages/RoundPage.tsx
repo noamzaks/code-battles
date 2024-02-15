@@ -9,9 +9,7 @@ import { useAPIs, useLocalStorage } from "../../hooks"
 import { parallax } from "../../particles"
 import {
   RoundInfo,
-  getLocalStorage,
   runNoUI,
-  setLocalStorage,
   shuffle,
   updatePointModifier,
 } from "../../utilities"
@@ -35,7 +33,7 @@ const Round = () => {
   })
   const [map, setMap] = useLocalStorage<string>({
     key: "Map",
-    defaultValue: "Cards",
+    defaultValue: configuration.maps[0],
   })
   const [rounds, setRounds] = useLocalStorage<RoundInfo[]>({
     key: "Rounds",
@@ -45,11 +43,12 @@ const Round = () => {
     await loadFull(engine)
   }, [])
 
-  const [results] = useLocalStorage<any>({ key: "Results" })
-  const pointModifier: Record<string, number> =
-    getLocalStorage("Point Modifier")
+  const [results, setResults] = useLocalStorage<any>({ key: "Results" })
+  const [pointModifier] = useLocalStorage<Record<string, number>>({
+    key: "Point Modifier",
+  })
 
-  useEffect(updatePointModifier, [])
+  useEffect(updatePointModifier, [results])
 
   return (
     <>
@@ -123,7 +122,7 @@ const Round = () => {
                                 `/simulation/${round.map.replaceAll(
                                   " ",
                                   "-"
-                                )}/${round.players.join("-")}?log=false`
+                                )}/${round.players.join("-")}?showcase=true`
                               )
                             }
                           >
@@ -175,11 +174,22 @@ const Round = () => {
                   mt="xs"
                   onClick={() => {
                     setRounds([])
-                    setLocalStorage("Results", {})
+                    setResults({})
                   }}
-                  style={{ width: "45%", marginRight: "10%" }}
+                  style={{ width: "30%", marginRight: "5%" }}
                 >
                   Clear
+                </Button>
+                <Button
+                  color="red"
+                  leftIcon={<i className="fa-solid fa-refresh" />}
+                  mt="xs"
+                  onClick={() => {
+                    setResults({})
+                  }}
+                  style={{ width: "30%", marginRight: "5%" }}
+                >
+                  Clear Results
                 </Button>
                 <Button
                   leftIcon={<i className="fa-solid fa-plus" />}
@@ -190,7 +200,7 @@ const Round = () => {
                       { players: playerBots, map },
                     ])
                   }}
-                  style={{ width: "45%" }}
+                  style={{ width: "30%" }}
                 >
                   Add
                 </Button>

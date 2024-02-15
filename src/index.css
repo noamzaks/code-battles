@@ -1,5 +1,6 @@
 py-config,
 py-script,
-py-splashscreen {
+py-splashscreen,
+.py-error {
   display: none;
 }

@@ -57,13 +57,13 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
           borderRadius: 20,
           width: "100%",
           height: "95%",
-          maxHeight: "95%",
+          maxHeight: "calc(100% - 80px)",
           overflow: "auto",
           padding: 10,
         }}
       >
         {logs
-          .filter((log) => showLogs[log.playerIndex])
+          .filter((log) => log.playerIndex === -1 || showLogs[log.playerIndex])
           .map((log, index) => (
             <p key={index} style={{ margin: 0, color: log.color }}>
               {log.text}

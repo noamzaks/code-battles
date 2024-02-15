@@ -24,8 +24,8 @@ const PlayPauseButton = () => {
         // @ts-ignore
         if (!window.playing) {
           const audio = new Audio("/sounds/main.mp3")
+          audio.volume = getLocalStorage("Volume", 0)
           audio.loop = true
-          audio.volume = 0.25
           audio.play()
 
           // @ts-ignore
@@ -58,6 +58,7 @@ const Simulation = () => {
   const [winner, setWinner] = useState<string>()
   const navigate = useNavigate()
   const colorScheme = useColorScheme()
+  const showcaseMode = location.search.includes("showcase=true")
 
   useEffect(() => {
     // @ts-ignore
@@ -71,7 +72,7 @@ const Simulation = () => {
         }
         setTimeout(() => {
           const audio = new Audio("/sounds/nyoooom.mp3")
-          audio.volume = 1
+          audio.volume = getLocalStorage("Volume", 0)
           audio.play()
         }, 700)
       } else {
@@ -91,7 +92,6 @@ const Simulation = () => {
   const playerNames = playerapis?.split("-") ?? []
 
   const players = playerNames.map((api) => (api === "None" ? "" : apis[api]))
-  const hideLog = location.search.includes("log=false")
 
   useEffect(() => {
     if (!loading && players && playerapis) {
@@ -120,8 +120,9 @@ const Simulation = () => {
     <div
       style={{
         width: "100%",
-        height: "calc(100% - 75px)",
+        height: "100%",
         display: "flex",
+        paddingTop: 10,
         flexDirection: "column",
         alignItems: "center",
       }}
@@ -229,27 +230,31 @@ const Simulation = () => {
             {!location.search.includes("background=true") && (
               <>
                 <div style={{ textAlign: "center", flexGrow: 1 }}>
-                  <NumberInput
-                    id="breakpoint"
-                    label="Breakpoint"
-                    min={0}
-                    icon={<i className="fa-solid fa-stopwatch" />}
-                    display="inline-block"
-                    maw="35%"
-                    mr="xs"
-                  />
-                  <Button
-                    style={{ flex: "none" }}
-                    my="xs"
-                    w={100}
-                    leftIcon={<i className="fa-solid fa-wand-magic" />}
-                    color={"grape"}
-                    id="step"
-                    mr="xs"
-                    radius="20px"
-                  >
-                    Step
-                  </Button>
+                  {showcaseMode || (
+                    <>
+                      <NumberInput
+                        id="breakpoint"
+                        label="Breakpoint"
+                        min={0}
+                        icon={<i className="fa-solid fa-stopwatch" />}
+                        display="inline-block"
+                        maw="35%"
+                        mr="xs"
+                      />
+                      <Button
+                        style={{ flex: "none" }}
+                        my="xs"
+                        w={100}
+                        leftIcon={<i className="fa-solid fa-wand-magic" />}
+                        color={"grape"}
+                        id="step"
+                        mr="xs"
+                        radius="20px"
+                      >
+                        Step
+                      </Button>
+                    </>
+                  )}
                   <PlayPauseButton />
                 </div>
                 <p style={{ margin: 0 }}>Playback Speed</p>
@@ -296,7 +301,7 @@ const Simulation = () => {
             <canvas id="simulation" style={{ borderRadius: 10 }} />
           </div>
 
-          {!hideLog && (
+          {!showcaseMode && (
             <div
               style={{
                 flex: "none",

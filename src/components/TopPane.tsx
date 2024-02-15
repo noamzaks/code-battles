@@ -1,15 +1,21 @@
 import { signOut } from "firebase/auth"
 import React from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useAuthentication, useConfiguration } from "../configuration"
-import Timer from "./Timer"
+import TimerAndVolume from "./TimerAndVolume"
 
 const TopPane = () => {
   const configuration = useConfiguration()
   const authentication = useAuthentication()
   const [user] = useAuthState(authentication)
   const navigate = useNavigate()
+  const location = useLocation()
+  const showcaseMode = location.search.includes("showcase=true")
+
+  if (showcaseMode || location.pathname.startsWith("/round")) {
+    return <></>
+  }
 
   return (
     <div
@@ -58,7 +64,7 @@ const TopPane = () => {
         </div>
       </div>
       <div style={{ flexGrow: 1 }} />
-      {document.body.clientWidth >= 500 && <Timer />}
+      {document.body.clientWidth >= 500 && <TimerAndVolume />}
       <div style={{ flexGrow: 1 }} />
       <div
         style={{
@@ -71,8 +77,14 @@ const TopPane = () => {
       >
         {user && (
           <>
-            <p style={{ marginInlineEnd: 5 }}>
-              Welcome, <b>{user.email?.split("@")[0]}</b>!
+            <p style={{ marginInlineEnd: 5, textAlign: "right" }}>
+              Welcome,{" "}
+              <img
+                height={35}
+                src={`/images/teams/${user.email?.split("@")[0]}.png`}
+                style={{ marginInlineEnd: 5 }}
+              />
+              <b>{user.email?.split("@")[0]}</b>!
             </p>
             <i
               className="fa-solid fa-right-from-bracket"

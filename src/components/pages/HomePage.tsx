@@ -1,6 +1,6 @@
 import React from "react"
 import { useAdmin } from "../../hooks"
-import Timer from "../Timer"
+import TimerAndVolume from "../TimerAndVolume"
 import AdminBlock from "../blocks/AdminBlock"
 import PickBotBlock from "../blocks/PickBotBlock"
 import RunSimulationBlock from "../blocks/RunSimulationBlock"
@@ -20,13 +20,13 @@ const HomePage: React.FC<Props> = ({ blocks }) => {
         display: "flex",
         flexDirection: "column",
         overflow: "auto",
-        padding: 30,
-        paddingTop: 0,
+        padding: 20,
+        paddingTop: 10,
         width: 500,
-        maxWidth: "95%",
+        maxWidth: "97.5%",
       }}
     >
-      {document.body.clientWidth < 500 && <Timer />}
+      {document.body.clientWidth < 500 && <TimerAndVolume />}
 
       {admin && <AdminBlock />}
       <UploadBlock />
