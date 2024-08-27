@@ -55,7 +55,7 @@ const RunSimulationBlock = () => {
   return (
     <Block title="Run Simulation" logo="fa-solid fa-display">
       <Select
-        icon={<i className="fa-solid fa-earth-americas" />}
+        leftSection={<i className="fa-solid fa-earth-americas" />}
         label="Map"
         data={configuration.maps}
         value={map}
@@ -77,7 +77,7 @@ const RunSimulationBlock = () => {
         <Button
           variant="default"
           w="50%"
-          leftIcon={<i className="fa-solid fa-play" />}
+          leftSection={<i className="fa-solid fa-play" />}
           onClick={run}
         >
           Run
@@ -85,7 +85,7 @@ const RunSimulationBlock = () => {
         <Button
           variant="default"
           w="50%"
-          leftIcon={<i className="fa-solid fa-forward" />}
+          leftSection={<i className="fa-solid fa-forward" />}
           onClick={startRunNoUI}
           loading={runningNoUI}
         >

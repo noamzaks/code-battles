@@ -11,6 +11,10 @@ import SettingsPage from "./pages/SettingsPage"
 import SimulationPage from "./pages/SimulationPage"
 import ViewAPIPage from "./pages/ViewAPIPage"
 
+import "@mantine/core/styles.css"
+import "@mantine/dates/styles.css"
+import "@mantine/notifications/styles.css"
+
 interface Props {
   routes: Record<string, React.ReactNode>
   blocks?: React.ReactNode

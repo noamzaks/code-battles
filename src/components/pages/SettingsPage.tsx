@@ -21,13 +21,13 @@ const SettingsPage = () => {
     <div style={{ overflow: "auto", paddingTop: 40, paddingBottom: 40 }}>
       <h2>General</h2>
       <TextInput
-        icon={<i className="fa-solid fa-calculator" />}
+        leftSection={<i className="fa-solid fa-calculator" />}
         label="Point Formula (1st Place)"
         value={pointFormula1}
         onChange={(event) => setPointFormula1(event.currentTarget.value)}
       />
       <TextInput
-        icon={<i className="fa-solid fa-calculator" />}
+        leftSection={<i className="fa-solid fa-calculator" />}
         label="Point Formula (2nd Place)"
         value={pointFormula2}
         onChange={(event) => setPointFormula2(event.currentTarget.value)}
@@ -56,7 +56,7 @@ const SettingsPage = () => {
             <TextInput
               mb="xs"
               label="Name"
-              icon={<i className="fa-solid fa-circle-user" />}
+              leftSection={<i className="fa-solid fa-circle-user" />}
               value={team?.name}
               onChange={(event) => {
                 info.teams[teamIndex].name = event.currentTarget.value
@@ -70,7 +70,7 @@ const SettingsPage = () => {
             <TextInput
               mb="xs"
               label="Members"
-              icon={<i className="fa-solid fa-people-group" />}
+              leftSection={<i className="fa-solid fa-people-group" />}
               value={team?.members}
               onChange={(event) => {
                 info.teams[teamIndex].members = event.currentTarget.value
@@ -84,7 +84,7 @@ const SettingsPage = () => {
             <NumberInput
               mb="xs"
               label="Points"
-              icon={<i className="fa-solid fa-ranking-star" />}
+              leftSection={<i className="fa-solid fa-ranking-star" />}
               value={team?.points}
               onChange={(value) => {
                 info.teams[teamIndex].points = value
@@ -99,7 +99,7 @@ const SettingsPage = () => {
               fullWidth
               mt="xs"
               color="red"
-              leftIcon={<i className="fa-solid fa-trash" />}
+              leftSection={<i className="fa-solid fa-trash" />}
               onClick={() => {
                 info.teams.splice(teamIndex, 1)
                 setDoc(
@@ -116,7 +116,7 @@ const SettingsPage = () => {
       })}
       <Button
         fullWidth
-        leftIcon={<i className="fa-solid fa-plus" />}
+        leftSection={<i className="fa-solid fa-plus" />}
         onClick={() => {
           if (!info.teams) {
             info.teams = []

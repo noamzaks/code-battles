@@ -24,7 +24,7 @@ const BotSelector: React.FC<Props> = ({
         value={playerCount}
         min={1}
         onChange={(c) => {
-          if (c) {
+          if (typeof c === "number") {
             setPlayerCount(c)
             while (playerBots.length < c) {
               playerBots.push("None")
@@ -35,14 +35,14 @@ const BotSelector: React.FC<Props> = ({
             setPlayerBots([...playerBots])
           }
         }}
-        icon={<i className="fa-solid fa-user-group" />}
+        leftSection={<i className="fa-solid fa-user-group" />}
       />
 
       {Array.from(Array(playerCount).keys()).map((_, index) => (
         <Select
           key={index}
           mt="xs"
-          icon={<i className="fa-solid fa-robot" />}
+          leftSection={<i className="fa-solid fa-robot" />}
           label={`Player ${index + 1} Bot`}
           value={playerBots[index]}
           onChange={(api) => {
@@ -52,7 +52,6 @@ const BotSelector: React.FC<Props> = ({
             }
           }}
           data={["None", ...Object.keys(apis).sort()]}
-          withinPortal={false}
         />
       ))}
     </>

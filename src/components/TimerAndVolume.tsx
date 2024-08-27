@@ -55,6 +55,7 @@ const TimerAndVolume = () => {
         )}
       </h3>
       <Slider
+        mt={5}
         min={0}
         max={100}
         value={Math.ceil(volume * 100)}

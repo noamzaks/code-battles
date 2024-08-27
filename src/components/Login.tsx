@@ -30,14 +30,14 @@ const Login = () => {
     <div style={{ width: "400px", maxWidth: "95%" }}>
       <TextInput
         label="Username"
-        icon={<i className="fa-solid fa-user" />}
+        leftSection={<i className="fa-solid fa-user" />}
         value={username}
         onChange={(e) => setUsername(e.currentTarget.value)}
       />
       <TextInput
         label="Password"
         type="password"
-        icon={<i className="fa-solid fa-key" />}
+        leftSection={<i className="fa-solid fa-key" />}
         value={password}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -49,7 +49,7 @@ const Login = () => {
       />
       <Button
         mt="xs"
-        leftIcon={<i className="fa-solid fa-unlock" />}
+        leftSection={<i className="fa-solid fa-unlock" />}
         fullWidth
         loading={loading}
         onClick={login}

@@ -36,11 +36,7 @@ const CodeBattles: React.FC<Props> = ({ configuration, routes, blocks }) => {
         } as any
       }
     >
-      <MantineProvider
-        withNormalizeCSS
-        withGlobalStyles
-        theme={{ colorScheme }}
-      >
+      <MantineProvider forceColorScheme={colorScheme}>
         <Router>
           <Notifications />
           <div

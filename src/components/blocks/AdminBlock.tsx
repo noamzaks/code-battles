@@ -102,7 +102,7 @@ const AdminBlock = () => {
         mt="xs"
         fullWidth
         variant="default"
-        leftIcon={<i className="fa-solid fa-gear" />}
+        leftSection={<i className="fa-solid fa-gear" />}
         onClick={() => navigate("/settings")}
       >
         Settings
@@ -111,7 +111,7 @@ const AdminBlock = () => {
         <Button
           style={{ width: "50%" }}
           variant="default"
-          leftIcon={<i className="fa-solid fa-edit" />}
+          leftSection={<i className="fa-solid fa-edit" />}
           onClick={() => navigate("/round?edit=true")}
         >
           Edit Round
@@ -119,7 +119,7 @@ const AdminBlock = () => {
         <Button
           style={{ width: "50%" }}
           variant="default"
-          leftIcon={<i className="fa-solid fa-gamepad" />}
+          leftSection={<i className="fa-solid fa-gamepad" />}
           onClick={() => navigate("/round")}
         >
           View Round
@@ -129,7 +129,7 @@ const AdminBlock = () => {
         mt="xs"
         fullWidth
         variant="default"
-        leftIcon={<i className="fa-solid fa-download" />}
+        leftSection={<i className="fa-solid fa-download" />}
         onClick={fetchLatestAPIs}
         loading={loading}
       >
@@ -139,20 +139,20 @@ const AdminBlock = () => {
         mt="xs"
         label="Next Round"
         ref={timeRef}
-        icon={<i className="fa-solid fa-clock" />}
+        leftSection={<i className="fa-solid fa-clock" />}
       />
       <Button
         mt="xs"
         fullWidth
         variant="default"
-        leftIcon={<i className="fa-solid fa-save" />}
+        leftSection={<i className="fa-solid fa-save" />}
         onClick={saveRoundTime}
       >
         Save
       </Button>
       <Select
         mt="xs"
-        icon={<i className="fa-solid fa-robot" />}
+        leftSection={<i className="fa-solid fa-robot" />}
         label="API"
         data={Object.keys(apis).sort()}
         value={chosenBot}
@@ -169,7 +169,7 @@ const AdminBlock = () => {
         mt="xs"
         fullWidth
         variant="default"
-        leftIcon={<i className="fa-solid fa-globe" />}
+        leftSection={<i className="fa-solid fa-globe" />}
         onClick={publish}
       >
         Publish

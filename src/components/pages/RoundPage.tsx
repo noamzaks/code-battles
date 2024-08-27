@@ -115,8 +115,8 @@ const Round = () => {
                       <td>
                         <Button.Group orientation="vertical">
                           <Button
-                            leftIcon={<i className="fa-solid fa-play" />}
-                            compact
+                            leftSection={<i className="fa-solid fa-play" />}
+                            size="xs"
                             onClick={() =>
                               navigate(
                                 `/simulation/${round.map.replaceAll(
@@ -129,8 +129,8 @@ const Round = () => {
                             Simulate
                           </Button>
                           <Button
-                            leftIcon={<i className="fa-solid fa-forward" />}
-                            compact
+                            leftSection={<i className="fa-solid fa-forward" />}
+                            size="xs"
                             onClick={() =>
                               runNoUI(round.map, apis, round.players)
                             }
@@ -151,7 +151,7 @@ const Round = () => {
             {location.search.includes("edit") && (
               <>
                 <Select
-                  icon={<i className="fa-solid fa-map" />}
+                  leftSection={<i className="fa-solid fa-map" />}
                   label="Map"
                   data={configuration.maps}
                   value={map}
@@ -170,7 +170,7 @@ const Round = () => {
                 />
                 <Button
                   color="red"
-                  leftIcon={<i className="fa-solid fa-trash" />}
+                  leftSection={<i className="fa-solid fa-trash" />}
                   mt="xs"
                   onClick={() => {
                     setRounds([])
@@ -182,7 +182,7 @@ const Round = () => {
                 </Button>
                 <Button
                   color="red"
-                  leftIcon={<i className="fa-solid fa-refresh" />}
+                  leftSection={<i className="fa-solid fa-refresh" />}
                   mt="xs"
                   onClick={() => {
                     setResults({})
@@ -192,7 +192,7 @@ const Round = () => {
                   Clear Results
                 </Button>
                 <Button
-                  leftIcon={<i className="fa-solid fa-plus" />}
+                  leftSection={<i className="fa-solid fa-plus" />}
                   mt="xs"
                   onClick={() => {
                     setRounds((rounds) => [
@@ -206,7 +206,7 @@ const Round = () => {
                 </Button>
 
                 <Button
-                  leftIcon={<i className="fa-solid fa-save" />}
+                  leftSection={<i className="fa-solid fa-save" />}
                   fullWidth
                   mt="xs"
                   onClick={async () => {
@@ -225,7 +225,7 @@ const Round = () => {
               </>
             )}
             <Button
-              leftIcon={<i className="fa-solid fa-dice" />}
+              leftSection={<i className="fa-solid fa-dice" />}
               mt="xs"
               fullWidth
               variant="white"

@@ -35,7 +35,7 @@ const PlayPauseButton = () => {
         }
         setPlaying((p) => !p)
       }}
-      leftIcon={
+      leftSection={
         playing ? (
           <i className="fa-solid fa-pause" />
         ) : (
@@ -192,7 +192,7 @@ const Simulation = () => {
         <Button
           mt="md"
           color="green"
-          leftIcon={<i className="fa-solid fa-play" />}
+          leftSection={<i className="fa-solid fa-play" />}
           onClick={() => navigate("/round")}
         >
           Continue Round
@@ -236,7 +236,7 @@ const Simulation = () => {
                         id="breakpoint"
                         label="Breakpoint"
                         min={0}
-                        icon={<i className="fa-solid fa-stopwatch" />}
+                        leftSection={<i className="fa-solid fa-stopwatch" />}
                         display="inline-block"
                         maw="35%"
                         mr="xs"
@@ -245,7 +245,7 @@ const Simulation = () => {
                         style={{ flex: "none" }}
                         my="xs"
                         w={100}
-                        leftIcon={<i className="fa-solid fa-wand-magic" />}
+                        leftSection={<i className="fa-solid fa-wand-magic" />}
                         color={"grape"}
                         id="step"
                         mr="xs"

@@ -14,7 +14,7 @@ const AutoScrollButton = () => {
       color={autoScroll ? "green" : "yellow"}
       fullWidth
       mb="xs"
-      leftIcon={<i className="fa-solid fa-angles-down" />}
+      leftSection={<i className="fa-solid fa-angles-down" />}
       onClick={() => setAutoScroll((s) => !s)}
     >
       Auto Scroll {autoScroll ? "Enabled" : "Disabled"}

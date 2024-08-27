@@ -18,7 +18,7 @@ const ShowLogsButtons: React.FC<Props> = ({
         <Button
           key={index}
           style={{ width: 100 / playerNames.length + "%" }}
-          leftIcon={
+          leftSection={
             showLogs[index] ? (
               <i className="fa-solid fa-check" />
             ) : (

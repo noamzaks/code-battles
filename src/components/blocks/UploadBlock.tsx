@@ -22,7 +22,7 @@ const UploadBlock = () => {
     <Block title="Bots" logo="fa-solid fa-code-merge">
       <Autocomplete
         label="Name"
-        icon={<i className="fa-solid fa-tag" />}
+        leftSection={<i className="fa-solid fa-tag" />}
         value={name}
         onChange={(s: string) => {
           if (s.includes("-")) {
@@ -44,7 +44,7 @@ const UploadBlock = () => {
       {!(apis && userAPIs && apis[name] && !userAPIs[name]) && (
         <Button
           mt="xs"
-          leftIcon={<i className="fa-solid fa-upload" />}
+          leftSection={<i className="fa-solid fa-upload" />}
           fullWidth
           loading={loading}
           onClick={() => {
@@ -109,7 +109,7 @@ const UploadBlock = () => {
           <Button
             variant="white"
             mt="xs"
-            leftIcon={<i className="fa-solid fa-eye" />}
+            leftSection={<i className="fa-solid fa-eye" />}
             fullWidth
             onClick={() => navigate("/view/" + name)}
           >
@@ -118,7 +118,7 @@ const UploadBlock = () => {
           <Button
             mt="xs"
             color="red"
-            leftIcon={<i className="fa-solid fa-trash" />}
+            leftSection={<i className="fa-solid fa-trash" />}
             fullWidth
             onClick={() => {
               if (name) {
