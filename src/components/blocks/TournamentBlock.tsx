@@ -50,7 +50,7 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
               )
               .map((team: any, index: number) => (
                 <tr key={index}>
-                  <td>
+                  <td style={{ display: "flex", alignItems: "center" }}>
                     <img
                       src={`/images/teams/${team.name.toLowerCase()}.png`}
                       width={40}
