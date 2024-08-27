@@ -77,7 +77,14 @@ const TopPane = () => {
       >
         {user && (
           <>
-            <p style={{ marginInlineEnd: 5, textAlign: "right" }}>
+            <p
+              style={{
+                marginInlineEnd: 5,
+                textAlign: "right",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               Welcome,{" "}
               <img
                 height={35}
