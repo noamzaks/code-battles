@@ -24,7 +24,7 @@ export default [
       resolve(),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
-      css(),
+      css({ output: "styles.css", minify: true }),
       peerDepsExternal(),
     ],
   },

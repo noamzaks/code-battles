@@ -6,8 +6,10 @@ import {
   updatePointModifier,
 } from "./utilities"
 
-import "@fortawesome/fontawesome-free/css/all.min.css"
-import "./index.css"
+import "prismjs/prism.js"
+
+import "prismjs/components/prism-python.js"
+import "prismjs/plugins/line-numbers/prism-line-numbers.js"
 
 const initialize = () => {
   // @ts-ignore
