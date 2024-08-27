@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Particles from "react-tsparticles"
 import { loadFull } from "tsparticles"
-import { useAPIs, useAdmin } from "../../hooks"
+import { useAPIs, useAdmin, useLocalStorage } from "../../hooks"
 import { confetti } from "../../particles"
 import * as pyscript from "../../pyscript"
 import { getLocalStorage, getRank, toPlacing } from "../../utilities"
@@ -13,6 +13,15 @@ import LogViewer from "../LogViewer"
 
 const PlayPauseButton = () => {
   const [playing, setPlaying] = useState(false)
+  const [volume] = useLocalStorage({ key: "Volume", defaultValue: 0 })
+
+  useEffect(() => {
+    // @ts-ignore
+    if (window.mainAudio) {
+      // @ts-ignore
+      window.mainAudio.volume = volume
+    }
+  }, [volume])
 
   return (
     <Button
@@ -22,16 +31,21 @@ const PlayPauseButton = () => {
       w={100}
       onClick={() => {
         // @ts-ignore
-        if (!window.playing) {
+        if (!window.mainAudio) {
           const audio = new Audio("/sounds/main.mp3")
           audio.volume = getLocalStorage("Volume", 0)
           audio.loop = true
-          audio.play()
 
           // @ts-ignore
-          window.playing = true
+          window.mainAudio = audio
+        }
+
+        if (playing) {
           // @ts-ignore
-          window.audio = audio
+          window.mainAudio?.pause()
+        } else {
+          // @ts-ignore
+          window.mainAudio?.play()
         }
         setPlaying((p) => !p)
       }}

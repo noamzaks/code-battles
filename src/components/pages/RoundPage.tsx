@@ -1,4 +1,5 @@
 import { Button, Select } from "@mantine/core"
+import { useViewportSize } from "@mantine/hooks"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import React, { useCallback, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -47,6 +48,7 @@ const Round = () => {
   const [pointModifier] = useLocalStorage<Record<string, number>>({
     key: "Point Modifier",
   })
+  const { width: clientWidth } = useViewportSize()
 
   useEffect(updatePointModifier, [results])
 
@@ -252,8 +254,7 @@ const Round = () => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              flexDirection:
-                document.body.clientWidth >= 700 ? "row" : "column",
+              flexDirection: clientWidth >= 700 ? "row" : "column",
             }}
           >
             <TournamentBlock title="Before" inline />

@@ -1,3 +1,4 @@
+import { DayOfWeek } from "@mantine/dates"
 import type { Auth } from "firebase/auth"
 import type { Firestore } from "firebase/firestore"
 import { createContext, useContext } from "react"
@@ -7,12 +8,20 @@ interface CodeBattlesRequiredConfiguration {
   maps: string[]
 }
 
+interface CodeBattlesDatesConfiguration {
+  locale?: string
+  firstDayOfWeek?: DayOfWeek
+  weekendDays?: DayOfWeek[]
+  timezone?: string
+}
+
 interface CodeBattlesOptionalConfiguration {
   primaryColor: string
   admin: string
   title: string
   firestore: Firestore
   authentication: Auth
+  dates?: CodeBattlesDatesConfiguration
 }
 
 export interface CodeBattlesConfiguration

@@ -2,7 +2,7 @@ import { Button, Select } from "@mantine/core"
 import { TimeInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
 import { Firestore, Timestamp, doc, getDoc, setDoc } from "firebase/firestore"
-import React, { useRef, useState } from "react"
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useFirestore } from "../../configuration"
 import { useUserAPIs } from "../../hooks"
@@ -45,7 +45,7 @@ const AdminBlock = () => {
   const [loading, setLoading] = useState(false)
   const [apis] = useUserAPIs()
   const [chosenBot, setChosenBot] = useState("")
-  const timeRef = useRef<HTMLInputElement>(null)
+  const [nextRoundTime, setNextRoundTime] = useState("")
 
   const fetchLatestAPIs = async () => {
     setLoading(true)
@@ -83,8 +83,7 @@ const AdminBlock = () => {
   }
 
   const saveRoundTime = async () => {
-    const selected = timeRef.current!.value
-    const [hours, minutes] = selected.split(":")
+    const [hours, minutes] = nextRoundTime.split(":")
     const now = new Date()
     now.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0)
     await setDoc(
@@ -138,7 +137,8 @@ const AdminBlock = () => {
       <TimeInput
         mt="xs"
         label="Next Round"
-        ref={timeRef}
+        value={nextRoundTime}
+        onChange={(e) => setNextRoundTime(e.currentTarget.value)}
         leftSection={<i className="fa-solid fa-clock" />}
       />
       <Button

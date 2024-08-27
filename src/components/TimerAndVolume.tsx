@@ -37,7 +37,7 @@ const TimerAndVolume = () => {
   const inThePast = date.getTime() - Date.now() <= 0
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", minWidth: 200 }}>
       <h3 style={{ textAlign: "center", margin: 0 }}>
         <i
           className="fa-solid fa-stopwatch"

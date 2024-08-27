@@ -1,3 +1,4 @@
+import { useViewportSize } from "@mantine/hooks"
 import { signOut } from "firebase/auth"
 import React from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
@@ -12,6 +13,7 @@ const TopPane = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const showcaseMode = location.search.includes("showcase=true")
+  const { width: clientWidth } = useViewportSize()
 
   if (showcaseMode || location.pathname.startsWith("/round")) {
     return <></>
@@ -36,7 +38,7 @@ const TopPane = () => {
         style={{
           display: "flex",
           flexDirection: "row",
-          width: "45%",
+          width: clientWidth >= 650 ? "45%" : undefined,
           alignItems: "center",
         }}
       >
@@ -64,13 +66,13 @@ const TopPane = () => {
         </div>
       </div>
       <div style={{ flexGrow: 1 }} />
-      {document.body.clientWidth >= 500 && <TimerAndVolume />}
+      {clientWidth >= 650 && <TimerAndVolume />}
       <div style={{ flexGrow: 1 }} />
       <div
         style={{
           display: "flex",
           flexDirection: "row",
-          width: "45%",
+          width: clientWidth >= 650 ? "45%" : undefined,
           alignItems: "center",
           justifyContent: "end",
         }}
@@ -85,7 +87,7 @@ const TopPane = () => {
                 alignItems: "center",
               }}
             >
-              Welcome,{" "}
+              {clientWidth > 400 && "Welcome, "}
               <img
                 height={35}
                 src={`/images/teams/${user.email?.split("@")[0]}.png`}

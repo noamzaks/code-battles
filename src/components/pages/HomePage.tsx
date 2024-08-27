@@ -1,3 +1,4 @@
+import { useViewportSize } from "@mantine/hooks"
 import React from "react"
 import { useAdmin } from "../../hooks"
 import TimerAndVolume from "../TimerAndVolume"
@@ -13,6 +14,7 @@ interface Props {
 
 const HomePage: React.FC<Props> = ({ blocks }) => {
   const admin = useAdmin()
+  const { width: clientWidth } = useViewportSize()
 
   return (
     <div
@@ -26,7 +28,7 @@ const HomePage: React.FC<Props> = ({ blocks }) => {
         maxWidth: "97.5%",
       }}
     >
-      {document.body.clientWidth < 500 && <TimerAndVolume />}
+      {clientWidth < 650 && <TimerAndVolume />}
 
       {admin && <AdminBlock />}
       <UploadBlock />

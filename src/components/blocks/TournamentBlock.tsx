@@ -22,23 +22,23 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
       logo="fa-solid fa-ranking-star"
       inline={inline}
     >
-      <Table>
-        <thead>
-          <tr>
-            <th>
+      <Table mt="xs">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>
               <i
                 className="fa-solid fa-user-group"
                 style={{ marginRight: 5 }}
               />
               Team
-            </th>
-            <th>
+            </Table.Th>
+            <Table.Th>
               <i className="fa-solid fa-trophy" style={{ marginRight: 5 }} />
               Points
-            </th>
-          </tr>
-        </thead>
-        <tbody>
+            </Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
           {info?.teams?.map &&
             info.teams
               .sort(
@@ -49,8 +49,8 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
                   (pointModifier![a.name] ?? 0)
               )
               .map((team: any, index: number) => (
-                <tr key={index}>
-                  <td style={{ display: "flex", alignItems: "center" }}>
+                <Table.Tr key={index}>
+                  <Table.Td style={{ display: "flex", alignItems: "center" }}>
                     <img
                       src={`/images/teams/${team.name.toLowerCase()}.png`}
                       width={40}
@@ -67,8 +67,8 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
                       <b style={{ display: "inline" }}>{team.name}</b>
                       <span style={{ fontSize: 12 }}>{team.members}</span>
                     </div>
-                  </td>
-                  <td>
+                  </Table.Td>
+                  <Table.Td>
                     <div
                       style={{
                         display: "flex",
@@ -90,10 +90,10 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
                         </Badge>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </Table.Td>
+                </Table.Tr>
               ))}
-        </tbody>
+        </Table.Tbody>
       </Table>
     </Block>
   )
