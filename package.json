@@ -1,6 +1,6 @@
 {
   "name": "code-battles-components",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "React components for Code Battles, a fun group coding experience",
   "repository": "https://github.com/noamzaks/code-battles-components",
   "author": "Noam Zaks <imnoamzaks@gmail.com>",
@@ -55,6 +55,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.7.0",
     "rollup": "^4.21.1",
+    "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-import-css": "^3.5.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",

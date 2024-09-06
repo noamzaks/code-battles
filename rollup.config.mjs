@@ -1,6 +1,7 @@
 import commonjs from "@rollup/plugin-commonjs"
 import resolve from "@rollup/plugin-node-resolve"
 import typescript from "@rollup/plugin-typescript"
+import copy from "rollup-plugin-copy"
 import dts from "rollup-plugin-dts"
 import css from "rollup-plugin-import-css"
 import peerDepsExternal from "rollup-plugin-peer-deps-external"
@@ -24,6 +25,11 @@ export default [
       resolve(),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
+      copy({
+        targets: [
+          { src: "node_modules/@fortawesome/fontawesome-free/webfonts/*", dest: "dist/webfonts" },
+        ],
+      }),
       css({ output: "styles.css", minify: true }),
       peerDepsExternal(),
     ],
