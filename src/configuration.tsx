@@ -21,6 +21,7 @@ interface CodeBattlesOptionalConfiguration {
   title: string
   firestore: Firestore
   authentication: Auth
+  runningCountOptions?: number[]
   dates?: CodeBattlesDatesConfiguration
 }
 

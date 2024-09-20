@@ -1,5 +1,3 @@
-import * as pyscript from "./pyscript"
-
 export interface RoundInfo {
   players: string[]
   map: string
@@ -73,24 +71,24 @@ export const updatePointModifier = () => {
       results[round.players.join(", ")] &&
       results[round.players.join(", ")][round.map]
     ) {
-      const first =
-        round.players[results[round.players.join(", ")][round.map][0]]
-      const second =
-        round.players[results[round.players.join(", ")][round.map][1]]
-      if (!pointModifier[first]) {
-        pointModifier[first] = 0
-      }
-      if (!pointModifier[second]) {
-        pointModifier[second] = 0
-      }
+      for (const result of results[round.players.join(", ")][round.map]) {
+        const first = round.players[result[0]]
+        const second = round.players[result[1]]
+        if (!pointModifier[first]) {
+          pointModifier[first] = 0
+        }
+        if (!pointModifier[second]) {
+          pointModifier[second] = 0
+        }
 
-      const pointFormula1 = getLocalStorage("Point Formula 1", "2")
-      const pointFormula2 = getLocalStorage("Point Formula 2", "1")
-      const n = round.players.length
-      // @ts-ignore
-      window.n = n // this is because the name 'n' is going to be lost after building
-      pointModifier[first] += eval(pointFormula1)
-      pointModifier[second] += eval(pointFormula2)
+        const pointFormula1 = getLocalStorage("Point Formula 1", "2")
+        const pointFormula2 = getLocalStorage("Point Formula 2", "1")
+        const n = round.players.length
+        // @ts-ignore
+        window.n = n // this is because the name 'n' is going to be lost after building
+        pointModifier[first] += eval(pointFormula1)
+        pointModifier[second] += eval(pointFormula2)
+      }
     }
   }
   setLocalStorage("Point Modifier", pointModifier)
@@ -116,12 +114,21 @@ export const zeroPad = (s: string, l: number) => {
 export const runNoUI = (
   map: string,
   apis: Record<string, any>,
-  playerBots: string[]
+  playerBots: string[],
+  verbose: boolean
 ) => {
   const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
-  pyscript.run(
-    `run_noui_simulation("${map}", ${JSON.stringify(players)}, ${JSON.stringify(
-      playerBots
-    )})`
+  tryUntilFailure(() =>
+    // @ts-ignore
+    window._startSimulation(map, players, playerBots, true, false, verbose)
   )
+}
+
+export const tryUntilFailure = (f: () => void, timeout = 500) => {
+  try {
+    f()
+  } catch (error: any) {
+    console.log("Failed, waiting for timeout...", error?.message)
+    setTimeout(() => tryUntilFailure(f, timeout), timeout)
+  }
 }

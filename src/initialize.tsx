@@ -45,23 +45,22 @@ const initialize = () => {
   window.setResults = (
     playerNames: string[],
     places: number[],
-    map: string
+    map: string,
+    verbose: boolean
   ) => {
-    // @ts-ignore
-    playerNames = playerNames.toJs()
-    // @ts-ignore
-    places = places.toJs()
-
     const results = getLocalStorage("Results")
     if (!results[playerNames.join(", ")]) {
       results[playerNames.join(", ")] = {}
     }
-    results[playerNames.join(", ")][map] = places
+    if (!results[playerNames.join(", ")][map]) {
+      results[playerNames.join(", ")][map] = []
+    }
+    results[playerNames.join(", ")][map].push(places)
     setLocalStorage("Results", results)
     updatePointModifier()
 
     // @ts-ignore
-    window.showWinner(playerNames[places[0]])
+    window.showWinner(playerNames[places[0]], verbose)
   }
 
   // @ts-ignore

@@ -30,10 +30,10 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
+    "@tsparticles/react": "^3.0.0",
     "prismjs": "^1.29.0",
     "react-countdown": "^2.3.6",
     "react-firebase-hooks": "^5.1.1",
-    "react-tsparticles": "^2.12.2",
     "tsparticles": "^3.5.0"
   },
   "peerDependencies": {
@@ -41,26 +41,26 @@
     "@mantine/dates": "^7.12.2",
     "@mantine/hooks": "^7.12.2",
     "@mantine/notifications": "^7.12.2",
-    "firebase": "^10.13.1",
+    "firebase": "^10.13.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.1"
+    "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/prismjs": "^1.26.4",
-    "@types/react": "^18.3.5",
+    "@types/react": "^18.3.8",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.7.0",
-    "rollup": "^4.21.2",
+    "rollup": "^4.22.2",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-import-css": "^3.5.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "tslib": "^2.7.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   },
   "prettier": {
     "semi": false

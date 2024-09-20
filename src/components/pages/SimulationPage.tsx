@@ -3,12 +3,16 @@ import { useColorScheme } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import React, { useCallback, useEffect, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
-import Particles from "react-tsparticles"
+import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadFull } from "tsparticles"
 import { useAPIs, useAdmin, useLocalStorage } from "../../hooks"
 import { confetti } from "../../particles"
-import * as pyscript from "../../pyscript"
-import { getLocalStorage, getRank, toPlacing } from "../../utilities"
+import {
+  getLocalStorage,
+  getRank,
+  toPlacing,
+  tryUntilFailure,
+} from "../../utilities"
 import LogViewer from "../LogViewer"
 
 const PlayPauseButton = () => {
@@ -75,8 +79,10 @@ const Simulation = () => {
   const showcaseMode = location.search.includes("showcase=true")
 
   useEffect(() => {
+    initParticlesEngine(async (engine) => await loadFull(engine))
+
     // @ts-ignore
-    window.showWinner = (winner: string) => {
+    window.showWinner = (winner: string, verbose: boolean) => {
       if (admin) {
         setWinner(winner)
         // @ts-ignore
@@ -109,17 +115,19 @@ const Simulation = () => {
 
   useEffect(() => {
     if (!loading && players && playerapis) {
-      pyscript.run(
-        `initialize_simulation("${map}", ${JSON.stringify(
-          players
-        )}, ${JSON.stringify(playerapis?.split("-"))}, "${location.search}")`
+      tryUntilFailure(() =>
+        // @ts-ignore
+        window._startSimulation(
+          map,
+          players,
+          playerNames,
+          false,
+          !showcaseMode,
+          true
+        )
       )
     }
   }, [loading])
-
-  const particlesInit = useCallback(async (engine: any) => {
-    await loadFull(engine)
-  }, [])
 
   const newRank =
     getRank(
@@ -211,7 +219,7 @@ const Simulation = () => {
         >
           Continue Round
         </Button>
-        <Particles init={particlesInit} options={confetti} />
+        <Particles options={confetti} />
       </div>
 
       {loading && (

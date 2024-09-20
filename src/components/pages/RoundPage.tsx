@@ -1,13 +1,13 @@
-import { Button, Select } from "@mantine/core"
+import { Button, NumberInput, Select } from "@mantine/core"
 import { useViewportSize } from "@mantine/hooks"
 import { doc, getDoc, setDoc } from "firebase/firestore"
-import React, { useCallback, useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import Particles from "react-tsparticles"
+import { initParticlesEngine } from "@tsparticles/react"
 import { loadFull } from "tsparticles"
 import { useConfiguration, useFirestore } from "../../configuration"
 import { useAPIs, useLocalStorage } from "../../hooks"
-import { parallax } from "../../particles"
+
 import {
   RoundInfo,
   runNoUI,
@@ -17,6 +17,9 @@ import {
 import Block from "../blocks/Block"
 import BotSelector from "../blocks/BotSelector"
 import TournamentBlock from "../blocks/TournamentBlock"
+
+let currentMap: string
+let currentPlayers: string[]
 
 const Round = () => {
   const firestore = useFirestore()
@@ -40,17 +43,54 @@ const Round = () => {
     key: "Rounds",
     defaultValue: [],
   })
-  const particlesInit = useCallback(async (engine: any) => {
-    await loadFull(engine)
-  }, [])
+  const [roundIterations, setRoundIterations] = useLocalStorage<number>({
+    key: "Round Iterations",
+    defaultValue: 1,
+  })
 
-  const [results, setResults] = useLocalStorage<any>({ key: "Results" })
+  const [results, setResults] = useLocalStorage<any>({
+    key: "Results",
+    defaultValue: {},
+  })
   const [pointModifier] = useLocalStorage<Record<string, number>>({
     key: "Point Modifier",
   })
   const { width: clientWidth } = useViewportSize()
+  const [runningNoUIN, setRunningNoUIN] = useState<Record<string, number>>({})
+
+  const startRunNoUIN = (n: number) => {
+    setRunningNoUIN({ [n.toString()]: n })
+  }
+
+  useEffect(() => {
+    // @ts-ignore
+    window.showWinner = (winner: string, verbose: boolean) => {
+      setRunningNoUIN((runningNoUIN) => {
+        const newRunningNoUIN: Record<string, number> = {}
+        for (const key in runningNoUIN) {
+          newRunningNoUIN[key] = runningNoUIN[key] - 1
+        }
+
+        return newRunningNoUIN
+      })
+    }
+  }, [])
+
+  let remaining = 0
+  if (Object.keys(runningNoUIN).length > 0) {
+    remaining = Math.max(...Object.values(runningNoUIN))
+  }
+
+  useEffect(() => {
+    if (remaining > 0) {
+      runNoUI(currentMap, apis, currentPlayers, false)
+    }
+  }, [remaining])
 
   useEffect(updatePointModifier, [results])
+  useEffect(() => {
+    initParticlesEngine(async (engine) => await loadFull(engine))
+  }, [])
 
   return (
     <>
@@ -68,13 +108,37 @@ const Round = () => {
                 <tr>
                   <th style={{ width: "25%" }}>Map</th>
                   <th style={{ width: "35%" }}>Players</th>
-                  <th style={{ width: "17.5%" }}>1st Place</th>
-                  <th style={{ width: "17.5%" }}>2nd Place</th>
+                  {roundIterations === 1 && (
+                    <>
+                      <th style={{ width: "17.5%" }}>1st Place</th>
+                      <th style={{ width: "17.5%" }}>2nd Place</th>
+                    </>
+                  )}
+                  {roundIterations !== 1 && (
+                    <th style={{ width: "35%" }}>Results</th>
+                  )}
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {rounds.map((round, index) => {
+                  const winCounts: Record<string, number> = {}
+                  if (results[round.players.join(", ")] !== undefined) {
+                    const currentResults =
+                      results[round.players.join(", ")][round.map]
+                    for (const result of currentResults) {
+                      const winner = round.players[result[0]]
+                      if (!winCounts[winner]) {
+                        winCounts[winner] = 1
+                      } else {
+                        winCounts[winner]++
+                      }
+                    }
+                  }
+                  const winners = Object.keys(winCounts).sort(
+                    (a, b) => winCounts[b] - winCounts[a]
+                  )
+
                   return (
                     <tr key={index}>
                       <td>{round.map}</td>
@@ -88,32 +152,49 @@ const Round = () => {
                           />
                         ))}
                       </td>
-                      <td>
-                        {results[round.players.join(", ")] !== undefined &&
-                          results[round.players.join(", ")][round.map] !==
-                            undefined && (
-                            <img
-                              src={`/images/teams/${round.players[
-                                results[round.players.join(", ")][round.map][0]
-                              ].toLowerCase()}.png`}
-                              width={30}
-                              style={{ marginInlineEnd: 10 }}
-                            />
-                          )}
-                      </td>
-                      <td>
-                        {results[round.players.join(", ")] !== undefined &&
-                          results[round.players.join(", ")][round.map] !==
-                            undefined && (
-                            <img
-                              src={`/images/teams/${round.players[
-                                results[round.players.join(", ")][round.map][1]
-                              ].toLowerCase()}.png`}
-                              width={30}
-                              style={{ marginInlineEnd: 10 }}
-                            />
-                          )}
-                      </td>
+                      {roundIterations === 1 && (
+                        <>
+                          <td>
+                            {results[round.players.join(", ")] !== undefined &&
+                              results[round.players.join(", ")][round.map] !==
+                                undefined && (
+                                <img
+                                  src={`/images/teams/${round.players[
+                                    results[round.players.join(", ")][
+                                      round.map
+                                    ][0][0]
+                                  ].toLowerCase()}.png`}
+                                  width={30}
+                                  style={{ marginInlineEnd: 10 }}
+                                />
+                              )}
+                          </td>
+                          <td>
+                            {results[round.players.join(", ")] !== undefined &&
+                              results[round.players.join(", ")][round.map] !==
+                                undefined && (
+                                <img
+                                  src={`/images/teams/${round.players[
+                                    results[round.players.join(", ")][
+                                      round.map
+                                    ][0][1]
+                                  ].toLowerCase()}.png`}
+                                  width={30}
+                                  style={{ marginInlineEnd: 10 }}
+                                />
+                              )}
+                          </td>
+                        </>
+                      )}
+                      {roundIterations !== 1 && (
+                        <td>
+                          {winners.map((winner, index) => (
+                            <p key={index}>
+                              {winner}: {winCounts[winner]}
+                            </p>
+                          ))}
+                        </td>
+                      )}
                       <td>
                         <Button.Group orientation="vertical">
                           <Button
@@ -133,9 +214,15 @@ const Round = () => {
                           <Button
                             leftSection={<i className="fa-solid fa-forward" />}
                             size="xs"
-                            onClick={() =>
-                              runNoUI(round.map, apis, round.players)
-                            }
+                            onClick={() => {
+                              if (roundIterations === 1) {
+                                runNoUI(round.map, apis, round.players, true)
+                              } else {
+                                currentMap = round.map
+                                currentPlayers = round.players
+                                startRunNoUIN(roundIterations)
+                              }
+                            }}
                           >
                             Simulate (No UI)
                           </Button>
@@ -150,9 +237,23 @@ const Round = () => {
               style={{ textAlign: "center", display: "none" }}
               id="noui-progress"
             />
+            {remaining > 0 && (
+              <p style={{ textAlign: "center", marginTop: 10 }}>
+                Remaining Simulations: {remaining}
+              </p>
+            )}
             {location.search.includes("edit") && (
               <>
+                <NumberInput
+                  value={roundIterations}
+                  onChange={(v) =>
+                    setRoundIterations(parseInt(v.toString(), 10) ?? 1)
+                  }
+                  label="Round Iterations"
+                  leftSection={<i className="fa-solid fa-hashtag" />}
+                />
                 <Select
+                  mt="xs"
                   leftSection={<i className="fa-solid fa-map" />}
                   label="Map"
                   data={configuration.maps}
@@ -265,13 +366,6 @@ const Round = () => {
             />
           </div>
         </div>
-      </div>
-      <div
-        style={{
-          zIndex: -10,
-        }}
-      >
-        <Particles init={particlesInit} options={parallax} />
       </div>
     </>
   )

@@ -32,7 +32,13 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
               />
               Team
             </Table.Th>
-            <Table.Th>
+            <Table.Th
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <i className="fa-solid fa-trophy" style={{ marginRight: 5 }} />
               Points
             </Table.Th>
