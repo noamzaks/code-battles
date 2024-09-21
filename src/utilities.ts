@@ -81,8 +81,8 @@ export const updatePointModifier = () => {
           pointModifier[second] = 0
         }
 
-        const pointFormula1 = getLocalStorage("Point Formula 1", "2")
-        const pointFormula2 = getLocalStorage("Point Formula 2", "1")
+        const pointFormula1 = getLocalStorage("Point Formula 1", "1")
+        const pointFormula2 = getLocalStorage("Point Formula 2", "0")
         const n = round.players.length
         // @ts-ignore
         window.n = n // this is because the name 'n' is going to be lost after building

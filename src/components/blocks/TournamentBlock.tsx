@@ -89,7 +89,7 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
                         <Badge
                           color="green"
                           variant="filled"
-                          ml="auto"
+                          ml={5}
                           leftSection={<i className="fa-solid fa-plus" />}
                         >
                           {pointModifier![team.name]}
