@@ -89,7 +89,7 @@ const UploadBlock = () => {
                 .then(() => {
                   notifications.show({
                     title: "Upload successful!",
-                    message: `Your '${n}' API has been uploaded succesfully!`,
+                    message: `Your '${n}' Bot has been uploaded succesfully!`,
                     color: "green",
                     icon: <i className="fa-solid fa-check" />,
                   })
@@ -133,7 +133,7 @@ const UploadBlock = () => {
                   setName("")
                   notifications.show({
                     title: "Deletion successful!",
-                    message: `Your '${name}' API has been succesfully deleted!`,
+                    message: `Your '${name}' Bot has been succesfully deleted!`,
                     color: "green",
                     icon: <i className="fa-solid fa-check" />,
                   })

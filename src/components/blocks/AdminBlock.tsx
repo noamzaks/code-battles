@@ -25,14 +25,14 @@ const fetchPlayer = async (name: string, firestore: Firestore) => {
 
     notifications.show({
       title: `Succesfully fetched ${name}`,
-      message: `Their chosen API name was ${pick}`,
+      message: `Their chosen bot name was ${pick}`,
       icon: <i className="fa-solid fa-check" />,
       color: "green",
     })
   } else {
     notifications.show({
-      title: `${name} did not pick a valid API!`,
-      message: `Their chosen API name was ${pick}`,
+      title: `${name} did not pick a valid bot!`,
+      message: `Their chosen bot name was ${pick}`,
       icon: <i className="fa-solid fa-xmark" />,
       color: "red",
     })
@@ -153,7 +153,7 @@ const AdminBlock = () => {
       <Select
         mt="xs"
         leftSection={<i className="fa-solid fa-robot" />}
-        label="API"
+        label="Bot"
         data={Object.keys(apis).sort()}
         value={chosenBot}
         allowDeselect

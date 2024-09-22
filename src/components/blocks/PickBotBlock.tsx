@@ -18,7 +18,7 @@ const PickBotBlock = () => {
     <Block title="Tournament Bot" logo="fa-solid fa-gamepad">
       <Select
         leftSection={<i className="fa-solid fa-robot" />}
-        label="API"
+        label="Bot"
         data={Object.keys(apis)}
         value={value?.pick}
         onChange={(s) =>
