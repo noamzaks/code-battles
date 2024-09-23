@@ -63,11 +63,20 @@ const TimerAndVolume = () => {
         thumbSize={25}
         thumbChildren={
           volume === 0 ? (
-            <i className="fa-solid fa-volume-xmark" style={{ fontSize: 10 }} />
+            <i
+              className="fa-solid fa-volume-xmark"
+              style={{ fontSize: 8, color: "white" }}
+            />
           ) : volume < 0.5 ? (
-            <i className="fa-solid fa-volume-low" style={{ fontSize: 10 }} />
+            <i
+              className="fa-solid fa-volume-low"
+              style={{ fontSize: 8, color: "white" }}
+            />
           ) : (
-            <i className="fa-solid fa-volume-high" style={{ fontSize: 10 }} />
+            <i
+              className="fa-solid fa-volume-high"
+              style={{ fontSize: 8, color: "white" }}
+            />
           )
         }
       />
