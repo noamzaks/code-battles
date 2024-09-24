@@ -28,6 +28,9 @@ export default [
       copy({
         targets: [
           { src: "node_modules/@fortawesome/fontawesome-free/webfonts/*", dest: "dist/webfonts" },
+          { src: "node_modules/@pyscript/core/dist/*", dest: "dist/pyscript" },
+          { src: "pdoc-template/*", dest: "dist/pdoc-template" },
+          { src: "code_battles/*", dest: "dist/code_battles" },
         ],
       }),
       css({ output: "styles.css", minify: true }),

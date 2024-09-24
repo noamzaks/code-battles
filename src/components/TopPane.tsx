@@ -59,7 +59,7 @@ const TopPane = () => {
           <h4 style={{ margin: 0 }}>{configuration.title}</h4>
           <a
             style={{ textDecoration: "none", color: "white" }}
-            href="/api.html#Context"
+            href="/api.html"
           >
             API Docs
           </a>
