@@ -9,11 +9,10 @@ from code_battles.utilities import (
     GameCanvas,
     console_log,
     download_image,
-    play_sound,
     set_results,
     show_alert,
 )
-from js import Image, document, window, FontFace
+from js import Audio, Image, document, window, FontFace
 from pyscript.ffi import create_proxy
 
 GameStateType = TypeVar("GameStateType")
@@ -61,6 +60,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     _player_globals: List[Dict[str, Any]]
     _initialized: bool
     _eliminated: List[int]
+    _sounds: Dict[str, Audio] = {}
 
     def render(self) -> None:
         """
@@ -140,6 +140,11 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
 
         return "/images/maps/" + map.lower().replace(" ", "_") + ".png"
 
+    def configure_sound_url(self, name: str):
+        """The URL containing the sound for the given name. By default, this takes the lowercase, replaces spaces with _ and loads from `/sounds` which is stored in `public/sounds` in a project."""
+
+        return "/sounds/" + name.lower().replace(" ", "_") + ".mp3"
+
     def configure_bot_base_class_name(self) -> str:
         """A bot's base class name. CodeBattlesBot by default."""
 
@@ -205,13 +210,22 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
                 0,
                 False,
             )
-            play_sound("player_eliminated")
+            self.play_sound("player_eliminated")
         self._eliminated.append(player_index)
         console_log(
             -1,
             f"[Game T{self.time}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
             "white",
         )
+
+    def play_sound(self, sound: str):
+        if sound not in self._sounds:
+            self._sounds[sound] = Audio.new(self.configure_sound_url(sound))
+
+        volume = window.localStorage.getItem("Volume") or 0
+        s = self._sounds[sound].cloneNode(True)
+        s.volume = volume
+        s.play()
 
     @property
     def time(self) -> str:

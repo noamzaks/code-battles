@@ -1,10 +1,10 @@
 """Generic useful utilities for creating games with PyScript."""
 
 import asyncio
-from typing import Callable, Coroutine, Dict, List, Tuple, Union
+from typing import Callable, List, Union
 from enum import Enum
 
-from js import Audio, Element, FontFace, Image, document, window
+from js import Element, Image, window
 
 
 class Alignment(Enum):
@@ -52,19 +52,6 @@ def console_log(player_index: int, text: str, color: str):
             window.consoleLog(player_index, text, color)
         except Exception as e:
             print(e)
-
-
-SOUNDS: Dict[str, Audio] = {}
-
-
-def play_sound(sound: str):
-    if sound not in SOUNDS:
-        SOUNDS[sound] = Audio.new("/sounds/" + sound + ".mp3")
-
-    volume = window.localStorage.getItem("Volume") or 0
-    sound = SOUNDS[sound].cloneNode(True)
-    sound.volume = volume
-    sound.play()
 
 
 async def with_timeout(fn: Callable[[], None], timeout_seconds: float):

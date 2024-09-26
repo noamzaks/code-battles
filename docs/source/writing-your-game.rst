@@ -12,6 +12,8 @@ by running it alongside editing it using ``bun run dev`` (i.e. edit your code an
 
 Your game implementation begins in the `main.py` file. Your custom game will inherit from the `CodeBattles` class of the `code_battles` library, which provides methods to override, and binds to the React code.
 
+When using images/fonts/sounds from URLs, you can put your assets in the `public` directory like in the template, and it will be copied to your website, so for example `public/config.json` is available at the URL ``/config.json``.
+
 Game Renderer
 +++++++++++++
 
@@ -32,7 +34,18 @@ Setup Functions
 
 You may use ``download_images`` inside your ``setup`` method.
 This is a utility method which takes a list of images to download and returns a dictionary mapping from name to image.
-For example, run ``self.images = await download_images([("Snake", "/public/images/snake.png")])``
+
+For example:
+
+.. code-block:: python
+
+    self.images = await self.download_images([("Snake", "/images/snake.png")])
 
 In order to load additional fonts (which you can then use in the ``draw_text()`` method), you can simply call ``load_font()`` in your ``setup`` method.
-Supply it with the url of your font, for instance, ``load_font("Assistant", "/fonts/assistant.ttf")``.
+Supply it with the url of your font.
+
+For example:
+
+.. code-block:: python
+
+    self.load_font("Assistant", "/fonts/assistant.ttf")
