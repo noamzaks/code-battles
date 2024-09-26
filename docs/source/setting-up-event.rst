@@ -11,21 +11,12 @@ You are encouraged to pick simple passwords. This does not need to be very secur
 Tournament Configuration
 ++++++++++++++++++++++++
 
-Inside the Firebase Console, edit the `tournament/info` document (if you didn't create it yet, do so now). 
-Create a `teams` array inside of it. Each object in the `teams` array should look like so:
-
-.. code-block:: json
-    :linenos:
-
-    {
-        "members": "Noam, John, Dan",
-        "name": "Mercedes",
-        "points": 0
-    }
+You can add teams for your event in the web application itself (inside the `Settings`, which should be visible in the `Admin` block when you're signed in as the admin).
+This information will be stored in Firebase.
 
 As an admin user, you will be able to set the next round time (at that time you will fetch all of the teams' bots), edit the matches of the next round.
 
-Then, at each round, you should open the round page to the audience and simulate each of the games. After running all of the games, commit the results.
+Then, at each round, you should open the round page to the audience and simulate each of the games. After running all of the games, save the results.
 
 Firestore Security Rules
 ++++++++++++++++++++++++
@@ -69,4 +60,4 @@ You should upload an image for each team inside `public/images/teams/TEAM_NAME.p
 This will show up in the tournament table and after someone wins a simulation.
 
 Additionally, if you use car company themed teams, you can upload `public/images/teams/TEAM_NAME-side.png` and that side profile of 
-the winner's car will drive from the left of the screen to the right of it.
+the winner's car will drive from the left edge of the screen to the right edge.

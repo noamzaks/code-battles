@@ -1,13 +1,21 @@
 # Configuration file for the Sphinx documentation builder.
 
+# -- Additional path locations
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "code_battles"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "stubs"))
+
 # -- Project information
 
 project = "Code Battles"
-copyright = "2023, Noam Zaks"
+copyright = "2024, Noam Zaks"
 author = "Noam Zaks"
 
 release = "1.0"
-version = "1.0.0"
+version = "1.0.7"
 
 # -- General configuration
 
@@ -41,3 +49,6 @@ html_theme_options = {
 
 # -- Options for EPUB output
 epub_show_urls = "footnote"
+
+# -- Options for automatic code generation
+autodoc_member_order = "bysource"

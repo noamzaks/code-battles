@@ -1,7 +1,7 @@
 """Generic useful utilities for creating games with PyScript."""
 
 import asyncio
-from typing import Callable, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 from js import Audio, Element, FontFace, Image, document, window
 
@@ -19,7 +19,12 @@ def download_image(src: str) -> Image:
     return result
 
 
-def download_images(sources: list[tuple[str, str]]) -> dict[str, Image]:
+def download_images(sources: List[Tuple[str, str]]) -> Dict[str, Image]:
+    """
+    :param sources: A list of ``(image_name, image_url)`` to download.
+    :returns: A dictionary mapping each ``image_name`` to its loaded image. 
+    """
+
     remaining_images: list[str] = []
     result = asyncio.Future()
 
@@ -180,10 +185,10 @@ class GameCanvas:
             self.canvas_map_width * self.map_image.height / self.map_image.width
         )
 
-    def _translate_position(self, player_index: int, x: float, y: float):
+    def _translate_position(self, board_index: int, x: float, y: float):
         x *= self.scale
         y *= self.scale
-        x += player_index * self.map_image.width * self.scale
+        x += board_index * self.map_image.width * self.scale
 
         return x, y
 
@@ -211,7 +216,7 @@ class GameCanvas:
     def draw_element(
         self,
         image: Image,
-        player_index: int,
+        board_index: int,
         x: int,
         y: int,
         width: int,
@@ -227,7 +232,7 @@ class GameCanvas:
         if direction is None:
             direction = 0
 
-        x, y = self._translate_position(player_index, x, y)
+        x, y = self._translate_position(board_index, x, y)
         width, height = self._translate_width(width, image.width / image.height)
 
         if alignment == Alignment.TOP_LEFT:
@@ -245,7 +250,7 @@ class GameCanvas:
         self,
         text: str,
         color: str,
-        player_index: int,
+        board_index: int,
         x: int,
         y: int,
         text_size=15,
@@ -254,7 +259,7 @@ class GameCanvas:
         if font != "":
             font += ", "
 
-        x, y = self._translate_position(player_index, x, y)
+        x, y = self._translate_position(board_index, x, y)
         self.context.font = f"{text_size * self.scale}pt {font}system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, 'Noto Emoji'"
         self.context.fillStyle = color
         self.context.fillText(text, x, y)
@@ -265,6 +270,8 @@ class GameCanvas:
 
 
 async def load_font(name: str, url: str):
+    """Loads the font from the specified url as the specified name."""
+    
     ff = FontFace.new(name, f"url({url})")
     await ff.load()
     document.fonts.add(ff)
