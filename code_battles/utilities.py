@@ -1,12 +1,13 @@
 """Generic useful utilities for creating games with PyScript."""
 
 import asyncio
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Coroutine, Dict, List, Tuple, Union
+from enum import Enum
 
 from js import Audio, Element, FontFace, Image, document, window
 
 
-class Alignment:
+class Alignment(Enum):
     CENTER = 0
     TOP_LEFT = 1
 
@@ -19,57 +20,6 @@ def download_image(src: str) -> Image:
     return result
 
 
-def download_images(sources: List[Tuple[str, str]]) -> Dict[str, Image]:
-    """
-    :param sources: A list of ``(image_name, image_url)`` to download.
-    :returns: A dictionary mapping each ``image_name`` to its loaded image. 
-    """
-
-    remaining_images: list[str] = []
-    result = asyncio.Future()
-
-    images: dict[str, Image] = {}
-    remaining = len(sources)
-
-    def add_image(image):
-        nonlocal remaining
-        nonlocal remaining_images
-        src = image.currentTarget.src
-        to_remove = None
-        for image in remaining_images:
-            if image in src:
-                to_remove = image
-                break
-        if to_remove:
-            remaining_images.remove(to_remove)
-
-        remaining -= 1
-        if remaining == 0:
-            result.set_result(images)
-
-    for key, src in sources:
-        image = Image.new()
-        images[key] = image
-        remaining_images.append(src)
-        image.onload = lambda _: add_image(_)
-        image.onerror = lambda _: print(f"Failed to fetch {src}")
-        image.src = src
-
-    return result
-
-
-def get_element(id: str) -> Element:
-    """Wrapper for JS getElementById."""
-    return document.getElementById(id)
-
-
-def get_breakpoint() -> int:
-    value = document.getElementById("breakpoint").value
-    if value == "":
-        return -1
-    return int(value)
-
-
 def show_alert(
     title: str, alert: str, color: str, icon: str, limit_time: int = 5000, is_code=True
 ):
@@ -80,7 +30,7 @@ def show_alert(
             print(e)
 
 
-def set_results(player_names: list[str], places: list[int], map: str, verbose: bool):
+def set_results(player_names: List[str], places: List[int], map: str, verbose: bool):
     if hasattr(window, "setResults"):
         try:
             window.setResults(player_names, places, map, verbose)
@@ -104,20 +54,7 @@ def console_log(player_index: int, text: str, color: str):
             print(e)
 
 
-def should_play():
-    return "Pause" in document.getElementById("playpause").textContent
-
-
-def get_playback_speed():
-    return 2 ** float(
-        document.getElementById("timescale")
-        .getElementsByClassName("mantine-Slider-thumb")
-        .to_py()[0]
-        .ariaValueNow
-    )
-
-
-SOUNDS: dict[str, Audio] = {}
+SOUNDS: Dict[str, Audio] = {}
 
 
 def play_sound(sound: str):
@@ -142,8 +79,7 @@ class GameCanvas:
     A nice wrapper around HTML Canvas for drawing map-based multiplayer games.
     """
 
-    scale: float
-    """The amount of real pixels in one map pixel"""
+    _scale: float
 
     def __init__(
         self,
@@ -159,73 +95,22 @@ class GameCanvas:
         self.map_image = map_image
         self.extra_height = extra_height
 
-        self.fit_into(max_width, max_height)
-
-    def fit_into(self, max_width: int, max_height: int):
-        if self.map_image.width == 0 or self.map_image.height == 0:
-            raise Exception("Map image invalid!")
-        aspect_ratio = (
-            self.map_image.width
-            * self.player_count
-            / (self.map_image.height + self.extra_height)
-        )
-        width = min(max_width, max_height * aspect_ratio)
-        height = width / aspect_ratio
-        self.canvas.style.width = f"{width}px"
-        self.canvas.style.height = f"{height}px"
-        self.canvas.width = width * window.devicePixelRatio
-        self.canvas.height = height * window.devicePixelRatio
-        self.scale = self.canvas.width / self.player_count / self.map_image.width
-        self.context = self.canvas.getContext("2d")
-        self.context.textAlign = "center"
-        self.context.textBaseline = "middle"
-
-        self.canvas_map_width = self.canvas.width / self.player_count
-        self.canvas_map_height = (
-            self.canvas_map_width * self.map_image.height / self.map_image.width
-        )
-
-    def _translate_position(self, board_index: int, x: float, y: float):
-        x *= self.scale
-        y *= self.scale
-        x += board_index * self.map_image.width * self.scale
-
-        return x, y
-
-    def _translate_width(self, width: float, aspect_ratio: float):
-        """Aspect ratio: w/h"""
-        width *= self.scale
-        height = width / aspect_ratio
-        return width, height
-
-    def clear(self):
-        """Clears the canvas and re-draws the players' maps"""
-        self.context.clearRect(0, 0, self.canvas.width, self.canvas.height)
-        self.context.fillStyle = "#fff"
-        self.context.fillRect(0, 0, self.canvas.width, self.canvas.height)
-
-        for i in range(self.player_count):
-            self.context.drawImage(
-                self.map_image,
-                i * self.canvas.width / self.player_count,
-                0,
-                self.map_image.width * self.scale,
-                self.map_image.height * self.scale,
-            )
+        self._fit_into(max_width, max_height)
 
     def draw_element(
         self,
         image: Image,
-        board_index: int,
         x: int,
         y: int,
         width: int,
+        board_index=0,
         direction: Union[float, None] = None,
         alignment=Alignment.CENTER,
     ):
         """
-        Draws the given image on the specified player's board.
-        Scaled to fit `width` in map pixels, be on position (`x`, `y`) in map pixels and face `direction`
+        Draws the given image on the specified board.
+
+        Scaled to fit `width` in map pixels, be on position ``(x, y)`` in map pixels and face `direction`
         where 0 is no rotation and the direction is clockwise positive.
         """
 
@@ -249,29 +134,80 @@ class GameCanvas:
     def draw_text(
         self,
         text: str,
-        color: str,
-        board_index: int,
         x: int,
         y: int,
+        color="black",
+        board_index=0,
         text_size=15,
         font="",
     ):
+        """
+        Draws the given text in the given coordinates (in map pixels).
+        """
+
         if font != "":
             font += ", "
 
         x, y = self._translate_position(board_index, x, y)
-        self.context.font = f"{text_size * self.scale}pt {font}system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, 'Noto Emoji'"
+        self.context.font = f"{text_size * self._scale}pt {font}system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, 'Noto Emoji'"
         self.context.fillStyle = color
         self.context.fillText(text, x, y)
 
+    def clear(self):
+        """Clears the canvas and re-draws the players' maps."""
+
+        self.context.clearRect(0, 0, self.canvas.width, self.canvas.height)
+        self.context.fillStyle = "#fff"
+        self.context.fillRect(0, 0, self.canvas.width, self.canvas.height)
+
+        for i in range(self.player_count):
+            self.context.drawImage(
+                self.map_image,
+                i * self.canvas.width / self.player_count,
+                0,
+                self.map_image.width * self._scale,
+                self.map_image.height * self._scale,
+            )
+
     @property
-    def total_width(self):
+    def total_width(self) -> float:
+        """The total width of the canvas (in map pixels)."""
+
         return self.map_image.width * self.player_count
 
+    def _fit_into(self, max_width: int, max_height: int):
+        if self.map_image.width == 0 or self.map_image.height == 0:
+            raise Exception("Map image invalid!")
+        aspect_ratio = (
+            self.map_image.width
+            * self.player_count
+            / (self.map_image.height + self.extra_height)
+        )
+        width = min(max_width, max_height * aspect_ratio)
+        height = width / aspect_ratio
+        self.canvas.style.width = f"{width}px"
+        self.canvas.style.height = f"{height}px"
+        self.canvas.width = width * window.devicePixelRatio
+        self.canvas.height = height * window.devicePixelRatio
+        self._scale = self.canvas.width / self.player_count / self.map_image.width
+        self.context = self.canvas.getContext("2d")
+        self.context.textAlign = "center"
+        self.context.textBaseline = "middle"
 
-async def load_font(name: str, url: str):
-    """Loads the font from the specified url as the specified name."""
-    
-    ff = FontFace.new(name, f"url({url})")
-    await ff.load()
-    document.fonts.add(ff)
+        self.canvas_map_width = self.canvas.width / self.player_count
+        self.canvas_map_height = (
+            self.canvas_map_width * self.map_image.height / self.map_image.width
+        )
+
+    def _translate_position(self, board_index: int, x: float, y: float):
+        x *= self._scale
+        y *= self._scale
+        x += board_index * self.map_image.width * self._scale
+
+        return x, y
+
+    def _translate_width(self, width: float, aspect_ratio: float):
+        """Aspect ratio: w/h"""
+        width *= self._scale
+        height = width / aspect_ratio
+        return width, height

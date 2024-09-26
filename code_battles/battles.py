@@ -1,4 +1,10 @@
-from typing import Any, Generic, List, TypeVar
+import asyncio
+import math
+import time
+import random
+import traceback
+
+from typing import Any, Dict, Generic, List, Tuple, TypeVar
 from code_battles.utilities import (
     GameCanvas,
     console_log,
@@ -7,7 +13,7 @@ from code_battles.utilities import (
     set_results,
     show_alert,
 )
-from js import Image, document, window
+from js import Image, document, window, FontFace
 from pyscript.ffi import create_proxy
 
 GameStateType = TypeVar("GameStateType")
@@ -18,9 +24,9 @@ APIType = TypeVar("APIType")
 class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     """
     The base class for a Code Battles game.
-    
+
     You should subclass this class and override the following methods:
-    
+
     - :meth:`.render`
     - :meth:`.simulate_step`
     - :meth:`.create_initial_state`
@@ -30,7 +36,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     Then, bind your class to the React application by calling :func:`run_game` with an instance of your subclass.
     """
 
-    player_names: list[str]
+    player_names: List[str]
     """The name of the players. This is populated before any of the overridable methods run."""
     map: str
     """The name of the map. This is populated before any of the overridable methods run."""
@@ -40,7 +46,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     """The game's canvas. Useful for the :func:`render` method. This is populated before any of the overridable methods run, but it isn't populated for background simulations, so you should only use it in :func:`render`."""
     state: GameStateType
     """The current state of the game. You should modify this in :func:`simulate_step`."""
-    
+
     background: bool
     """Whether the current simulation is occuring in the background (without UI)."""
     console_visible: bool
@@ -52,14 +58,14 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     active_players: List[int]
     """A list of the currently active player indices."""
 
-    _player_globals: list[dict[str, Any]]
+    _player_globals: List[Dict[str, Any]]
     _initialized: bool
     _eliminated: List[int]
 
     def render(self) -> None:
         """
         **You must override this method.**
-        
+
         Use the :attr:`canvas` attribute to render the current :attr:`state` attribute.
         """
 
@@ -68,7 +74,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     def simulate_step(self) -> None:
         """
         **You must override this method.**
-        
+
         Update the current state to run another step.
 
         Do NOT update :attr:`step`.
@@ -79,7 +85,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     def create_initial_state(self) -> GameStateType:
         """
         **You must override this method.**
-        
+
         Create the initial state for each simulation, to store in the :attr:`state` attribute.
         """
 
@@ -88,7 +94,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     def get_api(self) -> APIType:
         """
         **You must override this method.**
-        
+
         Returns the `api` module.
         """
 
@@ -97,7 +103,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     def create_api_implementation(self, player_index: int) -> APIImplementationType:
         """
         **You must override this method.**
-        
+
         Returns an implementation for the API's Context class, which provides users with access to the state.
 
         **Important:** This implementation may and should change properties in the state, but they should only be propogated in :func:`simulate_step`!
@@ -108,36 +114,83 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     async def setup(self):
         """
         Optional setup for the simulation.
-        
-        For example, loading images using :func:`utilities.download_images` or fonts using :func:`utilities.load_font`.
+
+        For example, loading images using :func:`download_images` or fonts using :func:`load_font`.
         """
 
         pass
 
-    def get_extra_height(self):
-        """Optionally add extra height below the boards."""
+    def configure_extra_height(self) -> int:
+        """Optionally add extra height below the boards. 0 by default."""
 
         return 0
 
-    def get_steps_per_second(self):
-        """The number of wanted steps per second when running the simulation with UI."""
+    def configure_steps_per_second(self) -> int:
+        """The number of wanted steps per second when running the simulation with UI. 20 by default."""
 
         return 20
 
-    def get_board_count(self):
-        """The number of wanted boards for the game."""
+    def configure_board_count(self) -> int:
+        """The number of wanted boards for the game. 1 by default."""
 
         return 1
 
-    def get_map_image_url(self, map: str):
+    def configure_map_image_url(self, map: str):
         """The URL containing the map image for the given map. By default, this takes the lowercase, replaces spaces with _ and loads from `/images/maps` which is stored in `public/images/maps` in a project."""
 
         return "/images/maps/" + map.lower().replace(" ", "_") + ".png"
 
-    def get_bot_base_class_name(self):
-        """A bot's base class name. By default, this is CodeBattlesBot."""
+    def configure_bot_base_class_name(self) -> str:
+        """A bot's base class name. CodeBattlesBot by default."""
 
         return "CodeBattlesBot"
+
+    def download_images(
+        self, sources: List[Tuple[str, str]]
+    ) -> asyncio.Future[Dict[str, Image]]:
+        """
+        :param sources: A list of ``(image_name, image_url)`` to download.
+        :returns: A future which can be ``await``'d containing a dictionary mapping each ``image_name`` to its loaded image.
+        """
+
+        remaining_images: List[str] = []
+        result = asyncio.Future()
+
+        images: Dict[str, Image] = {}
+        remaining = len(sources)
+
+        def add_image(image):
+            nonlocal remaining
+            nonlocal remaining_images
+            src = image.currentTarget.src
+            to_remove = None
+            for image in remaining_images:
+                if image in src:
+                    to_remove = image
+                    break
+            if to_remove:
+                remaining_images.remove(to_remove)
+
+            remaining -= 1
+            if remaining == 0:
+                result.set_result(images)
+
+        for key, src in sources:
+            image = Image.new()
+            images[key] = image
+            remaining_images.append(src)
+            image.onload = lambda _: add_image(_)
+            image.onerror = lambda _: print(f"Failed to fetch {src}")
+            image.src = src
+
+        return result
+
+    async def load_font(self, name: str, url: str) -> None:
+        """Loads the font from the specified url as the specified name."""
+
+        ff = FontFace.new(name, f"url({url})")
+        await ff.load()
+        document.fonts.add(ff)
 
     def eliminate_player(self, player_index: int, reason=""):
         """Eliminate the specified player for the specified reason from the simulation."""
@@ -161,13 +214,13 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
         )
 
     @property
-    def time(self):
+    def time(self) -> str:
         """The current step of the simulation, as a string with justification to fill 5 characters."""
 
         return str(self.step).rjust(5)
 
     @property
-    def over(self):
+    def over(self) -> bool:
         """Whether there is only one remaining player."""
 
         return len(self.active_players) <= 1
@@ -190,8 +243,8 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     async def _start_simulation_async(
         self,
         map: str,
-        player_codes: list[str],
-        player_names: list[str],
+        player_codes: List[str],
+        player_names: List[str],
         background: bool,
         console_visible: bool,
         verbose: bool,
@@ -231,8 +284,10 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
         if self.background:
             await self._play_pause()
 
-    def _get_initial_player_globals(self, player_codes: list[str]):
-        contexts = [self.create_api_implementation(i) for i in range(len(self.player_names))]
+    def _get_initial_player_globals(self, player_codes: List[str]):
+        contexts = [
+            self.create_api_implementation(i) for i in range(len(self.player_names))
+        ]
         bot_base_class_name = self.get_bot_base_class_name()
 
         player_globals = [
@@ -300,7 +355,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
         if not hasattr(self, "canvas"):
             return
 
-        self.canvas.fit_into(
+        self.canvas._fit_into(
             document.body.clientWidth - 440
             if self.console_visible
             else document.body.clientWidth - 40,

@@ -25,6 +25,7 @@ extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
 ]
@@ -52,3 +53,4 @@ epub_show_urls = "footnote"
 
 # -- Options for automatic code generation
 autodoc_member_order = "bysource"
+autodoc_mock_imports = ["js", "pyodide", "pyscript"]

@@ -3,7 +3,7 @@ Basic type hints for JavaScript in PyOdide and PyScript.
 A lot of properties are missing.
 """
 
-from typing import Callable, Literal, Optional
+from typing import Callable, List, Literal, Optional
 
 from pyodide.ffi import JsCallable
 
@@ -85,7 +85,7 @@ class Audio:
 
 class HTMLCollection:
     @staticmethod
-    def to_py() -> list[Element]: ...
+    def to_py() -> List[Element]: ...
 
 class Image(Element):
     @staticmethod
