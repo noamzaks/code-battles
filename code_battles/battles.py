@@ -337,41 +337,44 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
         console_visible: bool,
         verbose: bool,
     ):
-        self.map = map
-        self.player_names = player_names
-        self.map_image = await download_image(self.configure_map_image_url(map))
-        self.background = background
-        self.console_visible = console_visible
-        self.verbose = verbose
-        self.step = 0
-        self.active_players = list(range(len(player_names)))
-        self.state = self.create_initial_state()
-        self.player_requests = [self.create_initial_player_requests(i) for i in range(len(player_names))]
-        self._eliminated = []
-        self._player_globals = self._get_initial_player_globals(player_codes)
-        if not self.background:
-            self.canvas = GameCanvas(
-                document.getElementById("simulation"),
-                self.configure_board_count(),
-                self.map_image,
-                document.body.clientWidth - 440
-                if console_visible
-                else document.body.clientWidth - 40,
-                document.body.clientHeight - 280,
-                self.configure_extra_height(),
-            )
-        await self.setup()
+        try:
+            self.map = map
+            self.player_names = player_names
+            self.map_image = await download_image(self.configure_map_image_url(map))
+            self.background = background
+            self.console_visible = console_visible
+            self.verbose = verbose
+            self.step = 0
+            self.active_players = list(range(len(player_names)))
+            self.state = self.create_initial_state()
+            self.player_requests = [self.create_initial_player_requests(i) for i in range(len(player_names))]
+            self._eliminated = []
+            self._player_globals = self._get_initial_player_globals(player_codes)
+            if not self.background:
+                self.canvas = GameCanvas(
+                    document.getElementById("simulation"),
+                    self.configure_board_count(),
+                    self.map_image,
+                    document.body.clientWidth - 440
+                    if console_visible
+                    else document.body.clientWidth - 40,
+                    document.body.clientHeight - 280,
+                    self.configure_extra_height(),
+                )
+            await self.setup()
 
-        if not self.background:
-            if not hasattr(self, "_initialized"):
-                self._initialize()
+            if not self.background:
+                if not hasattr(self, "_initialized"):
+                    self._initialize()
 
-            # Show that loading finished
-            document.getElementById("loader").style.display = "none"
-            self.render()
+                # Show that loading finished
+                document.getElementById("loader").style.display = "none"
+                self.render()
 
-        if self.background:
-            await self._play_pause()
+            if self.background:
+                await self._play_pause()
+        except Exception:
+            traceback.print_exc()
 
     def _get_initial_player_globals(self, player_codes: List[str]):
         contexts = [
@@ -456,6 +459,8 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
     def _step(self):
         if not self.over:
             self.apply_decisions(self.make_decisions())
+        
+        if not self.over:
             self.step += 1
 
         if self.over:
@@ -518,7 +523,10 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
         await asyncio.sleep(0.05)
         while self._should_play():
             start = time.time()
-            self._step()
+            try:
+                self._step()
+            except Exception:
+                traceback.print_exc()
             if not self.background:
                 await asyncio.sleep(
                     max(
