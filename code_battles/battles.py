@@ -18,17 +18,20 @@ from pyscript.ffi import create_proxy
 GameStateType = TypeVar("GameStateType")
 APIImplementationType = TypeVar("APIImplementationType")
 APIType = TypeVar("APIType")
+PlayerRequestsType = TypeVar("PlayerRequestsType")
 
 
-class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
+class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerRequestsType]):
     """
     The base class for a Code Battles game.
 
     You should subclass this class and override the following methods:
 
     - :meth:`.render`
-    - :meth:`.simulate_step`
+    - :meth:`.make_decisions`
+    - :meth:`.apply_decisions`
     - :meth:`.create_initial_state`
+    - :meth:`.create_initial_player_requests`
     - :meth:`.get_api`
     - :meth:`.create_api_implementation`
 
@@ -44,7 +47,9 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     canvas: GameCanvas
     """The game's canvas. Useful for the :func:`render` method. This is populated before any of the overridable methods run, but it isn't populated for background simulations, so you should only use it in :func:`render`."""
     state: GameStateType
-    """The current state of the game. You should modify this in :func:`simulate_step`."""
+    """The current state of the game. You should modify this in :func:`apply_decisions`."""
+    player_requests: List[PlayerRequestsType]
+    """The current requests set by the players. Should be read in :func:`make_decisions` (and probably serialized), and set by the API implementation."""
 
     background: bool
     """Whether the current simulation is occuring in the background (without UI)."""
@@ -53,7 +58,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
     verbose: bool
     """Whether the current simulation is verbose, i.e. should show alerts and play sounds."""
     step: int
-    """The current step of the simulation. Automatically increments after each :func:`simulate_step`."""
+    """The current step of the simulation. Automatically increments after each :func:`apply_decisions`."""
     active_players: List[int]
     """A list of the currently active player indices."""
 
@@ -71,25 +76,35 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
 
         raise NotImplementedError("render")
 
-    def simulate_step(self) -> None:
+    def make_decisions(self) -> bytes:
         """
         **You must override this method.**
 
-        Update the current state to run another step.
+        Use the current state and bots to make decisions in order to reach the next state.
+        You may use :func:`run_bot_method` to run a specific player's method (for instance, `run`).
 
+        This function may take a lot of time to execute.
+
+        .. warning::
+           Do not call any other method other than :func:`run_bot_method` in here. This method will run in a web worker.
+
+        Do NOT update :attr:`state` or :attr:`step`.
+        """
+
+        raise NotImplementedError("make_decisions")
+    
+    def apply_decisions(self, decisions: bytes) -> None:
+        """
+        **You must override this method.**
+
+        Use the current state and the specified decisions to update the current state to be the next state.
+        
+        This function should not take a lot of time.
+        
         Do NOT update :attr:`step`.
         """
 
-        raise NotImplementedError("simulate_step")
-
-    def create_initial_state(self) -> GameStateType:
-        """
-        **You must override this method.**
-
-        Create the initial state for each simulation, to store in the :attr:`state` attribute.
-        """
-
-        raise NotImplementedError("create_initial_state")
+        raise NotImplementedError("apply_decisions")
 
     def get_api(self) -> APIType:
         """
@@ -100,13 +115,35 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
 
         raise NotImplementedError("get_api")
 
+    def create_initial_state(self) -> GameStateType:
+        """
+        **You must override this method.**
+
+        Create the initial state for each simulation, to store in the :attr:`state` attribute.
+        """
+
+        raise NotImplementedError("create_initial_state")
+    
+    def create_initial_player_requests(self, player_index: int) -> PlayerRequestsType:
+        """
+        **You must override this method.**
+
+        Create the initial player requests for each simulation, to store in the :attr:`player_requests` attribute.
+        
+        Should probably be empty.
+        """
+
+        raise NotImplementedError("create_initial_player_requests")
+
     def create_api_implementation(self, player_index: int) -> APIImplementationType:
         """
         **You must override this method.**
 
-        Returns an implementation for the API's Context class, which provides users with access to the state.
+        Returns an implementation for the API's Context class, which provides users with access to their corresponding element in :attr:`player_requests`.
 
-        **Important:** This implementation may and should change properties in the state, but they should only be propogated in :func:`simulate_step`!
+        You should also provide the API implementation with the state, but think about it as read-only.
+
+        Should perform checking.
         """
 
         raise NotImplementedError("create_api_implementation")
@@ -197,6 +234,41 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
         await ff.load()
         document.fonts.add(ff)
 
+    def run_bot_method(self, player_index: int, method_name: str):
+        """
+        Runs the specifid method of the given player.
+        
+        Upon exception, shows an alert (does not terminate the bot).
+        """
+
+        assert player_index in self.active_players
+
+        try:
+            exec(
+                f"if player_api is not None: player_api.{method_name}()",
+                self._player_globals[player_index],
+            )
+        except Exception:
+            lines = traceback.format_exc().splitlines()
+            string_file_indices: List[int] = []
+            for i, line in enumerate(lines):
+                if "<string>" in line:
+                    string_file_indices.append(i)
+            output = lines[0] + "\n"
+            for i in string_file_indices:
+                output += (
+                    lines[i].strip().replace('File "<string>", line', "Line") + "\n"
+                )
+            output += lines[string_file_indices[-1] + 1].strip() + "\n"
+
+            show_alert(
+                f"Code Exception in 'Player {player_index + 1}' API!",
+                output,
+                "red",
+                "fa-solid fa-exclamation",
+            )
+
+
     def eliminate_player(self, player_index: int, reason=""):
         """Eliminate the specified player for the specified reason from the simulation."""
 
@@ -219,6 +291,8 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
         )
 
     def play_sound(self, sound: str):
+        """Plays the given sound, from the URL given by :func:`configure_sound_url`."""
+
         if sound not in self._sounds:
             self._sounds[sound] = Audio.new(self.configure_sound_url(sound))
 
@@ -269,9 +343,10 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
         self.background = background
         self.console_visible = console_visible
         self.verbose = verbose
-        self.state = self.create_initial_state()
         self.step = 0
         self.active_players = list(range(len(player_names)))
+        self.state = self.create_initial_state()
+        self.player_requests = [self.create_initial_player_requests(i) for i in range(len(player_names))]
         self._eliminated = []
         self._player_globals = self._get_initial_player_globals(player_codes)
         if not self.background:
@@ -380,7 +455,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
 
     def _step(self):
         if not self.over:
-            self._simulate_with_apis()
+            self.apply_decisions(self.make_decisions())
             self.step += 1
 
         if self.over:
@@ -454,32 +529,3 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType]):
                 )
             else:
                 await asyncio.sleep(0.01)
-
-    def _simulate_with_apis(self):
-        self.simulate_step()
-
-        for index in self.active_players:
-            try:
-                exec(
-                    "if player_api is not None: player_api.run()",
-                    self._player_globals[index],
-                )
-            except Exception:
-                lines = traceback.format_exc().splitlines()
-                string_file_indices: List[int] = []
-                for i, line in enumerate(lines):
-                    if "<string>" in line:
-                        string_file_indices.append(i)
-                output = lines[0] + "\n"
-                for i in string_file_indices:
-                    output += (
-                        lines[i].strip().replace('File "<string>", line', "Line") + "\n"
-                    )
-                output += lines[string_file_indices[-1] + 1].strip() + "\n"
-
-                show_alert(
-                    f"Code Exception in 'Player {index + 1}' API!",
-                    output,
-                    "red",
-                    "fa-solid fa-exclamation",
-                )
