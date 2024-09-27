@@ -21,7 +21,9 @@ APIType = TypeVar("APIType")
 PlayerRequestsType = TypeVar("PlayerRequestsType")
 
 
-class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerRequestsType]):
+class CodeBattles(
+    Generic[GameStateType, APIImplementationType, APIType, PlayerRequestsType]
+):
     """
     The base class for a Code Battles game.
 
@@ -92,15 +94,15 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
         """
 
         raise NotImplementedError("make_decisions")
-    
+
     def apply_decisions(self, decisions: bytes) -> None:
         """
         **You must override this method.**
 
         Use the current state and the specified decisions to update the current state to be the next state.
-        
+
         This function should not take a lot of time.
-        
+
         Do NOT update :attr:`step`.
         """
 
@@ -123,13 +125,13 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
         """
 
         raise NotImplementedError("create_initial_state")
-    
+
     def create_initial_player_requests(self, player_index: int) -> PlayerRequestsType:
         """
         **You must override this method.**
 
         Create the initial player requests for each simulation, to store in the :attr:`player_requests` attribute.
-        
+
         Should probably be empty.
         """
 
@@ -187,6 +189,24 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
 
         return "CodeBattlesBot"
 
+    def configure_bot_globals(self) -> Dict[str, Any]:
+        """
+        Configure additional available global items, such as libraries from the Python standard library, bots can use.
+
+        By default, this is math, time and random.
+
+        .. warning::
+           Bots will also have `api`, `context`, `player_api`, and the bot base class name (CodeBattlesBot by default) available as part of the globals, alongside everything in `api`.
+
+           Any additional imports will be stripped (not as a security mechanism).
+        """
+        
+        return {
+            "math": math,
+            "time": time,
+            "random": random,
+        }
+
     def download_images(
         self, sources: List[Tuple[str, str]]
     ) -> asyncio.Future[Dict[str, Image]]:
@@ -237,7 +257,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
     def run_bot_method(self, player_index: int, method_name: str):
         """
         Runs the specifid method of the given player.
-        
+
         Upon exception, shows an alert (does not terminate the bot).
         """
 
@@ -267,7 +287,6 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
                 "red",
                 "fa-solid fa-exclamation",
             )
-
 
     def eliminate_player(self, player_index: int, reason=""):
         """Eliminate the specified player for the specified reason from the simulation."""
@@ -347,7 +366,9 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
             self.step = 0
             self.active_players = list(range(len(player_names)))
             self.state = self.create_initial_state()
-            self.player_requests = [self.create_initial_player_requests(i) for i in range(len(player_names))]
+            self.player_requests = [
+                self.create_initial_player_requests(i) for i in range(len(player_names))
+            ]
             self._eliminated = []
             self._player_globals = self._get_initial_player_globals(player_codes)
             if not self.background:
@@ -384,15 +405,12 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
 
         player_globals = [
             {
-                "math": math,
-                "time": time,
-                "random": random,
                 "api": self.get_api(),
                 bot_base_class_name: getattr(self.get_api(), bot_base_class_name),
                 "player_api": None,
                 "context": context,
                 **self.get_api().__dict__,
-            }
+            } | self.configure_bot_globals()
             for context in contexts
         ]
         for index, api_code in enumerate(player_codes):
@@ -459,7 +477,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
     def _step(self):
         if not self.over:
             self.apply_decisions(self.make_decisions())
-        
+
         if not self.over:
             self.step += 1
 
@@ -530,7 +548,9 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
             if not self.background:
                 await asyncio.sleep(
                     max(
-                        1 / self.configure_steps_per_second() / self._get_playback_speed()
+                        1
+                        / self.configure_steps_per_second()
+                        / self._get_playback_speed()
                         - (time.time() - start),
                         0,
                     )

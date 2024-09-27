@@ -4,13 +4,13 @@ Getting Started
 Forking and Cloning
 +++++++++++++++++++
 
-To create your first game, you need to fork `noamzaks/code-battles`, and clone your fork.
-You can do this by clicking the green "Use this template" button in `code-battles <https://github.com/noamzaks/code-battles>`_.
+To create your first game, you need to fork `noamzaks/code-battles-template`, and clone your fork.
+You can do this by clicking the green "Use this template" button in `code-battles-template <https://github.com/noamzaks/code-battles-template>`_.
 
-The web part of your game will be inside the `src` directory. Inside `App.tsx`, you will see additional web configuration available as part of Code Battles. 
+The web part of your game will be inside the `src` directory. Inside `App.tsx`, you will see additional configuration for the React application available as part of Code Battles. 
 Part of this configuration is your Firebase project, where all of the code of the bots will be stored (using Cloud Firestore), your users will authenticate, and you can also use it to deploy your website to an address like `code-battles.web.app`.
 
-After cloning your fork,install all of the dependencies by running ``bun install``. 
+After cloning your fork, install all of the dependencies by running ``bun install``. 
 
 .. note::
     If you don't have ``bun``, follow the instructions on their `website <https://bun.sh/>`_.

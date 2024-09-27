@@ -15,7 +15,7 @@ copyright = "2024, Noam Zaks"
 author = "Noam Zaks"
 
 release = "1.0"
-version = "1.0.7"
+version = "1.0.0"
 
 # -- General configuration
 
@@ -46,6 +46,13 @@ html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
 html_theme_options = {
     "logo_only": True,
+}
+html_context = {
+    "display_github": True,
+    "github_user": "noamzaks",
+    "github_repo": "code-battles",
+    "github_version": "main",
+    "conf_py_path": "/docs/source/",
 }
 
 # -- Options for EPUB output
