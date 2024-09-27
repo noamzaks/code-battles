@@ -1,5 +1,5 @@
-from utilities import GameCanvas, Alignment
-from battles import CodeBattles
+from code_battles.utilities import GameCanvas, Alignment
+from code_battles.battles import CodeBattles
 from js import window
 from pyscript.ffi import create_proxy
 

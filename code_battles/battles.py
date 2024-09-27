@@ -339,7 +339,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
     ):
         self.map = map
         self.player_names = player_names
-        self.map_image = await download_image(self.get_map_image_url(map))
+        self.map_image = await download_image(self.configure_map_image_url(map))
         self.background = background
         self.console_visible = console_visible
         self.verbose = verbose
@@ -352,13 +352,13 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
         if not self.background:
             self.canvas = GameCanvas(
                 document.getElementById("simulation"),
-                self.get_board_count(),
+                self.configure_board_count(),
                 self.map_image,
                 document.body.clientWidth - 440
                 if console_visible
                 else document.body.clientWidth - 40,
                 document.body.clientHeight - 280,
-                self.get_extra_height(),
+                self.configure_extra_height(),
             )
         await self.setup()
 
@@ -377,7 +377,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
         contexts = [
             self.create_api_implementation(i) for i in range(len(self.player_names))
         ]
-        bot_base_class_name = self.get_bot_base_class_name()
+        bot_base_class_name = self.configure_bot_base_class_name()
 
         player_globals = [
             {
@@ -522,7 +522,7 @@ class CodeBattles(Generic[GameStateType, APIImplementationType, APIType, PlayerR
             if not self.background:
                 await asyncio.sleep(
                     max(
-                        1 / self.get_steps_per_second() / self._get_playback_speed()
+                        1 / self.configure_steps_per_second() / self._get_playback_speed()
                         - (time.time() - start),
                         0,
                     )
