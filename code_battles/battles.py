@@ -159,6 +159,11 @@ class CodeBattles(
 
         pass
 
+    def configure_extra_width(self) -> int:
+        """Optionally add extra height to the right of the boards. 0 by default."""
+
+        return 0
+
     def configure_extra_height(self) -> int:
         """Optionally add extra height below the boards. 0 by default."""
 
@@ -200,7 +205,7 @@ class CodeBattles(
 
            Any additional imports will be stripped (not as a security mechanism).
         """
-        
+
         return {
             "math": math,
             "time": time,
@@ -380,6 +385,7 @@ class CodeBattles(
                     if console_visible
                     else document.body.clientWidth - 40,
                     document.body.clientHeight - 280,
+                    self.configure_extra_width(),
                     self.configure_extra_height(),
                 )
             await self.setup()
@@ -410,7 +416,8 @@ class CodeBattles(
                 "player_api": None,
                 "context": context,
                 **self.get_api().__dict__,
-            } | self.configure_bot_globals()
+            }
+            | self.configure_bot_globals()
             for context in contexts
         ]
         for index, api_code in enumerate(player_codes):

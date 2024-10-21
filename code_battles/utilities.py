@@ -1,6 +1,7 @@
 """Generic useful utilities for creating games with PyScript."""
 
 import asyncio
+import math
 from typing import Callable, List, Union
 from enum import Enum
 
@@ -75,12 +76,14 @@ class GameCanvas:
         map_image: Image,
         max_width: int,
         max_height: int,
+        extra_width: int,
         extra_height: int,
     ):
         self.canvas = canvas
         self.player_count = player_count
         self.map_image = map_image
         self.extra_height = extra_height
+        self.extra_width = extra_width
 
         self._fit_into(max_width, max_height)
 
@@ -140,6 +143,23 @@ class GameCanvas:
         self.context.fillStyle = color
         self.context.fillText(text, x, y)
 
+    def draw_circle(
+        self,
+        x: int,
+        y: int,
+        radius: float,
+        fill="black",
+        stroke="transparent",
+        board_index=0,
+    ):
+        x, y = self._translate_position(board_index, x, y)
+        self.context.fillStyle = fill
+        self.context.strokeStyle = stroke
+        self.context.beginPath()
+        self.context.arc(x, y, radius, 0, 2 * math.pi)
+        self.context.stroke()
+        self.context.fill()
+
     def clear(self):
         """Clears the canvas and re-draws the players' maps."""
 
@@ -165,10 +185,8 @@ class GameCanvas:
     def _fit_into(self, max_width: int, max_height: int):
         if self.map_image.width == 0 or self.map_image.height == 0:
             raise Exception("Map image invalid!")
-        aspect_ratio = (
-            self.map_image.width
-            * self.player_count
-            / (self.map_image.height + self.extra_height)
+        aspect_ratio = (self.map_image.width * self.player_count + self.extra_width) / (
+            self.map_image.height + self.extra_height
         )
         width = min(max_width, max_height * aspect_ratio)
         height = width / aspect_ratio
@@ -176,12 +194,16 @@ class GameCanvas:
         self.canvas.style.height = f"{height}px"
         self.canvas.width = width * window.devicePixelRatio
         self.canvas.height = height * window.devicePixelRatio
-        self._scale = self.canvas.width / self.player_count / self.map_image.width
+        self._scale = self.canvas.width / (
+            self.player_count * self.map_image.width + self.extra_width
+        )
         self.context = self.canvas.getContext("2d")
         self.context.textAlign = "center"
         self.context.textBaseline = "middle"
 
-        self.canvas_map_width = self.canvas.width / self.player_count
+        self.canvas_map_width = (
+            self.canvas.width - self._scale * self.extra_width
+        ) / self.player_count
         self.canvas_map_height = (
             self.canvas_map_width * self.map_image.height / self.map_image.width
         )

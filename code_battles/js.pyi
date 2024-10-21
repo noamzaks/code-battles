@@ -14,7 +14,23 @@ class TwoDContext:
     ]
     font: str
     fillStyle: str
+    strokeStyle: str
 
+    @staticmethod
+    def beginPath(): ...
+    @staticmethod
+    def arc(
+        x: int,
+        y: int,
+        radius: float,
+        startAngle: float,
+        endAngle: float,
+        counterclockwise=False,
+    ): ...
+    @staticmethod
+    def stroke(): ...
+    @staticmethod
+    def fill(): ...
     @staticmethod
     def fillText(text: str, x: int, y: int): ...
     @staticmethod
