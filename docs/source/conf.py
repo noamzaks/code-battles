@@ -3,6 +3,8 @@
 # -- Additional path locations
 import os
 import sys
+import json
+import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "code_battles"))
@@ -11,11 +13,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "stubs"))
 # -- Project information
 
 project = "Code Battles"
-copyright = "2024, Noam Zaks"
+copyright = f"{datetime.datetime.now().year}, Noam Zaks"
 author = "Noam Zaks"
 
-release = "1.0"
-version = "1.0.0"
+with open(
+    os.path.join(os.path.dirname(__file__), "..", "..", "package.json"), "r"
+) as f:
+    version = json.load(f)["version"]
+    release = ".".join(version.split(".")[:2])
 
 # -- General configuration
 
