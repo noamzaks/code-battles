@@ -20,3 +20,4 @@ You only need to implement the simulation logic, API definition and implementati
     :caption: API Docs
 
     reference
+    changelog

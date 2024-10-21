@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
+    "sphinx_mdinclude",
 ]
 
 intersphinx_mapping = {
