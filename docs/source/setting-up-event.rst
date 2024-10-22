@@ -61,3 +61,11 @@ This will show up in the tournament table and after someone wins a simulation.
 
 Additionally, if you use car company themed teams, you can upload `public/images/teams/TEAM_NAME-side.png` and that side profile of 
 the winner's car will drive from the left edge of the screen to the right edge.
+
+CLI for Competitors
++++++++++++++++++++
+
+You may encourage your competitors to use the Code Battles CLI which can be installed as simple as running ``pip install code-battles-cli``.
+
+Then, they can run ``code-battles download`` and ``code-battles upload bots/mybot.py`` (for example). They'll need to enter your event's URL
+alongside their username and password in the first execution, but it will be saved in `code-battles.json` for successive executions.
