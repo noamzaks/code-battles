@@ -1,10 +1,12 @@
 import asyncio
+import json
 import math
 import time
 import random
+import sys
 import traceback
 
-from typing import Any, Dict, Generic, List, Tuple, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar
 from code_battles.utilities import (
     GameCanvas,
     console_log,
@@ -19,6 +21,16 @@ GameStateType = TypeVar("GameStateType")
 APIImplementationType = TypeVar("APIImplementationType")
 APIType = TypeVar("APIType")
 PlayerRequestsType = TypeVar("PlayerRequestsType")
+
+is_web = "MicroPython" in sys.version or "pyodide" in sys.executable
+
+
+def web_only(method):
+    def wrapper(*args, **kwargs):
+        if is_web:
+            return method(*args, **kwargs)
+
+    return wrapper
 
 
 class CodeBattles(
@@ -212,6 +224,7 @@ class CodeBattles(
             "random": random,
         }
 
+    @web_only
     def download_images(
         self, sources: List[Tuple[str, str]]
     ) -> asyncio.Future[Dict[str, Image]]:
@@ -252,6 +265,7 @@ class CodeBattles(
 
         return result
 
+    @web_only
     async def load_font(self, name: str, url: str) -> None:
         """Loads the font from the specified url as the specified name."""
 
@@ -308,12 +322,31 @@ class CodeBattles(
             )
             self.play_sound("player_eliminated")
         self._eliminated.append(player_index)
-        console_log(
+        self.log(
+            f"[Game T{self.step}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
             -1,
-            f"[Game T{self.time}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
             "white",
         )
 
+    def log(self, text: str, player_index: Optional[int] = None, color="white"):
+        """
+        Logs the given entry with the given color.
+
+        For game-global log entries (not coming from a specific player), don't specify a ``player_index``.
+        """
+        if is_web:
+            console_log(-1 if player_index is None else player_index, text, color)
+        else:
+            self._logs.append(
+                {
+                    "step": self.step,
+                    "text": text,
+                    "player_index": player_index,
+                    "color": color,
+                }
+            )
+
+    @web_only
     def play_sound(self, sound: str):
         """Plays the given sound, from the URL given by :func:`configure_sound_url`."""
 
@@ -348,6 +381,53 @@ class CodeBattles(
 
         self._initialized = True
 
+    def _initialize_simulation(self, player_codes: List[str]):
+        self.step = 0
+        self.active_players = list(range(len(self.player_names)))
+        self.active_players = list(range(len(self.player_names)))
+        self.state = self.create_initial_state()
+        self.player_requests = [
+            self.create_initial_player_requests(i)
+            for i in range(len(self.player_names))
+        ]
+        self._eliminated = []
+        self._player_globals = self._get_initial_player_globals(player_codes)
+
+    def _run_local_simulation(self):
+        self.map = sys.argv[1]
+        self.player_names = sys.argv[2].split("-")
+        self.background = True
+        self.console_visible = False
+        self.verbose = False
+        self._logs = []
+        player_codes = []
+        for filename in sys.argv[3:]:
+            with open(filename, "r") as f:
+                player_codes.append(f.read())
+        self._initialize_simulation(player_codes)
+
+        while not self.over:
+            self.apply_decisions(self.make_decisions())
+
+            if not self.over:
+                self.step += 1
+
+        print("--- SIMULATION FINISHED ---")
+        print(
+            json.dumps(
+                {
+                    "winner_index": self.active_players[0]
+                    if len(self.active_players) > 0
+                    else None,
+                    "winner": self.player_names[self.active_players[0]]
+                    if len(self.active_players) > 0
+                    else None,
+                    "steps": self.step,
+                    "logs": self._logs,
+                }
+            )
+        )
+
     def _start_simulation(self, *args, **kwargs):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._start_simulation_async(*args, **kwargs))
@@ -368,14 +448,8 @@ class CodeBattles(
             self.background = background
             self.console_visible = console_visible
             self.verbose = verbose
-            self.step = 0
-            self.active_players = list(range(len(player_names)))
-            self.state = self.create_initial_state()
-            self.player_requests = [
-                self.create_initial_player_requests(i) for i in range(len(player_names))
-            ]
-            self._eliminated = []
-            self._player_globals = self._get_initial_player_globals(player_codes)
+            self._initialize_simulation(player_codes)
+
             if not self.background:
                 self.canvas = GameCanvas(
                     document.getElementById("simulation"),

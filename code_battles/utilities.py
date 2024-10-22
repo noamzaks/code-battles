@@ -152,6 +152,10 @@ class GameCanvas:
         stroke="transparent",
         board_index=0,
     ):
+        """
+        Draws the given circle (with the given stroke and fill) in the given coordinates and with the given radius (in map pixels).
+        """
+
         x, y = self._translate_position(board_index, x, y)
         self.context.fillStyle = fill
         self.context.strokeStyle = stroke
