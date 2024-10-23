@@ -160,7 +160,7 @@ class GameCanvas:
         self.context.fillStyle = fill
         self.context.strokeStyle = stroke
         self.context.beginPath()
-        self.context.arc(x, y, radius, 0, 2 * math.pi)
+        self.context.arc(x, y, radius * self._scale, 0, 2 * math.pi)
         self.context.stroke()
         self.context.fill()
 
