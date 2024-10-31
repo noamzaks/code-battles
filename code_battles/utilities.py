@@ -143,6 +143,26 @@ class GameCanvas:
         self.context.fillStyle = color
         self.context.fillText(text, x, y)
 
+    def draw_line(
+        self,
+        start_x: int,
+        start_y: int,
+        end_x: int,
+        end_y: int,
+        stroke="black",
+        stroke_width=10,
+        board_index=0,
+    ):
+        start_x, start_y = self._translate_position(board_index, start_x, start_y)
+        end_x, end_y = self._translate_position(board_index, end_x, end_y)
+
+        self.context.strokeStyle = stroke
+        self.context.lineWidth = stroke_width * self._scale
+        self.context.beginPath()
+        self.context.moveTo(start_x, start_y)
+        self.context.lineTo(end_x, end_y)
+        self.context.stroke()
+
     def draw_circle(
         self,
         x: int,
@@ -150,6 +170,7 @@ class GameCanvas:
         radius: float,
         fill="black",
         stroke="transparent",
+        stroke_width=2,
         board_index=0,
     ):
         """
@@ -157,8 +178,10 @@ class GameCanvas:
         """
 
         x, y = self._translate_position(board_index, x, y)
+
         self.context.fillStyle = fill
         self.context.strokeStyle = stroke
+        self.context.lineWidth = stroke_width * self._scale
         self.context.beginPath()
         self.context.arc(x, y, radius * self._scale, 0, 2 * math.pi)
         self.context.stroke()

@@ -15,6 +15,7 @@ class TwoDContext:
     font: str
     fillStyle: str
     strokeStyle: str
+    lineWidth: int
 
     @staticmethod
     def beginPath(): ...
@@ -27,6 +28,10 @@ class TwoDContext:
         endAngle: float,
         counterclockwise=False,
     ): ...
+    @staticmethod
+    def moveTo(x: int, y: int): ...
+    @staticmethod
+    def lineTo(x: int, y: int): ...
     @staticmethod
     def stroke(): ...
     @staticmethod
