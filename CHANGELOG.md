@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Breaking Changes
 
-- You must now add the following to your `index.html` inside `<body>`:
+- You must now add the following to your `index.html` inside `body`:
 
   ```html
   <script
@@ -41,7 +41,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - There is a new vite plugin to include the Python library, update PyScript configuration etc. named vite-plugin-code-battles.
 - The documentation now also has a reference of the Python library.
 - Breaking changes will now be versioned correctly.
-
-```
-
-```
