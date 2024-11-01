@@ -356,7 +356,16 @@ class CodeBattles(
         volume = window.localStorage.getItem("Volume") or 0
         s = self._sounds[sound].cloneNode(True)
         s.volume = volume
-        s.play()
+
+        async def p():
+            try:
+                await s.play()
+            except Exception:
+                print(
+                    f"Warning: couldn't play sound '{sound}'. Make sure the `sound` and `configure_sound_url` are correct."
+                )
+
+        asyncio.get_event_loop().run_until_complete(p())
 
     @property
     def time(self) -> str:
