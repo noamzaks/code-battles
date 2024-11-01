@@ -2,10 +2,39 @@
 
 import asyncio
 import math
+import sys
 from typing import Callable, List, Union
 from enum import Enum
 
-from js import Element, Image, window
+try:
+    import js
+except Exception:
+    pass
+
+
+def is_worker():
+    try:
+        from js import window  # noqa: F401
+
+        return False
+    except Exception:
+        return True
+
+
+def is_web():
+    return (
+        "MicroPython" in sys.version or "pyodide" in sys.executable
+    ) and not is_worker()
+
+
+def web_only(method):
+    if is_web():
+        return method
+
+    def wrapper(*args, **kwargs):
+        print(f"Warning: {method.__name__} should only be called in a web context.")
+
+    return wrapper
 
 
 class Alignment(Enum):
@@ -13,7 +42,10 @@ class Alignment(Enum):
     TOP_LEFT = 1
 
 
-def download_image(src: str) -> Image:
+@web_only
+def download_image(src: str):
+    from js import Image
+
     result = asyncio.Future()
     image = Image.new()
     image.onload = lambda _: result.set_result(image)
@@ -24,14 +56,22 @@ def download_image(src: str) -> Image:
 def show_alert(
     title: str, alert: str, color: str, icon: str, limit_time: int = 5000, is_code=True
 ):
-    if hasattr(window, "showAlert"):
-        try:
-            window.showAlert(title, alert, color, icon, limit_time, is_code)
-        except Exception as e:
-            print(e)
+    if is_web():
+        from js import window
+
+        if hasattr(window, "showAlert"):
+            try:
+                window.showAlert(title, alert, color, icon, limit_time, is_code)
+            except Exception as e:
+                print(e)
+    else:
+        print(f"[ALERT] {title}: {alert}")
 
 
+@web_only
 def set_results(player_names: List[str], places: List[int], map: str, verbose: bool):
+    from js import window
+
     if hasattr(window, "setResults"):
         try:
             window.setResults(player_names, places, map, verbose)
@@ -39,7 +79,10 @@ def set_results(player_names: List[str], places: List[int], map: str, verbose: b
             print(e)
 
 
+@web_only
 def download_json(filename: str, contents: str):
+    from js import window
+
     if hasattr(window, "downloadJson"):
         try:
             window.downloadJson(filename, contents)
@@ -47,7 +90,10 @@ def download_json(filename: str, contents: str):
             print(e)
 
 
+@web_only
 def console_log(player_index: int, text: str, color: str):
+    from js import window
+
     if hasattr(window, "consoleLog"):
         try:
             window.consoleLog(player_index, text, color)
@@ -71,9 +117,9 @@ class GameCanvas:
 
     def __init__(
         self,
-        canvas: Element,
+        canvas: "js.Element",
         player_count: int,
-        map_image: Image,
+        map_image: "js.Image",
         max_width: int,
         max_height: int,
         extra_width: int,
@@ -89,7 +135,7 @@ class GameCanvas:
 
     def draw_element(
         self,
-        image: Image,
+        image: "js.Image",
         x: int,
         y: int,
         width: int,
@@ -210,6 +256,8 @@ class GameCanvas:
         return self.map_image.width * self.player_count
 
     def _fit_into(self, max_width: int, max_height: int):
+        from js import window
+
         if self.map_image.width == 0 or self.map_image.height == 0:
             raise Exception("Map image invalid!")
         aspect_ratio = (self.map_image.width * self.player_count + self.extra_width) / (

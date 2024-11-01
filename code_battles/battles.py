@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import json
 import math
 import time
@@ -13,24 +14,19 @@ from code_battles.utilities import (
     download_image,
     set_results,
     show_alert,
+    web_only,
+    is_web,
 )
-from js import Audio, Image, document, window, FontFace
-from pyscript.ffi import create_proxy
+
+try:
+    import js
+except Exception:
+    pass
 
 GameStateType = TypeVar("GameStateType")
 APIImplementationType = TypeVar("APIImplementationType")
 APIType = TypeVar("APIType")
 PlayerRequestsType = TypeVar("PlayerRequestsType")
-
-is_web = "MicroPython" in sys.version or "pyodide" in sys.executable
-
-
-def web_only(method):
-    def wrapper(*args, **kwargs):
-        if is_web:
-            return method(*args, **kwargs)
-
-    return wrapper
 
 
 class CodeBattles(
@@ -56,7 +52,7 @@ class CodeBattles(
     """The name of the players. This is populated before any of the overridable methods run."""
     map: str
     """The name of the map. This is populated before any of the overridable methods run."""
-    map_image: Image
+    map_image: "js.Image"
     """The map image. This is populated before any of the overridable methods run."""
     canvas: GameCanvas
     """The game's canvas. Useful for the :func:`render` method. This is populated before any of the overridable methods run, but it isn't populated for background simulations, so you should only use it in :func:`render`."""
@@ -79,7 +75,8 @@ class CodeBattles(
     _player_globals: List[Dict[str, Any]]
     _initialized: bool
     _eliminated: List[int]
-    _sounds: Dict[str, Audio] = {}
+    _sounds: Dict[str, "js.Audio"] = {}
+    _decisions: List[bytes]
 
     def render(self) -> None:
         """
@@ -227,11 +224,12 @@ class CodeBattles(
     @web_only
     def download_images(
         self, sources: List[Tuple[str, str]]
-    ) -> asyncio.Future[Dict[str, Image]]:
+    ) -> asyncio.Future[Dict[str, "js.Image"]]:
         """
         :param sources: A list of ``(image_name, image_url)`` to download.
         :returns: A future which can be ``await``'d containing a dictionary mapping each ``image_name`` to its loaded image.
         """
+        from js import Image
 
         remaining_images: List[str] = []
         result = asyncio.Future()
@@ -268,6 +266,7 @@ class CodeBattles(
     @web_only
     async def load_font(self, name: str, url: str) -> None:
         """Loads the font from the specified url as the specified name."""
+        from js import FontFace, document
 
         ff = FontFace.new(name, f"url({url})")
         await ff.load()
@@ -334,7 +333,7 @@ class CodeBattles(
 
         For game-global log entries (not coming from a specific player), don't specify a ``player_index``.
         """
-        if is_web:
+        if is_web():
             console_log(-1 if player_index is None else player_index, text, color)
         else:
             self._logs.append(
@@ -349,6 +348,7 @@ class CodeBattles(
     @web_only
     def play_sound(self, sound: str):
         """Plays the given sound, from the URL given by :func:`configure_sound_url`."""
+        from js import window, Audio
 
         if sound not in self._sounds:
             self._sounds[sound] = Audio.new(self.configure_sound_url(sound))
@@ -370,7 +370,11 @@ class CodeBattles(
 
         return len(self.active_players) <= 1
 
+    @web_only
     def _initialize(self):
+        from js import window, document
+        from pyscript.ffi import create_proxy
+
         window.addEventListener("resize", create_proxy(lambda _: self._resize_canvas()))
         document.getElementById("playpause").onclick = create_proxy(
             lambda _: asyncio.get_event_loop().run_until_complete(self._play_pause())
@@ -383,6 +387,8 @@ class CodeBattles(
 
     def _initialize_simulation(self, player_codes: List[str]):
         self.step = 0
+        self._logs = []
+        self._decisions = []
         self.active_players = list(range(len(self.player_names)))
         self.active_players = list(range(len(self.player_names)))
         self.state = self.create_initial_state()
@@ -392,6 +398,38 @@ class CodeBattles(
         ]
         self._eliminated = []
         self._player_globals = self._get_initial_player_globals(player_codes)
+        self._webworker_frame = 0
+
+    def _run_webworker_simulation(
+        self, map: str, player_names_str: str, player_codes_str: str
+    ):
+        from pyscript import sync
+
+        # JS to Python
+        player_names = json.loads(player_names_str)
+        player_codes = json.loads(player_codes_str)
+
+        self.map = map
+        self.player_names = player_names
+        self.background = True
+        self.console_visible = False
+        self.verbose = False
+        self._initialize_simulation(player_codes)
+        while not self.over:
+            self._logs = []
+            decisions = self.make_decisions()
+            logs = self._logs
+            self._logs = []
+            self.apply_decisions(decisions)
+
+            sync.update_step(
+                base64.b64encode(decisions).decode(),
+                json.dumps(logs),
+                "true" if self.over else "false",
+            )
+
+            if not self.over:
+                self.step += 1
 
     def _run_local_simulation(self):
         self.map = sys.argv[1]
@@ -399,7 +437,6 @@ class CodeBattles(
         self.background = True
         self.console_visible = False
         self.verbose = False
-        self._logs = []
         player_codes = []
         for filename in sys.argv[3:]:
             with open(filename, "r") as f:
@@ -432,6 +469,7 @@ class CodeBattles(
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._start_simulation_async(*args, **kwargs))
 
+    @web_only
     async def _start_simulation_async(
         self,
         map: str,
@@ -441,7 +479,18 @@ class CodeBattles(
         console_visible: bool,
         verbose: bool,
     ):
+        from js import document
+        from pyscript import workers
+
+        # JS to Python
+        player_names = [str(x) for x in player_names]
+        player_codes = [str(x) for x in player_codes]
+
         try:
+            render_status = document.getElementById("render-status")
+            if render_status is not None:
+                render_status.textContent = "Rendering: Initializing..."
+
             self.map = map
             self.player_names = player_names
             self.map_image = await download_image(self.configure_map_image_url(map))
@@ -472,10 +521,35 @@ class CodeBattles(
                 document.getElementById("loader").style.display = "none"
                 self.render()
 
+                self._worker = await workers["worker"]
+                self._worker.update_step = self._update_step
+                self._worker._run_webworker_simulation(
+                    map, json.dumps(player_names), json.dumps(player_codes)
+                )
+
             if self.background:
                 await self._play_pause()
         except Exception:
             traceback.print_exc()
+
+    def _update_step(self, decisions_str: str, logs_str: str, is_over_str: str):
+        from js import document
+
+        decisions = base64.b64decode(str(decisions_str))
+        logs: list = json.loads(str(logs_str))
+        is_over = str(is_over_str) == "true"
+
+        self._decisions.append(decisions)
+        self._logs.append(logs)
+        self._webworker_frame += 1
+
+        render_status = document.getElementById("render-status")
+        if render_status is not None:
+            render_status.textContent = (
+                "Rendering: Complete!"
+                if is_over
+                else f"Rendering: Frame {self._webworker_frame}"
+            )
 
     def _get_initial_player_globals(self, player_codes: List[str]):
         contexts = [
@@ -542,7 +616,10 @@ class CodeBattles(
 
         return player_globals
 
+    @web_only
     def _resize_canvas(self):
+        from js import document
+
         if not hasattr(self, "canvas"):
             return
 
@@ -555,9 +632,25 @@ class CodeBattles(
         if not self.background:
             self.render()
 
+    @web_only
     def _step(self):
+        from js import document, setTimeout
+        from pyscript.ffi import create_proxy
+
         if not self.over:
-            self.apply_decisions(self.make_decisions())
+            if len(self._decisions) == 0:
+                print("Warning: sleeping because decisions were not made yet!")
+                setTimeout(create_proxy(self._step), 100)
+                return
+            else:
+                logs = self._logs.pop(0)
+                for log in logs:
+                    console_log(
+                        -1 if log["player_index"] is None else log["player_index"],
+                        log["text"],
+                        log["color"],
+                    )
+                self.apply_decisions(self._decisions.pop(0))
 
         if not self.over:
             self.step += 1
@@ -585,7 +678,10 @@ class CodeBattles(
             if self.over:
                 document.getElementById("noui-progress").style.display = "none"
 
+    @web_only
     def _should_play(self):
+        from js import document
+
         if self.over:
             return False
 
@@ -600,7 +696,10 @@ class CodeBattles(
 
         return True
 
+    @web_only
     def _get_playback_speed(self):
+        from js import document
+
         return 2 ** float(
             document.getElementById("timescale")
             .getElementsByClassName("mantine-Slider-thumb")
@@ -608,7 +707,10 @@ class CodeBattles(
             .ariaValueNow
         )
 
+    @web_only
     def _get_breakpoint(self):
+        from js import document
+
         breakpoint_element = document.getElementById("breakpoint")
         if breakpoint_element is None or breakpoint_element.value == "":
             return -1

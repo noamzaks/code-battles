@@ -254,6 +254,7 @@ const Simulation = () => {
                 <div style={{ textAlign: "center", flexGrow: 1 }}>
                   {showcaseMode || (
                     <>
+                      <span id="render-status" style={{ marginRight: 10 }} />
                       <NumberInput
                         id="breakpoint"
                         label="Breakpoint"
