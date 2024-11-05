@@ -516,7 +516,9 @@ class CodeBattles(
                     document.body.clientWidth - 440
                     if console_visible
                     else document.body.clientWidth - 40,
-                    document.body.clientHeight - 280,
+                    document.body.clientHeight - 280
+                    if console_visible
+                    else document.body.clientHeight - 160,
                     self.configure_extra_width(),
                     self.configure_extra_height(),
                 )
