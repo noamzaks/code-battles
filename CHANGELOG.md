@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+
+- You may now specify a varying render rate with `configure_render_rate` for render-intensive code battle games.
+- The web worker rendering time is now shown.
+
 ### Changed
 
 - The error when `play_sound` fails is now more readable.

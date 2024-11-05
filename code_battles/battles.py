@@ -77,6 +77,7 @@ class CodeBattles(
     _eliminated: List[int]
     _sounds: Dict[str, "js.Audio"] = {}
     _decisions: List[bytes]
+    _since_last_render: int
 
     def render(self) -> None:
         """
@@ -188,12 +189,12 @@ class CodeBattles(
 
         return 1
 
-    def configure_map_image_url(self, map: str):
+    def configure_map_image_url(self, map: str) -> str:
         """The URL containing the map image for the given map. By default, this takes the lowercase, replaces spaces with _ and loads from `/images/maps` which is stored in `public/images/maps` in a project."""
 
         return "/images/maps/" + map.lower().replace(" ", "_") + ".png"
 
-    def configure_sound_url(self, name: str):
+    def configure_sound_url(self, name: str) -> str:
         """The URL containing the sound for the given name. By default, this takes the lowercase, replaces spaces with _ and loads from `/sounds` which is stored in `public/sounds` in a project."""
 
         return "/sounds/" + name.lower().replace(" ", "_") + ".mp3"
@@ -202,6 +203,14 @@ class CodeBattles(
         """A bot's base class name. CodeBattlesBot by default."""
 
         return "CodeBattlesBot"
+
+    def configure_render_rate(self, playback_speed: float) -> int:
+        """
+        The amount of frames to simulate before each render.
+
+        For games with an intensive `render` method, this is useful for higher playback speeds.
+        """
+        return 1
 
     def configure_bot_globals(self) -> Dict[str, Any]:
         """
@@ -398,6 +407,7 @@ class CodeBattles(
         self.step = 0
         self._logs = []
         self._decisions = []
+        self._decision_index = 0
         self.active_players = list(range(len(self.player_names)))
         self.active_players = list(range(len(self.player_names)))
         self.state = self.create_initial_state()
@@ -407,7 +417,8 @@ class CodeBattles(
         ]
         self._eliminated = []
         self._player_globals = self._get_initial_player_globals(player_codes)
-        self._webworker_frame = 0
+        self._since_last_render = 1
+        self._start_time = time.time()
 
     def _run_webworker_simulation(
         self, map: str, player_names_str: str, player_codes_str: str
@@ -546,20 +557,20 @@ class CodeBattles(
     def _update_step(self, decisions_str: str, logs_str: str, is_over_str: str):
         from js import document
 
+        now = time.time()
         decisions = base64.b64decode(str(decisions_str))
         logs: list = json.loads(str(logs_str))
         is_over = str(is_over_str) == "true"
 
         self._decisions.append(decisions)
         self._logs.append(logs)
-        self._webworker_frame += 1
 
         render_status = document.getElementById("render-status")
         if render_status is not None:
             render_status.textContent = (
-                "Rendering: Complete!"
+                f"Rendering: Complete! ({int(now - self._start_time)}s)"
                 if is_over
-                else f"Rendering: Frame {self._webworker_frame}"
+                else f"Rendering: Frame {len(self._decisions)} ({int(now - self._start_time)}s)"
             )
 
     def _get_initial_player_globals(self, player_codes: List[str]):
@@ -649,19 +660,20 @@ class CodeBattles(
         from pyscript.ffi import create_proxy
 
         if not self.over:
-            if len(self._decisions) == 0:
+            if len(self._decisions) == self._decision_index:
                 print("Warning: sleeping because decisions were not made yet!")
                 setTimeout(create_proxy(self._step), 100)
                 return
             else:
-                logs = self._logs.pop(0)
+                logs = self._logs[self._decision_index]
                 for log in logs:
                     console_log(
                         -1 if log["player_index"] is None else log["player_index"],
                         log["text"],
                         log["color"],
                     )
-                self.apply_decisions(self._decisions.pop(0))
+                self.apply_decisions(self._decisions[self._decision_index])
+                self._decision_index += 1
 
         if not self.over:
             self.step += 1
@@ -672,9 +684,17 @@ class CodeBattles(
             set_results(
                 self.player_names, self._eliminated[::-1], self.map, self.verbose
             )
+            self.render()
 
         if not self.background:
-            self.render()
+            if self._since_last_render >= self.configure_render_rate(
+                self._get_playback_speed()
+            ):
+                self.render()
+                self._since_last_render = 1
+            else:
+                self._since_last_render += 1
+
             if (
                 self.over
                 and "Pause" in document.getElementById("playpause").textContent
