@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - The error when `play_sound` fails is now more readable.
 
+### Fixed
+
+- The canvas dimensions in showcase mode are now more accurate (with regard to the height).
+
 ## [1.3.0] - 2024-11-01
 
 ### Breaking Changes

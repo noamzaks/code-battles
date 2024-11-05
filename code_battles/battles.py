@@ -649,7 +649,9 @@ class CodeBattles(
             document.body.clientWidth - 440
             if self.console_visible
             else document.body.clientWidth - 40,
-            document.body.clientHeight - 280,
+            document.body.clientHeight - 280
+            if self.console_visible
+            else document.body.clientHeight - 160,
         )
         if not self.background:
             self.render()
