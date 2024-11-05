@@ -280,6 +280,7 @@ const Simulation = () => {
                   )}
                   <PlayPauseButton />
                 </div>
+                {showcaseMode && <span id="render-status" />}
                 <p style={{ margin: 0 }}>Playback Speed</p>
                 <Slider
                   style={{ flex: "none" }}
