@@ -38,11 +38,12 @@
     "tsparticles": "^3.5.0"
   },
   "peerDependencies": {
-    "@mantine/core": "^7.13.3",
-    "@mantine/dates": "^7.13.3",
-    "@mantine/hooks": "^7.13.3",
-    "@mantine/notifications": "^7.13.3",
-    "firebase": "^10.14.1",
+    "@mantine/core": "^7.13.4",
+    "@mantine/dates": "^7.13.4",
+    "@mantine/dropzone": "^7.13.4",
+    "@mantine/hooks": "^7.13.4",
+    "@mantine/notifications": "^7.13.4",
+    "firebase": "^11.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0"
@@ -56,7 +57,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "chokidar-cli": "^3.0.0",
-    "rollup": "^4.24.3",
+    "rollup": "^4.24.4",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-import-css": "^3.5.6",

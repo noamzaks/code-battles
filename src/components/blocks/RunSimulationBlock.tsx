@@ -4,9 +4,15 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useConfiguration } from "../../configuration"
 import { useAPIs, useLocalStorage } from "../../hooks"
-import { getLocalStorage, runNoUI, setLocalStorage } from "../../utilities"
+import {
+  getLocalStorage,
+  runNoUI,
+  setLocalStorage,
+  tryUntilSuccess,
+} from "../../utilities"
 import Block from "./Block"
 import BotSelector from "./BotSelector"
+import { Dropzone } from "@mantine/dropzone"
 
 const RunSimulationBlock = () => {
   const [apis, loading] = useAPIs()
@@ -33,6 +39,8 @@ const RunSimulationBlock = () => {
   }
 
   const run = () => {
+    // @ts-ignore
+    window._isSimulationFromFile = false
     navigate(`/simulation/${map.replaceAll(" ", "-")}/${playerBots.join("-")}`)
   }
 
@@ -174,6 +182,40 @@ const RunSimulationBlock = () => {
         style={{ textAlign: "center", display: "none", marginTop: 10 }}
         id="noui-progress"
       />
+      <Dropzone
+        mt="xs"
+        multiple={false}
+        onDrop={async (files) => {
+          if (files.length !== 1) {
+            return
+          }
+
+          const file = files[0]
+          const text = await file.text()
+          // @ts-ignore
+          window._navigate = navigate
+          // @ts-ignore
+          window._isSimulationFromFile = true
+
+          tryUntilSuccess(() => {
+            // @ts-ignore
+            window._startSimulationFromFile(text)
+          })
+        }}
+        style={{
+          textAlign: "center",
+          paddingTop: 20,
+          paddingBottom: 20,
+          paddingLeft: 10,
+          paddingRight: 10,
+        }}
+      >
+        <span>
+          <i className="fa-solid fa-file-code" style={{ marginRight: 10 }} />
+          Drag a simulation file here or click to select a file to run a
+          simulation from a file
+        </span>
+      </Dropzone>
     </Block>
   )
 }

@@ -118,17 +118,31 @@ export const runNoUI = (
   verbose: boolean
 ) => {
   const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
-  tryUntilFailure(() =>
+  tryUntilSuccess(() =>
     // @ts-ignore
     window._startSimulation(map, players, playerBots, true, false, verbose)
   )
 }
 
-export const tryUntilFailure = (f: () => void, timeout = 500) => {
+export const tryUntilSuccess = (f: () => void, timeout = 500) => {
   try {
     f()
   } catch (error: any) {
     console.log("Failed, waiting for timeout...", error?.message)
-    setTimeout(() => tryUntilFailure(f, timeout), timeout)
+    setTimeout(() => tryUntilSuccess(f, timeout), timeout)
   }
+}
+
+export const downloadFile = (
+  filename: string,
+  mimeType: string,
+  contents: string
+) => {
+  const a = document.createElement("a")
+  a.style.display = "none"
+  document.body.appendChild(a)
+  a.href = `data:${mimeType};charset=utf-8,${encodeURIComponent(contents)}`
+  a.download = filename
+  a.click()
+  document.body.removeChild(a)
 }

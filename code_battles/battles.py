@@ -1,19 +1,24 @@
 import asyncio
 import base64
+from dataclasses import dataclass
+import datetime
 import json
 import math
 import time
 import random
 import sys
 import traceback
+import gzip
 
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar
 from code_battles.utilities import (
     GameCanvas,
     console_log,
     download_image,
+    navigate,
     set_results,
     show_alert,
+    show_download,
     web_only,
     is_web,
 )
@@ -27,6 +32,50 @@ GameStateType = TypeVar("GameStateType")
 APIImplementationType = TypeVar("APIImplementationType")
 APIType = TypeVar("APIType")
 PlayerRequestsType = TypeVar("PlayerRequestsType")
+
+
+@dataclass
+class Simulation:
+    map: str
+    player_names: str
+    game: str
+    version: str
+    timestamp: datetime.datetime
+    logs: list
+    decisions: List[bytes]
+
+    def dump(self):
+        return base64.b64encode(
+            gzip.compress(
+                json.dumps(
+                    {
+                        "map": self.map,
+                        "playerNames": self.player_names,
+                        "game": self.game,
+                        "version": self.version,
+                        "timestamp": self.timestamp.isoformat(),
+                        "logs": self.logs,
+                        "decisions": [
+                            base64.b64encode(decision).decode()
+                            for decision in self.decisions
+                        ],
+                    }
+                ).encode()
+            )
+        ).decode()
+
+    @staticmethod
+    def load(file: str):
+        contents = json.loads(gzip.decompress(base64.b64decode(file)))
+        return Simulation(
+            contents["map"],
+            contents["playerNames"],
+            contents["game"],
+            contents["version"],
+            datetime.datetime.fromisoformat(contents["timestamp"]),
+            contents["logs"],
+            [base64.b64decode(decision) for decision in contents["decisions"]],
+        )
 
 
 class CodeBattles(
@@ -229,6 +278,10 @@ class CodeBattles(
             "time": time,
             "random": random,
         }
+
+    def configure_version(self) -> str:
+        """Configure the version of the game, which is stored in the simulation files."""
+        return "1.0.0"
 
     @web_only
     def download_images(
@@ -489,6 +542,71 @@ class CodeBattles(
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._start_simulation_async(*args, **kwargs))
 
+    def _start_simulation_from_file(self, contents: str):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self._start_simulation_from_file_async(contents))
+
+    async def _start_simulation_from_file_async(self, contents: str):
+        from js import document
+
+        try:
+            simulation = Simulation.load(str(contents))
+            navigate(
+                f"/simulation/{simulation.map}/{'-'.join(simulation.player_names)}"
+            )
+            show_alert(
+                "Loaded simulation file!",
+                f"{', '.join(simulation.player_names)} competed in {simulation.map} at {simulation.timestamp}",
+                "blue",
+                "fa-solid fa-file-code",
+                0,
+            )
+            if simulation.game != self.__class__.__name__:
+                show_alert(
+                    "Warning: game mismatch!",
+                    f"Simulation file is for game {simulation.game} while the website is running {self.__class__.__name__}!",
+                    "yellow",
+                    "fa-solid fa-exclamation",
+                    0,
+                )
+            if simulation.version != self.configure_version():
+                show_alert(
+                    "Warning: version mismatch!",
+                    f"Simulation file is for version {simulation.version} while the website is running {self.configure_version()}!",
+                    "yellow",
+                    "fa-solid fa-exclamation",
+                    0,
+                )
+            while document.getElementById("loader") is None:
+                await asyncio.sleep(0.01)
+            if not hasattr(self, "_initialized"):
+                self._initialize()
+            self.map = simulation.map
+            self.map_image = await download_image(
+                self.configure_map_image_url(simulation.map)
+            )
+            self.player_names = simulation.player_names
+            self.background = False
+            self.console_visible = True
+            self.verbose = False
+            self._initialize_simulation(["" for _ in simulation.player_names])
+            self._decisions = simulation.decisions
+            self._logs = simulation.logs
+            self.canvas = GameCanvas(
+                document.getElementById("simulation"),
+                self.configure_board_count(),
+                self.map_image,
+                document.body.clientWidth - 440,
+                document.body.clientHeight - 280,
+                self.configure_extra_width(),
+                self.configure_extra_height(),
+            )
+            document.getElementById("loader").style.display = "none"
+            await self.setup()
+            self.render()
+        except Exception as e:
+            print(e)
+
     @web_only
     async def _start_simulation_async(
         self,
@@ -555,7 +673,7 @@ class CodeBattles(
             traceback.print_exc()
 
     def _update_step(self, decisions_str: str, logs_str: str, is_over_str: str):
-        from js import document
+        from js import window, document
 
         now = time.time()
         decisions = base64.b64decode(str(decisions_str))
@@ -564,6 +682,22 @@ class CodeBattles(
 
         self._decisions.append(decisions)
         self._logs.append(logs)
+
+        if is_over:
+            try:
+                simulation = Simulation(
+                    self.map,
+                    self.player_names,
+                    self.__class__.__name__,
+                    self.configure_version(),
+                    datetime.datetime.now(),
+                    self._logs,
+                    self._decisions,
+                )
+                window.simulationToDownload = simulation.dump()
+                show_download()
+            except Exception as e:
+                print(e)
 
         render_status = document.getElementById("render-status")
         if render_status is not None:

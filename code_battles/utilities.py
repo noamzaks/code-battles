@@ -80,6 +80,28 @@ def set_results(player_names: List[str], places: List[int], map: str, verbose: b
 
 
 @web_only
+def show_download():
+    from js import window
+
+    if hasattr(window, "showDownload"):
+        try:
+            window.showDownload()
+        except Exception as e:
+            print(e)
+
+
+@web_only
+def navigate(route: str):
+    from js import window
+
+    if hasattr(window, "_navigate"):
+        try:
+            window._navigate(route)
+        except Exception as e:
+            print(e)
+
+
+@web_only
 def download_json(filename: str, contents: str):
     from js import window
 

@@ -8,10 +8,11 @@ import { loadFull } from "tsparticles"
 import { useAPIs, useAdmin, useLocalStorage } from "../../hooks"
 import { confetti } from "../../particles"
 import {
+  downloadFile,
   getLocalStorage,
   getRank,
   toPlacing,
-  tryUntilFailure,
+  tryUntilSuccess,
 } from "../../utilities"
 import LogViewer from "../LogViewer"
 
@@ -74,12 +75,18 @@ const Simulation = () => {
   let { map, playerapis } = useParams()
   const location = useLocation()
   const [winner, setWinner] = useState<string>()
+  const [downloadBytes, setDownloadBytes] = useState(false)
   const navigate = useNavigate()
   const colorScheme = useColorScheme()
   const showcaseMode = location.search.includes("showcase=true")
 
   useEffect(() => {
     initParticlesEngine(async (engine) => await loadFull(engine))
+
+    // @ts-ignore
+    window.showDownload = () => {
+      setDownloadBytes(true)
+    }
 
     // @ts-ignore
     window.showWinner = (winner: string, verbose: boolean) => {
@@ -114,8 +121,14 @@ const Simulation = () => {
   const players = playerNames.map((api) => (api === "None" ? "" : apis[api]))
 
   useEffect(() => {
-    if (!loading && players && playerapis) {
-      tryUntilFailure(() =>
+    if (
+      !loading &&
+      players &&
+      playerapis &&
+      // @ts-ignore
+      window._isSimulationFromFile !== true
+    ) {
+      tryUntilSuccess(() =>
         // @ts-ignore
         window._startSimulation(
           map,
@@ -279,6 +292,24 @@ const Simulation = () => {
                     </>
                   )}
                   <PlayPauseButton />
+                  {downloadBytes && (
+                    <Button
+                      ml="xs"
+                      radius="20px"
+                      leftSection={<i className="fa-solid fa-download" />}
+                      color="blue"
+                      onClick={() =>
+                        downloadFile(
+                          `${playerNames.join("-")}.btl`,
+                          "text/plain",
+                          // @ts-ignore
+                          window.simulationToDownload
+                        )
+                      }
+                    >
+                      Download Simulation
+                    </Button>
+                  )}
                 </div>
                 {showcaseMode && <span id="render-status" />}
                 <p style={{ margin: 0 }}>Playback Speed</p>

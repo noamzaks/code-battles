@@ -14,6 +14,9 @@ def run_game(battles: CodeBattles):
         from pyscript.ffi import create_proxy
 
         window._startSimulation = create_proxy(battles._start_simulation)
+        window._startSimulationFromFile = create_proxy(
+            battles._start_simulation_from_file
+        )
     elif is_worker():
         setattr(
             sys.modules["__main__"],

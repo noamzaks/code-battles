@@ -6,8 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Breaking Changes
+
+- You must now add `@mantine/dropzone` to your dependencies.
+
 ### Added
 
+- You can now download and upload simulation files. You may also use `configure_version` to invalidate previous simulation files, and choose a custom name for your main class (inheriting from `CodeBattles`) so your website can check that simulation files are of your game.
 - You may now specify a varying render rate with `configure_render_rate` for render-intensive code battle games.
 - The web worker rendering time is now shown.
 
