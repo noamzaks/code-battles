@@ -404,6 +404,9 @@ class CodeBattles(
 
         For game-global log entries (not coming from a specific player), don't specify a ``player_index``.
         """
+        if not isinstance(text, str):
+            text = str(text)
+
         if is_web():
             console_log(-1 if player_index is None else player_index, text, color)
         else:
