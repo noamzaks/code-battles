@@ -1,4 +1,4 @@
-import { Button, Select } from "@mantine/core"
+import { Button, NumberInput, Select } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -29,6 +29,10 @@ const RunSimulationBlock = () => {
     key: "Player Bots",
     defaultValue: ["None", "None"],
   })
+  const [seed, setSeed] = useLocalStorage<number | string>({
+    key: "Seed",
+    defaultValue: "",
+  })
   const [runningNoUI, setRunningNoUI] = useState(false)
   const [runningNoUIN, setRunningNoUIN] = useState<Record<string, number>>({})
   const navigate = useNavigate()
@@ -41,17 +45,22 @@ const RunSimulationBlock = () => {
   const run = () => {
     // @ts-ignore
     window._isSimulationFromFile = false
-    navigate(`/simulation/${map.replaceAll(" ", "-")}/${playerBots.join("-")}`)
+    navigate(
+      `/simulation/${map.replaceAll(" ", "-")}/${playerBots.join(
+        "-"
+      )}?seed=${seed}`
+    )
   }
 
   const startRunNoUI = () => {
     setRunningNoUI(true)
-    runNoUI(map, apis, playerBots, true)
+    runNoUI(map, apis, playerBots, seed.toString(), true)
   }
 
   const startRunNoUIN = (n: number) => {
+    setLocalStorage("Results", {})
     setRunningNoUIN({ [n.toString()]: n })
-    runNoUI(map, apis, playerBots, false)
+    runNoUI(map, apis, playerBots, seed.toString(), false)
   }
 
   useEffect(() => {
@@ -112,7 +121,7 @@ const RunSimulationBlock = () => {
         })
         setLocalStorage("Results", {})
       } else {
-        runNoUI(map, apis, playerBots, false)
+        runNoUI(map, apis, playerBots, seed.toString(), false)
       }
     }
   }, [runningNoUIN])
@@ -136,6 +145,13 @@ const RunSimulationBlock = () => {
         playerBots={playerBots}
         setPlayerBots={setPlayerBots}
         apis={apis}
+      />
+      <NumberInput
+        leftSection={<i className="fa-solid fa-dice" />}
+        label="Randomness Seed"
+        min={0}
+        value={seed}
+        onChange={setSeed}
       />
 
       <Button.Group mt="xs">

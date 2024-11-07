@@ -5,7 +5,7 @@ import datetime
 import json
 import math
 import time
-import random
+from random import Random
 import sys
 import traceback
 import gzip
@@ -43,6 +43,7 @@ class Simulation:
     timestamp: datetime.datetime
     logs: list
     decisions: List[bytes]
+    seed: int
 
     def dump(self):
         return base64.b64encode(
@@ -59,6 +60,7 @@ class Simulation:
                             base64.b64encode(decision).decode()
                             for decision in self.decisions
                         ],
+                        "seed": self.seed,
                     }
                 ).encode()
             )
@@ -66,7 +68,7 @@ class Simulation:
 
     @staticmethod
     def load(file: str):
-        contents = json.loads(gzip.decompress(base64.b64decode(file)))
+        contents: Dict[str, Any] = json.loads(gzip.decompress(base64.b64decode(file)))
         return Simulation(
             contents["map"],
             contents["playerNames"],
@@ -75,6 +77,7 @@ class Simulation:
             datetime.datetime.fromisoformat(contents["timestamp"]),
             contents["logs"],
             [base64.b64decode(decision) for decision in contents["decisions"]],
+            contents["seed"],
         )
 
 
@@ -109,6 +112,12 @@ class CodeBattles(
     """The current state of the game. You should modify this in :func:`apply_decisions`."""
     player_requests: List[PlayerRequestsType]
     """The current requests set by the players. Should be read in :func:`make_decisions` (and probably serialized), and set by the API implementation."""
+    random: Random
+    """A pseudorandom generator that should be used for all randomness purposes (except :func:`make_decisions`)"""
+    player_randoms: List[Random]
+    """A pseudorandom generator that should be used for all randomness purposes in a player's bot. Given to the bots as a global via :func:`configure_bot_globals`."""
+    make_decisions_random: Random
+    """A pseudorandom generator that should be used for all randomness purposes in :func:`make_decisions`."""
 
     background: bool
     """Whether the current simulation is occuring in the background (without UI)."""
@@ -144,12 +153,12 @@ class CodeBattles(
         Use the current state and bots to make decisions in order to reach the next state.
         You may use :func:`run_bot_method` to run a specific player's method (for instance, `run`).
 
+        If you need any randomness, use :attr:`make_decisions_random`.
+
         This function may take a lot of time to execute.
 
         .. warning::
            Do not call any other method other than :func:`run_bot_method` in here. This method will run in a web worker.
-
-        Do NOT update :attr:`state` or :attr:`step`.
         """
 
         raise NotImplementedError("make_decisions")
@@ -261,11 +270,11 @@ class CodeBattles(
         """
         return 1
 
-    def configure_bot_globals(self) -> Dict[str, Any]:
+    def configure_bot_globals(self, player_index: int) -> Dict[str, Any]:
         """
         Configure additional available global items, such as libraries from the Python standard library, bots can use.
 
-        By default, this is math, time and random.
+        By default, this is math, time and random, where random is the corresponding :attr:`player_randoms`.
 
         .. warning::
            Bots will also have `api`, `context`, `player_api`, and the bot base class name (CodeBattlesBot by default) available as part of the globals, alongside everything in `api`.
@@ -276,7 +285,7 @@ class CodeBattles(
         return {
             "math": math,
             "time": time,
-            "random": random,
+            "random": self.player_randoms[player_index],
         }
 
     def configure_version(self) -> str:
@@ -456,13 +465,19 @@ class CodeBattles(
 
         self._initialized = True
 
-    def _initialize_simulation(self, player_codes: List[str]):
-        self.step = 0
+    def _initialize_simulation(
+        self, player_codes: List[str], seed: Optional[int] = None
+    ):
+        if seed is None:
+            seed = Random().randint(0, 2**128)
         self._logs = []
         self._decisions = []
         self._decision_index = 0
+        self._seed = seed
+        self.step = 0
         self.active_players = list(range(len(self.player_names)))
-        self.active_players = list(range(len(self.player_names)))
+        self.random = Random(seed)
+        self.player_randoms = [Random(self.random.random()) for _ in self.player_names]
         self.state = self.create_initial_state()
         self.player_requests = [
             self.create_initial_player_requests(i)
@@ -474,7 +489,11 @@ class CodeBattles(
         self._start_time = time.time()
 
     def _run_webworker_simulation(
-        self, map: str, player_names_str: str, player_codes_str: str
+        self,
+        map: str,
+        player_names_str: str,
+        player_codes_str: str,
+        seed: Optional[int] = None,
     ):
         from pyscript import sync
 
@@ -487,7 +506,7 @@ class CodeBattles(
         self.background = True
         self.console_visible = False
         self.verbose = False
-        self._initialize_simulation(player_codes)
+        self._initialize_simulation(player_codes, seed)
         while not self.over:
             self._logs = []
             decisions = self.make_decisions()
@@ -505,16 +524,17 @@ class CodeBattles(
                 self.step += 1
 
     def _run_local_simulation(self):
-        self.map = sys.argv[1]
-        self.player_names = sys.argv[2].split("-")
+        seed = None if sys.argv[1] == "None" else int(sys.argv[1])
+        self.map = sys.argv[2]
+        self.player_names = sys.argv[3].split("-")
         self.background = True
         self.console_visible = False
         self.verbose = False
         player_codes = []
-        for filename in sys.argv[3:]:
+        for filename in sys.argv[4:]:
             with open(filename, "r") as f:
                 player_codes.append(f.read())
-        self._initialize_simulation(player_codes)
+        self._initialize_simulation(player_codes, seed)
 
         while not self.over:
             self.apply_decisions(self.make_decisions())
@@ -589,7 +609,9 @@ class CodeBattles(
             self.background = False
             self.console_visible = True
             self.verbose = False
-            self._initialize_simulation(["" for _ in simulation.player_names])
+            self._initialize_simulation(
+                ["" for _ in simulation.player_names], simulation.seed
+            )
             self._decisions = simulation.decisions
             self._logs = simulation.logs
             self.canvas = GameCanvas(
@@ -616,6 +638,7 @@ class CodeBattles(
         background: bool,
         console_visible: bool,
         verbose: bool,
+        seed="",
     ):
         from js import document
         from pyscript import workers
@@ -635,7 +658,7 @@ class CodeBattles(
             self.background = background
             self.console_visible = console_visible
             self.verbose = verbose
-            self._initialize_simulation(player_codes)
+            self._initialize_simulation(player_codes, None if seed == "" else int(seed))
 
             if not self.background:
                 self.canvas = GameCanvas(
@@ -661,11 +684,11 @@ class CodeBattles(
                 document.getElementById("loader").style.display = "none"
                 self.render()
 
-                self._worker = await workers["worker"]
-                self._worker.update_step = self._update_step
-                self._worker._run_webworker_simulation(
-                    map, json.dumps(player_names), json.dumps(player_codes)
-                )
+            self._worker = await workers["worker"]
+            self._worker.update_step = self._update_step
+            self._worker._run_webworker_simulation(
+                map, json.dumps(player_names), json.dumps(player_codes), self._seed
+            )
 
             if self.background:
                 await self._play_pause()
@@ -693,6 +716,7 @@ class CodeBattles(
                     datetime.datetime.now(),
                     self._logs,
                     self._decisions,
+                    self._seed,
                 )
                 window.simulationToDownload = simulation.dump()
                 show_download()
@@ -721,8 +745,8 @@ class CodeBattles(
                 "context": context,
                 **self.get_api().__dict__,
             }
-            | self.configure_bot_globals()
-            for context in contexts
+            | self.configure_bot_globals(player_index)
+            for player_index, context in enumerate(contexts)
         ]
         for index, api_code in enumerate(player_codes):
             if api_code != "" and api_code is not None:
@@ -820,7 +844,8 @@ class CodeBattles(
             set_results(
                 self.player_names, self._eliminated[::-1], self.map, self.verbose
             )
-            self.render()
+            if not self.background:
+                self.render()
 
         if not self.background:
             if self._since_last_render >= self.configure_render_rate(

@@ -115,12 +115,21 @@ export const runNoUI = (
   map: string,
   apis: Record<string, any>,
   playerBots: string[],
+  seed: string,
   verbose: boolean
 ) => {
   const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
   tryUntilSuccess(() =>
     // @ts-ignore
-    window._startSimulation(map, players, playerBots, true, false, verbose)
+    window._startSimulation(
+      map,
+      players,
+      playerBots,
+      true,
+      false,
+      verbose,
+      seed
+    )
   )
 }
 

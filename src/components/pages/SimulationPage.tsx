@@ -2,7 +2,12 @@ import { Badge, Button, Loader, NumberInput, Slider } from "@mantine/core"
 import { useColorScheme } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import React, { useCallback, useEffect, useState } from "react"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom"
 import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { loadFull } from "tsparticles"
 import { useAPIs, useAdmin, useLocalStorage } from "../../hooks"
@@ -74,6 +79,7 @@ const Simulation = () => {
   const [apis, loading] = useAPIs()
   let { map, playerapis } = useParams()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [winner, setWinner] = useState<string>()
   const [downloadBytes, setDownloadBytes] = useState(false)
   const navigate = useNavigate()
@@ -128,6 +134,7 @@ const Simulation = () => {
       // @ts-ignore
       window._isSimulationFromFile !== true
     ) {
+      const seed = searchParams.get("seed") ?? ""
       tryUntilSuccess(() =>
         // @ts-ignore
         window._startSimulation(
@@ -136,7 +143,8 @@ const Simulation = () => {
           playerNames,
           false,
           !showcaseMode,
-          true
+          true,
+          seed
         )
       )
     }

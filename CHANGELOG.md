@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Simulation files are now seeded.
+- When running a simulation, you may now choose a specific randomness seed.
+
+### Changed
+
+- You should now use `self.make_decisions_random` for any randomness usage in `make_decisions`.
+- The `random` global for bots is now a seeded pseudorandom generator initialized from the simulation seed by default (this can be customized with `configure_bot_globals`).
+- You should now use `self.random` to make your game deterministic for a given seed.
+
+### Fixed
+
+- Running N times now resets the `Results` to make sure the alert at the end is of exactly N times.
+
 ## [1.4.0] - 2024-11-06
 
 ### Breaking Changes
