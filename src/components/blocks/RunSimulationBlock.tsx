@@ -147,6 +147,7 @@ const RunSimulationBlock = () => {
         apis={apis}
       />
       <NumberInput
+        mt="xs"
         leftSection={<i className="fa-solid fa-dice" />}
         label="Randomness Seed"
         min={0}
