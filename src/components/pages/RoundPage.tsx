@@ -83,7 +83,7 @@ const Round = () => {
 
   useEffect(() => {
     if (remaining > 0) {
-      runNoUI(currentMap, apis, currentPlayers, false)
+      runNoUI(currentMap, apis, currentPlayers, "", false)
     }
   }, [remaining])
 
@@ -216,7 +216,13 @@ const Round = () => {
                             size="xs"
                             onClick={() => {
                               if (roundIterations === 1) {
-                                runNoUI(round.map, apis, round.players, true)
+                                runNoUI(
+                                  round.map,
+                                  apis,
+                                  round.players,
+                                  "",
+                                  true
+                                )
                               } else {
                                 currentMap = round.map
                                 currentPlayers = round.players

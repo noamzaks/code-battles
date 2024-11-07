@@ -1,8 +1,12 @@
 import { Button } from "@mantine/core"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
+import { useLocalStorage } from "../hooks"
 
 const AutoScrollButton = () => {
-  const [autoScroll, setAutoScroll] = useState(true)
+  const [autoScroll, setAutoScroll] = useLocalStorage<boolean>({
+    key: "Auto Scroll",
+    defaultValue: true,
+  })
 
   useEffect(() => {
     // @ts-ignore

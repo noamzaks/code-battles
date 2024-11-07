@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import AutoScrollButton from "./AutoScrollButton"
 import ShowLogsButtons from "./ShowLogsButtons"
+import { useLocalStorage } from "../hooks"
 
 interface Props {
   playerNames: string[]
@@ -13,8 +14,14 @@ interface Log {
 }
 
 const LogViewer: React.FC<Props> = ({ playerNames }) => {
-  const [showLogs, setShowLogs] = useState<boolean[]>([])
-  const [logs, setLogs] = useState<Log[]>([])
+  const [showLogs, setShowLogs] = useLocalStorage<boolean[]>({
+    key: "Show Logs",
+    defaultValue: [],
+  })
+  const [logs, setLogs] = useLocalStorage<Log[]>({
+    key: "Logs",
+    defaultValue: [],
+  })
 
   useEffect(() => {
     // @ts-ignore
