@@ -24,7 +24,7 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
   })
 
   useEffect(() => {
-    // @ts-ignore
+    setLogs([])
     setShowLogs(playerNames.map(() => true))
   }, [playerNames])
 
