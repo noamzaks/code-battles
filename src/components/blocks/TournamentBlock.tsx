@@ -52,7 +52,7 @@ const TournamentBlock: React.FC<Props> = ({ pointModifier, inline, title }) => {
                   b.points +
                   (pointModifier![b.name] ?? 0) -
                   a.points -
-                  (pointModifier![a.name] ?? 0)
+                  (pointModifier![a.name] ?? 0),
               )
               .map((team: any, index: number) => (
                 <Table.Tr key={index}>

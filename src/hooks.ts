@@ -18,7 +18,7 @@ export const useLocalStorage = <T>({
   defaultValue,
 }: Options): [T, React.Dispatch<React.SetStateAction<T>>] => {
   const [value, setValue] = useState<T>(
-    getLocalStorage(key, defaultValue ?? null)
+    getLocalStorage(key, defaultValue ?? null),
   )
 
   useEffect(() => {
@@ -49,7 +49,10 @@ export const useLocalStorage = <T>({
     if (newValue) {
       localStorage.setItem(key, JSON.stringify(newValue))
       window.dispatchEvent(
-        new StorageEvent("storage", { key, newValue: JSON.stringify(newValue) })
+        new StorageEvent("storage", {
+          key,
+          newValue: JSON.stringify(newValue),
+        }),
       )
     }
   }
@@ -58,7 +61,7 @@ export const useLocalStorage = <T>({
 }
 
 export const useCachedDocumentData = (
-  docRef: DocumentReference<DocumentData>
+  docRef: DocumentReference<DocumentData>,
 ) => {
   const [data, setData] = useLocalStorage<any>({
     key: "Cached " + docRef.path,
@@ -83,10 +86,13 @@ export const useAPIs = () => {
   const authentication = useAuthentication()
 
   const [adminAPIs, loadingAdminAPIs] = useCachedDocumentData(
-    doc(firestore, "/bots/public")
+    doc(firestore, "/bots/public"),
   )
   const [userAPIs, loadingUserAPIs] = useCachedDocumentData(
-    doc(firestore, `/bots/${authentication?.currentUser?.email?.split("@")[0]}`)
+    doc(
+      firestore,
+      `/bots/${authentication?.currentUser?.email?.split("@")[0]}`,
+    ),
   )
 
   return [
@@ -104,7 +110,10 @@ export const useUserAPIs = () => {
   const authentication = useAuthentication()
 
   const [userAPIs, loadingUserAPIs] = useCachedDocumentData(
-    doc(firestore, `/bots/${authentication?.currentUser?.email?.split("@")[0]}`)
+    doc(
+      firestore,
+      `/bots/${authentication?.currentUser?.email?.split("@")[0]}`,
+    ),
   )
 
   return [userAPIs, loadingUserAPIs]

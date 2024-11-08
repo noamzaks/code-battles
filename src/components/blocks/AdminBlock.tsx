@@ -10,7 +10,7 @@ import Block from "./Block"
 
 const fetchPlayer = async (name: string, firestore: Firestore) => {
   const selection = await getDoc(
-    doc(firestore, "/tournament/" + name.toLowerCase())
+    doc(firestore, "/tournament/" + name.toLowerCase()),
   )
   const pick = selection.data()?.pick
   const apis = await getDoc(doc(firestore, "/bots/" + name.toLowerCase()))
@@ -20,7 +20,7 @@ const fetchPlayer = async (name: string, firestore: Firestore) => {
     await setDoc(
       doc(firestore, `/bots/admin`),
       { [name]: api },
-      { merge: true }
+      { merge: true },
     )
 
     notifications.show({
@@ -70,7 +70,7 @@ const AdminBlock = () => {
     await setDoc(
       doc(firestore, "/bots/public"),
       { [chosenBot]: apis[chosenBot] },
-      { merge: true }
+      { merge: true },
     )
 
     notifications.show({
@@ -91,7 +91,7 @@ const AdminBlock = () => {
       {
         next: new Timestamp(now.getTime() / 1000, 0),
       },
-      { merge: true }
+      { merge: true },
     )
   }
 

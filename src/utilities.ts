@@ -10,7 +10,7 @@ export const getLocalStorage = (key: string, defaultValue = {}) => {
 export const setLocalStorage = (key: string, value = {}) => {
   localStorage.setItem(key, JSON.stringify(value))
   window.dispatchEvent(
-    new StorageEvent("storage", { key, newValue: JSON.stringify(value) })
+    new StorageEvent("storage", { key, newValue: JSON.stringify(value) }),
   )
 }
 
@@ -44,7 +44,7 @@ export const shuffle = <T>(array: T[]): T[] => {
 export const getRank = (
   tournamentInfo: any,
   team: string,
-  pointModifier: any
+  pointModifier: any,
 ) => {
   if (!tournamentInfo?.teams?.map) {
     return -1
@@ -55,7 +55,7 @@ export const getRank = (
       b.points +
       (pointModifier![b.name] ?? 0) -
       a.points -
-      (pointModifier![a.name] ?? 0)
+      (pointModifier![a.name] ?? 0),
   )
 
   return sorted.findIndex((t) => t.name === team)
@@ -116,7 +116,7 @@ export const runNoUI = (
   apis: Record<string, any>,
   playerBots: string[],
   seed: string,
-  verbose: boolean
+  verbose: boolean,
 ) => {
   const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
   tryUntilSuccess(() =>
@@ -128,8 +128,8 @@ export const runNoUI = (
       true,
       false,
       verbose,
-      seed
-    )
+      seed,
+    ),
   )
 }
 
@@ -145,7 +145,7 @@ export const tryUntilSuccess = (f: () => void, timeout = 500) => {
 export const downloadFile = (
   filename: string,
   mimeType: string,
-  contents: string
+  contents: string,
 ) => {
   const a = document.createElement("a")
   a.style.display = "none"

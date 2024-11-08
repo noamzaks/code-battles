@@ -16,7 +16,7 @@ const Login = () => {
     signInWithEmailAndPassword(
       authentication,
       username + "@gmail.com",
-      password
+      password,
     )
       .then(() => setLoading(false))
       .catch((e) => {

@@ -1,7 +1,7 @@
 import { Badge, Button, Loader, NumberInput, Slider } from "@mantine/core"
 import { useColorScheme } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   useLocation,
   useNavigate,
@@ -144,8 +144,8 @@ const Simulation = () => {
           false,
           !showcaseMode,
           true,
-          seed
-        )
+          seed,
+        ),
       )
     }
   }, [loading])
@@ -154,7 +154,7 @@ const Simulation = () => {
     getRank(
       getLocalStorage("Cached tournament/info"),
       winner!,
-      getLocalStorage("Point Modifier")
+      getLocalStorage("Point Modifier"),
     ) + 1
   const oldRank =
     getRank(getLocalStorage("Cached tournament/info"), winner!, {}) + 1
@@ -203,7 +203,7 @@ const Simulation = () => {
         <h2 style={{ fontSize: "6vmin", margin: 0 }}>
           {
             getLocalStorage("Cached tournament/info")?.teams?.find(
-              (t: any) => t.name === winner
+              (t: any) => t.name === winner,
             )?.members
           }
         </h2>
@@ -311,7 +311,7 @@ const Simulation = () => {
                           `${playerNames.join("-")}.btl`,
                           "text/plain",
                           // @ts-ignore
-                          window.simulationToDownload
+                          window.simulationToDownload,
                         )
                       }
                     >

@@ -81,10 +81,10 @@ const UploadBlock = () => {
               setDoc(
                 doc(
                   firestore,
-                  `/bots/${authentication?.currentUser?.email?.split("@")[0]}`
+                  `/bots/${authentication?.currentUser?.email?.split("@")[0]}`,
                 ),
                 userAPIs,
-                { merge: true }
+                { merge: true },
               )
                 .then(() => {
                   notifications.show({
@@ -126,9 +126,9 @@ const UploadBlock = () => {
                 setDoc(
                   doc(
                     firestore,
-                    `/bots/${authentication?.currentUser?.email?.split("@")[0]}`
+                    `/bots/${authentication?.currentUser?.email?.split("@")[0]}`,
                   ),
-                  userAPIs
+                  userAPIs,
                 ).then(() => {
                   setName("")
                   notifications.show({

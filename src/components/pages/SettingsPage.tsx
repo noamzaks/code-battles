@@ -63,7 +63,7 @@ const SettingsPage = () => {
                 setDoc(
                   tournamentInfoDoc,
                   { teams: info.teams },
-                  { merge: true }
+                  { merge: true },
                 )
               }}
             />
@@ -77,7 +77,7 @@ const SettingsPage = () => {
                 setDoc(
                   tournamentInfoDoc,
                   { teams: info.teams },
-                  { merge: true }
+                  { merge: true },
                 )
               }}
             />
@@ -91,7 +91,7 @@ const SettingsPage = () => {
                 setDoc(
                   tournamentInfoDoc,
                   { teams: info.teams },
-                  { merge: true }
+                  { merge: true },
                 )
               }}
             />
@@ -105,7 +105,7 @@ const SettingsPage = () => {
                 setDoc(
                   tournamentInfoDoc,
                   { teams: info.teams },
-                  { merge: true }
+                  { merge: true },
                 )
               }}
             >

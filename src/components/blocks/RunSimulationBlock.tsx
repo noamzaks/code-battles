@@ -47,8 +47,8 @@ const RunSimulationBlock = () => {
     window._isSimulationFromFile = false
     navigate(
       `/simulation/${map.replaceAll(" ", "-")}/${playerBots.join(
-        "-"
-      )}?seed=${seed}`
+        "-",
+      )}?seed=${seed}`,
     )
   }
 
@@ -102,7 +102,7 @@ const RunSimulationBlock = () => {
           }
         }
         const winners = Object.keys(winCounts).sort(
-          (a, b) => winCounts[b] - winCounts[a]
+          (a, b) => winCounts[b] - winCounts[a],
         )
         notifications.show({
           title: `Result of ${key} matches`,

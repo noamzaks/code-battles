@@ -136,7 +136,7 @@ const Round = () => {
                     }
                   }
                   const winners = Object.keys(winCounts).sort(
-                    (a, b) => winCounts[b] - winCounts[a]
+                    (a, b) => winCounts[b] - winCounts[a],
                   )
 
                   return (
@@ -204,8 +204,8 @@ const Round = () => {
                               navigate(
                                 `/simulation/${round.map.replaceAll(
                                   " ",
-                                  "-"
-                                )}/${round.players.join("-")}?showcase=true`
+                                  "-",
+                                )}/${round.players.join("-")}?showcase=true`,
                               )
                             }
                           >
@@ -221,7 +221,7 @@ const Round = () => {
                                   apis,
                                   round.players,
                                   "",
-                                  true
+                                  true,
                                 )
                               } else {
                                 currentMap = round.map
@@ -348,7 +348,7 @@ const Round = () => {
                     rounds.map((round) => ({
                       map: round.map,
                       players: shuffle(round.players),
-                    }))
+                    })),
                   )
                   await new Promise((resolve) => setTimeout(resolve, timeout))
                 }

@@ -19,7 +19,7 @@ const initialize = () => {
     color: string,
     icon: string,
     limitTime: number,
-    isCode: boolean
+    isCode: boolean,
   ) => {
     // @ts-ignore
     const difference = Date.now() - (window.lastSet ?? 0)
@@ -46,7 +46,7 @@ const initialize = () => {
     playerNames: string[],
     places: number[],
     map: string,
-    verbose: boolean
+    verbose: boolean,
   ) => {
     const results = getLocalStorage("Results")
     if (!results[playerNames.join(", ")]) {
