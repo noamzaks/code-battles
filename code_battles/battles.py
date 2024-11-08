@@ -480,7 +480,9 @@ class CodeBattles(
         self.step = 0
         self.active_players = list(range(len(self.player_names)))
         self.random = Random(seed)
-        self.player_randoms = [Random(self.random.random()) for _ in self.player_names]
+        self.player_randoms = [
+            Random(self.random.randint(0, 2**128)) for _ in self.player_names
+        ]
         self.state = self.create_initial_state()
         self.player_requests = [
             self.create_initial_player_requests(i)
