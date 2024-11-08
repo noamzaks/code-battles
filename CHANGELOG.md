@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.6] - 2024-11-08
+
+### Fixed
+
+- Second simulation not working because start button would not bind to Python simulation start.
+- Running simulation files which were generated locally now works because previous they did not have the correct `_logs`.
+
 ## [1.5.5] - 2024-11-08
 
 ### Added
