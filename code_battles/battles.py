@@ -530,13 +530,15 @@ class CodeBattles(
 
     def _run_local_simulation(self):
         command = sys.argv[1]
+        output_file = None
         decisions = []
         if command == "simulate":
             seed = None if sys.argv[2] == "None" else int(sys.argv[2])
-            self.map = sys.argv[3]
-            self.player_names = sys.argv[4].split("-")
+            output_file = None if sys.argv[3] == "None" else sys.argv[3]
+            self.map = sys.argv[4]
+            self.player_names = sys.argv[5].split("-")
             player_codes = []
-            for filename in sys.argv[5:]:
+            for filename in sys.argv[6:]:
                 with open(filename, "r") as f:
                     player_codes.append(f.read())
         elif command == "simulate-from-file":
@@ -561,7 +563,10 @@ class CodeBattles(
             if len(decisions) != 0:
                 self.apply_decisions(decisions.pop(0))
             else:
-                self.apply_decisions(self.make_decisions())
+                _decisions = self.make_decisions()
+                if output_file is not None:
+                    self._decisions.append(_decisions)
+                self.apply_decisions(_decisions)
 
             if not self.over:
                 self.step += 1
@@ -581,6 +586,11 @@ class CodeBattles(
                 }
             )
         )
+
+        if output_file is not None:
+            simulation_str = self._get_simulation().dump()
+            with open(output_file, "w") as f:
+                f.write(simulation_str)
 
     def _start_simulation(self, *args, **kwargs):
         loop = asyncio.get_event_loop()
@@ -719,6 +729,18 @@ class CodeBattles(
         except Exception:
             traceback.print_exc()
 
+    def _get_simulation(self):
+        return Simulation(
+            self.map,
+            self.player_names,
+            self.__class__.__name__,
+            self.configure_version(),
+            datetime.datetime.now(),
+            self._logs,
+            self._decisions,
+            self._seed,
+        )
+
     def _update_step(self, decisions_str: str, logs_str: str, is_over_str: str):
         from js import window, document
 
@@ -732,16 +754,7 @@ class CodeBattles(
 
         if is_over:
             try:
-                simulation = Simulation(
-                    self.map,
-                    self.player_names,
-                    self.__class__.__name__,
-                    self.configure_version(),
-                    datetime.datetime.now(),
-                    self._logs,
-                    self._decisions,
-                    self._seed,
-                )
+                simulation = self._get_simulation()
                 window.simulationToDownload = simulation.dump()
                 show_download()
             except Exception as e:
