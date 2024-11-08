@@ -558,18 +558,23 @@ class CodeBattles(
         self.verbose = False
         self._initialize_simulation(player_codes, seed)
 
+        all_logs = []
         while not self.over:
             print("__CODE_BATTLES_ADVANCE_STEP")
             if len(decisions) != 0:
                 self.apply_decisions(decisions.pop(0))
             else:
+                self._logs = []
                 _decisions = self.make_decisions()
+                all_logs.append(self._logs)
+                self._logs = []
                 if output_file is not None:
                     self._decisions.append(_decisions)
                 self.apply_decisions(_decisions)
 
             if not self.over:
                 self.step += 1
+        self._logs = all_logs
 
         print("--- SIMULATION FINISHED ---")
         print(
@@ -582,7 +587,7 @@ class CodeBattles(
                     if len(self.active_players) > 0
                     else None,
                     "steps": self.step,
-                    "logs": self._logs,
+                    "logs": [log for logs in self._logs for log in logs],
                 }
             )
         )
@@ -606,7 +611,7 @@ class CodeBattles(
         try:
             simulation = Simulation.load(str(contents))
             navigate(
-                f"/simulation/{simulation.map}/{'-'.join(simulation.player_names)}"
+                f"/simulation/{simulation.map}/{'-'.join(simulation.player_names)}?seed={simulation.seed}"
             )
             show_alert(
                 "Loaded simulation file!",
@@ -967,5 +972,3 @@ class CodeBattles(
                         0,
                     )
                 )
-            else:
-                await asyncio.sleep(0.01)
