@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.3] - 2024-11-08
+
+### Fixed
+
+- Infinite loop of `is_web`.
+
 ## [1.5.2] - 2024-11-08
 
 ### Fixed

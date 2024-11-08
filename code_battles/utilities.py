@@ -18,13 +18,15 @@ def is_worker():
 
         return False
     except Exception:
-        return is_web()
+        return is_web_or_worker()
+
+
+def is_web_or_worker():
+    return "MicroPython" in sys.version or "pyodide" in sys.executable
 
 
 def is_web():
-    return (
-        "MicroPython" in sys.version or "pyodide" in sys.executable
-    ) and not is_worker()
+    return is_web_or_worker() and not is_worker()
 
 
 def web_only(method):
