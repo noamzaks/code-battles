@@ -18,7 +18,7 @@ def is_worker():
 
         return False
     except Exception:
-        return True
+        return is_web()
 
 
 def is_web():

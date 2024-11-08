@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- The CLI now works again and supports the new randomness seed option and execution from a file.
+
 ## [1.5.1] - 2024-11-07
 
 ### Fixed

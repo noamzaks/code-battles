@@ -527,20 +527,39 @@ class CodeBattles(
                 self.step += 1
 
     def _run_local_simulation(self):
-        seed = None if sys.argv[1] == "None" else int(sys.argv[1])
-        self.map = sys.argv[2]
-        self.player_names = sys.argv[3].split("-")
+        command = sys.argv[1]
+        decisions = []
+        if command == "simulate":
+            seed = None if sys.argv[2] == "None" else int(sys.argv[2])
+            self.map = sys.argv[3]
+            self.player_names = sys.argv[4].split("-")
+            player_codes = []
+            for filename in sys.argv[5:]:
+                with open(filename, "r") as f:
+                    player_codes.append(f.read())
+        elif command == "simulate-from-file":
+            with open(sys.argv[2], "r") as f:
+                contents = f.read()
+            simulation = Simulation.load(contents)
+            seed = simulation.seed
+            self.map = simulation.map
+            self.player_names = simulation.player_names
+            decisions = simulation.decisions
+            player_codes = ["" for _ in simulation.player_names]
+        else:
+            print(f"invalid command {sys.argv[1]}", file=sys.stderr)
+            exit(-1)
         self.background = True
         self.console_visible = False
         self.verbose = False
-        player_codes = []
-        for filename in sys.argv[4:]:
-            with open(filename, "r") as f:
-                player_codes.append(f.read())
         self._initialize_simulation(player_codes, seed)
 
         while not self.over:
-            self.apply_decisions(self.make_decisions())
+            print("__CODE_BATTLES_ADVANCE_STEP")
+            if len(decisions) != 0:
+                self.apply_decisions(decisions.pop(0))
+            else:
+                self.apply_decisions(self.make_decisions())
 
             if not self.over:
                 self.step += 1
