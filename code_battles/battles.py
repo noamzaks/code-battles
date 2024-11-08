@@ -466,8 +466,6 @@ class CodeBattles(
         if step_element is not None:
             step_element.onclick = create_proxy(lambda _: self._step())
 
-        self._initialized = True
-
     def _initialize_simulation(
         self, player_codes: List[str], seed: Optional[int] = None
     ):
@@ -638,8 +636,7 @@ class CodeBattles(
                 )
             while document.getElementById("loader") is None:
                 await asyncio.sleep(0.01)
-            if not hasattr(self, "_initialized"):
-                self._initialize()
+            self._initialize()
             self.map = simulation.map
             self.map_image = await download_image(
                 self.configure_map_image_url(simulation.map)
@@ -716,8 +713,7 @@ class CodeBattles(
             await self.setup()
 
             if not self.background:
-                if not hasattr(self, "_initialized"):
-                    self._initialize()
+                self._initialize()
 
                 # Show that loading finished
                 document.getElementById("loader").style.display = "none"
