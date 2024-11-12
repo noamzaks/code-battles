@@ -16,6 +16,7 @@ import {
   downloadFile,
   getLocalStorage,
   getRank,
+  setLocalStorage,
   toPlacing,
   tryUntilSuccess,
 } from "../../utilities"
@@ -87,6 +88,7 @@ const Simulation = () => {
   const showcaseMode = location.search.includes("showcase=true")
 
   useEffect(() => {
+    setLocalStorage("Logs", [])
     initParticlesEngine(async (engine) => await loadFull(engine))
 
     // @ts-ignore
