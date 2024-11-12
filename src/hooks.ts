@@ -46,7 +46,7 @@ export const useLocalStorage = <T>({
     if (typeof newValue === "function") {
       newValue = newValue(value)
     }
-    if (newValue) {
+    if (newValue !== undefined) {
       localStorage.setItem(key, JSON.stringify(newValue))
       window.dispatchEvent(
         new StorageEvent("storage", {
