@@ -1,6 +1,6 @@
 {
   "name": "code-battles",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "A library for building interactive competitive coding battles",
   "repository": "https://github.com/noamzaks/code-battles",
   "homepage": "https://code-battles.readthedocs.org",
@@ -44,7 +44,7 @@
     "@mantine/hooks": "^7.14.0",
     "@mantine/notifications": "^7.14.0",
     "dayjs": "^1.11.13",
-    "firebase": "^11.0.1",
+    "firebase": "^11.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"
@@ -58,7 +58,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "chokidar-cli": "^3.0.0",
-    "rollup": "^4.25.0",
+    "rollup": "^4.26.0",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.1.1",
     "rollup-plugin-import-css": "^3.5.6",

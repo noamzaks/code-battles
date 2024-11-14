@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.8] - 2024-11-14
+
+### Fixed
+
+- Logs added immediately one after another now correctly added.
+- Peer dependency on `dayjs` now specified correctly.
+
 ## [1.5.7] - 2024-11-12
 
 ### Fixed
