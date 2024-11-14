@@ -44,7 +44,7 @@ export const useLocalStorage = <T>({
   const userSetValue = (newValue: any) => {
     setValue(newValue)
     if (typeof newValue === "function") {
-      newValue = newValue(value)
+      newValue = newValue(getLocalStorage(key, defaultValue ?? null))
     }
     if (newValue !== undefined) {
       localStorage.setItem(key, JSON.stringify(newValue))

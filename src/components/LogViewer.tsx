@@ -2,6 +2,7 @@ import React, { useEffect } from "react"
 import AutoScrollButton from "./AutoScrollButton"
 import ShowLogsButtons from "./ShowLogsButtons"
 import { useLocalStorage } from "../hooks"
+import { getLocalStorage } from "../utilities"
 
 interface Props {
   playerNames: string[]
@@ -34,13 +35,16 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
       const con = document.getElementById("console")
       if (con) {
         setLogs((l) => [...l, { playerIndex, text, color }])
-        // @ts-ignore
-        if (window.autoScroll) {
-          con.scrollTop = con.scrollHeight
-        }
       }
     }
   }, [])
+
+  useEffect(() => {
+    const con = document.getElementById("console")
+    if (con && getLocalStorage("Auto Scroll", true)) {
+      con.scrollTop = con.scrollHeight
+    }
+  }, [logs])
 
   return (
     <>

@@ -8,11 +8,6 @@ const AutoScrollButton = () => {
     defaultValue: true,
   })
 
-  useEffect(() => {
-    // @ts-ignore
-    window.autoScroll = autoScroll
-  }, [autoScroll])
-
   return (
     <Button
       color={autoScroll ? "green" : "yellow"}
