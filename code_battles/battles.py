@@ -10,7 +10,7 @@ import sys
 import traceback
 import gzip
 
-from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 from code_battles.utilities import (
     GameCanvas,
     console_log,
@@ -135,6 +135,7 @@ class CodeBattles(
     _eliminated: List[int]
     _sounds: Dict[str, "js.Audio"] = {}
     _decisions: List[bytes]
+    _breakpoints: Set[int]
     _since_last_render: int
 
     def render(self) -> None:
@@ -403,7 +404,7 @@ class CodeBattles(
             self.play_sound("player_eliminated")
         self._eliminated.append(player_index)
         self.log(
-            f"[Game T{self.step}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
+            f"[Battles {self.step + 1}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
             -1,
             "white",
         )
@@ -458,6 +459,14 @@ class CodeBattles(
 
         asyncio.get_event_loop().run_until_complete(p())
 
+    def pause(self):
+        """
+        Pauses the current simulation. Useful for letting bots insert breakpoints wherever they wish.
+
+        **Important:** call this method only from the :func:`make_decisions` method.
+        """
+        self._should_pause = True
+
     @property
     def time(self) -> str:
         """The current step of the simulation, as a string with justification to fill 5 characters."""
@@ -490,6 +499,7 @@ class CodeBattles(
             seed = Random().randint(0, 2**128)
         self._logs = []
         self._decisions = []
+        self._breakpoints = set()
         self._decision_index = 0
         self._seed = seed
         self.step = 0
@@ -528,6 +538,7 @@ class CodeBattles(
         self.verbose = False
         self._initialize_simulation(player_codes, seed)
         while not self.over:
+            self._should_pause = False
             self._logs = []
             decisions = self.make_decisions()
             logs = self._logs
@@ -538,6 +549,7 @@ class CodeBattles(
                 base64.b64encode(decisions).decode(),
                 json.dumps(logs),
                 "true" if self.over else "false",
+                "true" if self._should_pause else "false",
             )
 
             if not self.over:
@@ -671,8 +683,8 @@ class CodeBattles(
                 document.getElementById("simulation"),
                 self.configure_board_count(),
                 self.map_image,
-                document.body.clientWidth - 440,
-                document.body.clientHeight - 280,
+                self._get_canvas_width(),
+                self._get_canvas_height(),
                 self.configure_extra_width(),
                 self.configure_extra_height(),
             )
@@ -718,12 +730,8 @@ class CodeBattles(
                     document.getElementById("simulation"),
                     self.configure_board_count(),
                     self.map_image,
-                    document.body.clientWidth - 440
-                    if console_visible
-                    else document.body.clientWidth - 40,
-                    document.body.clientHeight - 280
-                    if console_visible
-                    else document.body.clientHeight - 160,
+                    self._get_canvas_width(),
+                    self._get_canvas_height(),
                     self.configure_extra_width(),
                     self.configure_extra_height(),
                 )
@@ -747,6 +755,26 @@ class CodeBattles(
         except Exception:
             traceback.print_exc()
 
+    @web_only
+    def _get_canvas_width(self):
+        from js import document
+
+        return (
+            document.body.clientWidth - 440
+            if self.console_visible
+            else document.body.clientWidth - 40
+        )
+
+    @web_only
+    def _get_canvas_height(self):
+        from js import document
+
+        return (
+            document.body.clientHeight - 255
+            if self.console_visible
+            else document.body.clientHeight - 180
+        )
+
     def _get_simulation(self):
         return Simulation(
             self.map,
@@ -759,14 +787,19 @@ class CodeBattles(
             self._seed,
         )
 
-    def _update_step(self, decisions_str: str, logs_str: str, is_over_str: str):
+    def _update_step(
+        self, decisions_str: str, logs_str: str, is_over_str: str, should_pause_str: str
+    ):
         from js import window, document
 
         now = time.time()
         decisions = base64.b64decode(str(decisions_str))
         logs: list = json.loads(str(logs_str))
         is_over = str(is_over_str) == "true"
+        should_pause = str(should_pause_str) == "true"
 
+        if should_pause:
+            self._breakpoints.add(len(self._decisions))
         self._decisions.append(decisions)
         self._logs.append(logs)
 
@@ -853,21 +886,23 @@ class CodeBattles(
 
     @web_only
     def _resize_canvas(self):
-        from js import document
-
         if not hasattr(self, "canvas"):
             return
 
         self.canvas._fit_into(
-            document.body.clientWidth - 440
-            if self.console_visible
-            else document.body.clientWidth - 40,
-            document.body.clientHeight - 280
-            if self.console_visible
-            else document.body.clientHeight - 160,
+            self._get_canvas_width(),
+            self._get_canvas_height(),
         )
         if not self.background:
             self.render()
+
+    @web_only
+    def _ensure_paused(self):
+        from js import document
+
+        if "Pause" in document.getElementById("playpause").textContent:
+            # Make it apparent that the game is stopped.
+            document.getElementById("playpause").click()
 
     @web_only
     def _step(self):
@@ -911,12 +946,8 @@ class CodeBattles(
             else:
                 self._since_last_render += 1
 
-            if (
-                self.over
-                and "Pause" in document.getElementById("playpause").textContent
-            ):
-                # Make it apparent that the game is stopped.
-                document.getElementById("playpause").click()
+            if self.over:
+                self._ensure_paused()
         elif self.verbose:
             document.getElementById("noui-progress").style.display = "block"
             document.getElementById(
@@ -939,6 +970,12 @@ class CodeBattles(
             return False
 
         if self.step == self._get_breakpoint():
+            return False
+
+        if self.step in self._breakpoints and self.console_visible:
+            self._breakpoints.remove(self.step)
+            self._ensure_paused()
+            self.log(f"[Battles {self.step + 1}] Pause requested!")
             return False
 
         return True

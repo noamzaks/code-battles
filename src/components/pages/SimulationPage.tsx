@@ -317,7 +317,7 @@ const Simulation = () => {
                         )
                       }
                     >
-                      Download Simulation
+                      Download
                     </Button>
                   )}
                 </div>

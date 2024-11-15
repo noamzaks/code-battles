@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- You may now `pause` in `make_decisions` to let the bots pause the simulation in interesting frames!
 - You may now use the `download_image` method instead of `download_images` to download a single image.
 
 ### Changed
@@ -16,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Canvas dimensions are now slightly improved.
 - Documentation of web-only methods is now accurate by using `functools.wraps`.
 
 ## [1.5.8] - 2024-11-14
