@@ -5,6 +5,7 @@ import math
 import sys
 from typing import Callable, List, Union
 from enum import Enum
+from functools import wraps
 
 try:
     import js
@@ -33,6 +34,7 @@ def web_only(method):
     if is_web():
         return method
 
+    @wraps(method)
     def wrapper(*args, **kwargs):
         print(f"Warning: {method.__name__} should only be called in a web context.")
 
@@ -223,6 +225,10 @@ class GameCanvas:
         stroke_width=10,
         board_index=0,
     ):
+        """
+        Draws a line between the given ``(start_x, start_y)`` and ``(end_x, end_y)`` coordinates (in map pixels) with the given stroke.
+        """
+
         start_x, start_y = self._translate_position(board_index, start_x, start_y)
         end_x, end_y = self._translate_position(board_index, end_x, end_y)
 

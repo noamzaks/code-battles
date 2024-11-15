@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- You may now use the `download_image` method instead of `download_images` to download a single image.
+
+### Changed
+
+- No UI simulations are now non-verbose by default, meaning alerts shouldn't be shown and sounds are not played (unless the new `force` parameter is specified).
+
+### Fixed
+
+- Documentation of web-only methods is now accurate by using `functools.wraps`.
+
 ## [1.5.8] - 2024-11-14
 
 ### Fixed

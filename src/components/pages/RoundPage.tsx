@@ -221,7 +221,7 @@ const Round = () => {
                                   apis,
                                   round.players,
                                   "",
-                                  true,
+                                  false,
                                 )
                               } else {
                                 currentMap = round.map

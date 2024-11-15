@@ -293,6 +293,16 @@ class CodeBattles(
         return "1.0.0"
 
     @web_only
+    def download_image(self, url: str) -> "asyncio.Future[js.Image]":
+        from js import Image
+
+        result = asyncio.Future()
+        image = Image.new()
+        image.onload = lambda _: result.set_result(image)
+        image.src = url
+        return result
+
+    @web_only
     def download_images(
         self, sources: List[Tuple[str, str]]
     ) -> asyncio.Future[Dict[str, "js.Image"]]:
@@ -420,9 +430,16 @@ class CodeBattles(
             )
 
     @web_only
-    def play_sound(self, sound: str):
-        """Plays the given sound, from the URL given by :func:`configure_sound_url`."""
+    def play_sound(self, sound: str, force=False):
+        """
+        Plays the given sound, from the URL given by :func:`configure_sound_url`.
+
+        If ``force`` is set, will play the sound even if the simulation is not :attr:`verbose`.
+        """
         from js import window, Audio
+
+        if not force and not self.verbose:
+            return
 
         if sound not in self._sounds:
             self._sounds[sound] = Audio.new(self.configure_sound_url(sound))
@@ -644,7 +661,7 @@ class CodeBattles(
             self.player_names = simulation.player_names
             self.background = False
             self.console_visible = True
-            self.verbose = False
+            self.verbose = True
             self._initialize_simulation(
                 ["" for _ in simulation.player_names], simulation.seed
             )
