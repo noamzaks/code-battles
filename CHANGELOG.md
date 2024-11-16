@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- The `GameCanvas` has a new `draw_rectangle` method which can fill/stroke a given rectangle.
+
 ## [1.6.0] - 2024-11-15
 
 ### Added

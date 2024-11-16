@@ -239,6 +239,33 @@ class GameCanvas:
         self.context.lineTo(end_x, end_y)
         self.context.stroke()
 
+    def draw_rectangle(
+        self,
+        start_x: int,
+        start_y: int,
+        width: int,
+        height: int,
+        fill="black",
+        stroke="transparent",
+        stroke_width=2,
+        board_index=0,
+    ):
+        """
+        Draws the given rectangle with the top-left corner at `(start_x, start_y)` (in map pixels) and with the specified `width` and `height` (in map pixels) with the given stroke and fill.
+        """
+
+        start_x, start_y = self._translate_position(board_index, start_x, start_y)
+        width *= self._scale
+        height *= self._scale
+
+        self.context.fillStyle = fill
+        self.context.strokeStyle = stroke
+        self.context.lineWidth = stroke_width * self._scale
+        self.context.beginPath()
+        self.context.rect(start_x, start_y, width, height)
+        self.context.stroke()
+        self.context.fill()
+
     def draw_circle(
         self,
         x: int,
