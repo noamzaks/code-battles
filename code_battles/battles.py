@@ -15,6 +15,7 @@ from code_battles.utilities import (
     GameCanvas,
     console_log,
     download_image,
+    is_worker,
     navigate,
     set_results,
     show_alert,
@@ -381,7 +382,7 @@ class CodeBattles(
                 )
             output += lines[string_file_indices[-1] + 1].strip() + "\n"
 
-            show_alert(
+            self.alert(
                 f"Code Exception in 'Player {player_index + 1}' API!",
                 output,
                 "red",
@@ -393,7 +394,7 @@ class CodeBattles(
 
         self.active_players = [p for p in self.active_players if p != player_index]
         if self.verbose:
-            show_alert(
+            self.alert(
                 f"{self.player_names[player_index]} was eliminated!",
                 reason,
                 "blue",
@@ -429,6 +430,33 @@ class CodeBattles(
                     "color": color,
                 }
             )
+
+    def alert(
+        self,
+        title: str,
+        alert: str,
+        color: str,
+        icon: str,
+        limit_time: int = 5000,
+        is_code=True,
+    ):
+        """
+        Displays the given alert in the game UI.
+        """
+
+        if is_worker():
+            self._alerts.append(
+                {
+                    "title": title,
+                    "alert": alert,
+                    "color": color,
+                    "icon": icon,
+                    "limit_time": limit_time,
+                    "is_code": is_code,
+                }
+            )
+        else:
+            show_alert(title, alert, color, icon, limit_time, is_code)
 
     @web_only
     def play_sound(self, sound: str, force=False):
@@ -498,6 +526,7 @@ class CodeBattles(
         if seed is None:
             seed = Random().randint(0, 2**128)
         self._logs = []
+        self._alerts = []
         self._decisions = []
         self._breakpoints = set()
         self._decision_index = 0
@@ -540,14 +569,16 @@ class CodeBattles(
         while not self.over:
             self._should_pause = False
             self._logs = []
+            self._alerts = []
             decisions = self.make_decisions()
             logs = self._logs
-            self._logs = []
+            alerts = self._alerts
             self.apply_decisions(decisions)
 
             sync.update_step(
                 base64.b64encode(decisions).decode(),
                 json.dumps(logs),
+                json.dumps(alerts),
                 "true" if self.over else "false",
                 "true" if self._should_pause else "false",
             )
@@ -640,7 +671,7 @@ class CodeBattles(
             navigate(
                 f"/simulation/{simulation.map}/{'-'.join(simulation.player_names)}?seed={simulation.seed}"
             )
-            show_alert(
+            self.alert(
                 "Loaded simulation file!",
                 f"{', '.join(simulation.player_names)} competed in {simulation.map} at {simulation.timestamp}",
                 "blue",
@@ -648,7 +679,7 @@ class CodeBattles(
                 0,
             )
             if simulation.game != self.__class__.__name__:
-                show_alert(
+                self.alert(
                     "Warning: game mismatch!",
                     f"Simulation file is for game {simulation.game} while the website is running {self.__class__.__name__}!",
                     "yellow",
@@ -656,7 +687,7 @@ class CodeBattles(
                     0,
                 )
             if simulation.version != self.configure_version():
-                show_alert(
+                self.alert(
                     "Warning: version mismatch!",
                     f"Simulation file is for version {simulation.version} while the website is running {self.configure_version()}!",
                     "yellow",
@@ -788,13 +819,19 @@ class CodeBattles(
         )
 
     def _update_step(
-        self, decisions_str: str, logs_str: str, is_over_str: str, should_pause_str: str
+        self,
+        decisions_str: str,
+        logs_str: str,
+        alerts_str: str,
+        is_over_str: str,
+        should_pause_str: str,
     ):
         from js import window, document
 
         now = time.time()
         decisions = base64.b64decode(str(decisions_str))
         logs: list = json.loads(str(logs_str))
+        alerts: list = json.loads(str(alerts_str))
         is_over = str(is_over_str) == "true"
         should_pause = str(should_pause_str) == "true"
 
@@ -802,6 +839,7 @@ class CodeBattles(
             self._breakpoints.add(len(self._decisions))
         self._decisions.append(decisions)
         self._logs.append(logs)
+        self._alerts.append(alerts)
 
         if is_over:
             try:
@@ -839,7 +877,7 @@ class CodeBattles(
         for index, api_code in enumerate(player_codes):
             if api_code != "" and api_code is not None:
                 if f"class MyBot({bot_base_class_name}):" not in api_code:
-                    show_alert(
+                    self.alert(
                         f"Code Exception in 'Player {index + 1}' API!",
                         f"Missing line:\nclass MyBot({bot_base_class_name}):",
                         "red",
@@ -875,7 +913,7 @@ class CodeBattles(
                         )
                     output += lines[string_file_indices[-1] + 1].strip() + "\n"
 
-                    show_alert(
+                    self.alert(
                         f"Code Exception in 'Player {index + 1}' API!",
                         output,
                         "red",
@@ -922,6 +960,9 @@ class CodeBattles(
                         log["text"],
                         log["color"],
                     )
+                alerts = self._alerts[self._decision_index]
+                for alert in alerts:
+                    self.alert(**alert)
                 self.apply_decisions(self._decisions[self._decision_index])
                 self._decision_index += 1
 
