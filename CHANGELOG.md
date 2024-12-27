@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- The `make_decisions_random` property is now correctly initialized.
+
 ## [1.6.2] - 2024-12-07
 
 ### Fixed

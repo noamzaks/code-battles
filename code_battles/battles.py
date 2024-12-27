@@ -534,6 +534,7 @@ class CodeBattles(
         self.step = 0
         self.active_players = list(range(len(self.player_names)))
         self.random = Random(seed)
+        self.make_decisions_random = Random(self.random.randint(0, 2**128))
         self.player_randoms = [
             Random(self.random.randint(0, 2**128)) for _ in self.player_names
         ]
