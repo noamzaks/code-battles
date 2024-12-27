@@ -1,6 +1,6 @@
 {
   "name": "code-battles",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "A library for building interactive competitive coding battles",
   "repository": "https://github.com/noamzaks/code-battles",
   "homepage": "https://code-battles.readthedocs.org",
