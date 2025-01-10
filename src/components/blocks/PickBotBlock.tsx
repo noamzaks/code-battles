@@ -11,7 +11,7 @@ const PickBotBlock = () => {
   const [apis] = useUserAPIs()
   const currentUser = authentication.currentUser?.email?.split("@")[0]
   const [value] = useCachedDocumentData(
-    doc(firestore, "/tournament/" + currentUser),
+    doc(firestore, "/tournament/" + currentUser)
   )
 
   return (
@@ -19,7 +19,7 @@ const PickBotBlock = () => {
       <Select
         leftSection={<i className="fa-solid fa-robot" />}
         label="Bot"
-        data={Object.keys(apis)}
+        data={Object.keys(apis).sort()}
         value={value?.pick}
         onChange={(s) =>
           setDoc(doc(firestore, "/tournament/" + currentUser), { pick: s })
