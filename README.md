@@ -27,10 +27,14 @@ Create your own **code battles** competition by implementing your game in Python
 
 Follow the instructions in the [documentation](https://code-battles.readthedocs.org).
 
+## Development
+
+To work on the project, clone it, install the dependencies with `bun` and you are encouraged to use pre-commit (run `pip install pre-commit` and `pre-commit install`).
+
 # Roadmap
 
-- [ ] Download game file containing all decisions made.
-- [ ] Support game file re-run of a simulation.
+- [x] Download game file containing all decisions made.
+- [x] Support game file re-run of a simulation.
 - [ ] Support additional metadata to detect "highlight" simulations.
 
 ## Open Source Licenses
