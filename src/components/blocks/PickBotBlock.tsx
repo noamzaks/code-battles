@@ -11,7 +11,7 @@ const PickBotBlock = () => {
   const [apis] = useUserAPIs()
   const currentUser = authentication.currentUser?.email?.split("@")[0]
   const [value] = useCachedDocumentData(
-    doc(firestore, "/tournament/" + currentUser)
+    doc(firestore, "/tournament/" + currentUser),
   )
 
   return (
