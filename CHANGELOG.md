@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.4] - 2025-04-30
+
+### Added
+
+- Invalid imports now show an alert.
+- Bot names are now URL-encoded and separated by commas.
+- `self.random` is now removed for `make_decisions`.
+- Simulations now start automatically.
+
 ## [1.6.3] - 2024-12-27
 
 ### Fixed
@@ -166,3 +175,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - There is a new vite plugin to include the Python library, update PyScript configuration etc. named vite-plugin-code-battles.
 - The documentation now also has a reference of the Python library.
 - Breaking changes will now be versioned correctly.
+
