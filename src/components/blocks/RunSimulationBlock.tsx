@@ -46,7 +46,7 @@ const RunSimulationBlock = () => {
     // @ts-ignore
     window._isSimulationFromFile = false
     navigate(
-      `/simulation/${map.replaceAll(" ", "-")}/${playerBots.join("-")}?seed=${
+      `/simulation/${map.replaceAll(" ", "-")}/${playerBots.map(encodeURIComponent).join(",")}?seed=${
         seed === "-" ? "" : seed
       }`,
     )
@@ -238,3 +238,4 @@ const RunSimulationBlock = () => {
 }
 
 export default RunSimulationBlock
+

@@ -44,11 +44,7 @@ const TopPane = () => {
       >
         <img
           onClick={() => {
-            // @ts-ignore
-            if (window.audio) {
-              // @ts-ignore
-              window.audio.pause()
-            }
+            window.mainAudio?.pause()
             navigate("/")
           }}
           src="/images/logo-transparent.png"
@@ -108,3 +104,4 @@ const TopPane = () => {
 }
 
 export default TopPane
+

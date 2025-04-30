@@ -10,8 +10,6 @@ import RoundPage from "./pages/RoundPage"
 import SettingsPage from "./pages/SettingsPage"
 import SimulationPage from "./pages/SimulationPage"
 import ViewAPIPage from "./pages/ViewAPIPage"
-import Particles from "@tsparticles/react"
-import { parallax } from "../particles"
 
 interface Props {
   routes: Record<string, React.ReactNode>
@@ -44,21 +42,7 @@ const App: React.FC<Props> = ({ routes, blocks }) => {
           path="/simulation/:map/:playerapis"
           element={<SimulationPage />}
         />
-        <Route
-          path="/round"
-          element={
-            <>
-              <RoundPage />
-              <div
-                style={{
-                  zIndex: -10,
-                }}
-              >
-                <Particles options={parallax} />
-              </div>
-            </>
-          }
-        />
+        <Route path="/round" element={<RoundPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
         {Object.keys(routes)
@@ -72,3 +56,4 @@ const App: React.FC<Props> = ({ routes, blocks }) => {
 }
 
 export default App
+

@@ -9,8 +9,10 @@ from random import Random
 import sys
 import traceback
 import gzip
+from urllib.parse import quote
 
 from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar
+import typing
 from code_battles.utilities import (
     GameCanvas,
     console_log,
@@ -276,7 +278,7 @@ class CodeBattles(
         """
         Configure additional available global items, such as libraries from the Python standard library, bots can use.
 
-        By default, this is math, time and random, where random is the corresponding :attr:`player_randoms`.
+        By default, this is math, time, typing and random, where random is the corresponding :attr:`player_randoms`.
 
         .. warning::
            Bots will also have `api`, `context`, `player_api`, and the bot base class name (CodeBattlesBot by default) available as part of the globals, alongside everything in `api`.
@@ -287,6 +289,7 @@ class CodeBattles(
         return {
             "math": math,
             "time": time,
+            "typing": typing,
             "random": self.player_randoms[player_index],
         }
 
@@ -507,6 +510,15 @@ class CodeBattles(
 
         return len(self.active_players) <= 1
 
+    def _make_decisions(self):
+        r = self.random
+        del self.random
+
+        result = self.make_decisions()
+
+        self.random = r
+        return result
+
     @web_only
     def _initialize(self):
         from js import window, document
@@ -519,6 +531,9 @@ class CodeBattles(
         step_element = document.getElementById("step")
         if step_element is not None:
             step_element.onclick = create_proxy(lambda _: self._step())
+
+        # Start the simulation.
+        document.getElementById("playpause").click()
 
     def _initialize_simulation(
         self, player_codes: List[str], seed: Optional[int] = None
@@ -571,7 +586,7 @@ class CodeBattles(
             self._should_pause = False
             self._logs = []
             self._alerts = []
-            decisions = self.make_decisions()
+            decisions = self._make_decisions()
             logs = self._logs
             alerts = self._alerts
             self.apply_decisions(decisions)
@@ -624,7 +639,7 @@ class CodeBattles(
                 self.apply_decisions(decisions.pop(0))
             else:
                 self._logs = []
-                _decisions = self.make_decisions()
+                _decisions = self._make_decisions()
                 all_logs.append(self._logs)
                 self._logs = []
                 if output_file is not None:
@@ -670,7 +685,7 @@ class CodeBattles(
         try:
             simulation = Simulation.load(str(contents))
             navigate(
-                f"/simulation/{simulation.map}/{'-'.join(simulation.player_names)}?seed={simulation.seed}"
+                f"/simulation/{simulation.map}/{','.join([quote(player_name) for player_name in simulation.player_names])}?seed={simulation.seed}"
             )
             self.alert(
                 "Loaded simulation file!",
@@ -886,8 +901,39 @@ class CodeBattles(
                     )
                     continue
 
+                def check_import(library: str):
+                    """Checks if the import is available, otherwise shows an alert"""
+                    split = library.split()
+                    if len(split) >= 2 and split[1] not in player_globals[index]:
+                        self.alert(
+                            f"Import Error in 'Player {index + 1}' API!",
+                            f"The import '{split[1]}' is not available, you need to remove it!",
+                            "red",
+                            "fa-solid fa-exclamation",
+                        )
+                    elif (
+                        len(split) >= 4
+                        and split[0] == "from"
+                        and not (
+                            split[3] == "*"
+                            or all(
+                                [
+                                    x.strip() in player_globals[index]
+                                    for x in "".join(split[3:]).split(",")
+                                ]
+                            )
+                        )
+                    ):
+                        self.alert(
+                            f"Import Error in 'Player {index + 1}' API!",
+                            f"You need to change '{library}' to 'import {split[1]}'!",
+                            "red",
+                            "fa-solid fa-exclamation",
+                        )
+                    return ""
+
                 lines = [
-                    ""
+                    check_import(line)
                     if (line.startswith("from") or line.startswith("import"))
                     else line
                     for line in api_code.splitlines()
@@ -1008,7 +1054,8 @@ class CodeBattles(
         if self.background:
             return True
 
-        if "Pause" not in document.getElementById("playpause").textContent:
+        playpause = document.getElementById("playpause")
+        if playpause is None or "Pause" not in playpause.textContent:
             return False
 
         if self.step == self._get_breakpoint():

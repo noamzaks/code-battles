@@ -8,10 +8,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom"
-import Particles, { initParticlesEngine } from "@tsparticles/react"
-import { loadFull } from "tsparticles"
 import { useAPIs, useAdmin, useLocalStorage } from "../../hooks"
-import { confetti } from "../../particles"
 import {
   downloadFile,
   getLocalStorage,
@@ -24,12 +21,10 @@ import LogViewer from "../LogViewer"
 
 const PlayPauseButton = () => {
   const [playing, setPlaying] = useState(false)
-  const [volume] = useLocalStorage({ key: "Volume", defaultValue: 0 })
+  const [volume] = useLocalStorage<number>({ key: "Volume", defaultValue: 0 })
 
   useEffect(() => {
-    // @ts-ignore
     if (window.mainAudio) {
-      // @ts-ignore
       window.mainAudio.volume = volume
     }
   }, [volume])
@@ -41,21 +36,17 @@ const PlayPauseButton = () => {
       radius="20px"
       w={100}
       onClick={() => {
-        // @ts-ignore
         if (!window.mainAudio) {
           const audio = new Audio("/sounds/main.mp3")
           audio.volume = getLocalStorage("Volume", 0)
           audio.loop = true
 
-          // @ts-ignore
           window.mainAudio = audio
         }
 
         if (playing) {
-          // @ts-ignore
           window.mainAudio?.pause()
         } else {
-          // @ts-ignore
           window.mainAudio?.play()
         }
         setPlaying((p) => !p)
@@ -89,7 +80,6 @@ const Simulation = () => {
 
   useEffect(() => {
     setLocalStorage("Logs", [])
-    initParticlesEngine(async (engine) => await loadFull(engine))
 
     // @ts-ignore
     window.showDownload = () => {
@@ -124,7 +114,7 @@ const Simulation = () => {
   map = map?.split("&")[0].replaceAll("-", " ")
   playerapis = playerapis?.split("&")[0]
 
-  const playerNames = playerapis?.split("-") ?? []
+  const playerNames = playerapis?.split(",").map(decodeURIComponent) ?? []
 
   const players = playerNames.map((api) => (api === "None" ? "" : apis[api]))
 
@@ -242,7 +232,6 @@ const Simulation = () => {
         >
           Continue Round
         </Button>
-        <Particles options={confetti} />
       </div>
 
       {loading && (
@@ -385,3 +374,4 @@ const Simulation = () => {
 }
 
 export default Simulation
+

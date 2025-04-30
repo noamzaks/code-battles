@@ -3,8 +3,6 @@ import { useViewportSize } from "@mantine/hooks"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { initParticlesEngine } from "@tsparticles/react"
-import { loadFull } from "tsparticles"
 import { useConfiguration, useFirestore } from "../../configuration"
 import { useAPIs, useLocalStorage } from "../../hooks"
 
@@ -88,9 +86,6 @@ const Round = () => {
   }, [remaining])
 
   useEffect(updatePointModifier, [results])
-  useEffect(() => {
-    initParticlesEngine(async (engine) => await loadFull(engine))
-  }, [])
 
   return (
     <>
@@ -205,7 +200,7 @@ const Round = () => {
                                 `/simulation/${round.map.replaceAll(
                                   " ",
                                   "-",
-                                )}/${round.players.join("-")}?showcase=true`,
+                                )}/${round.players.map(encodeURIComponent).join(",")}?showcase=true`,
                               )
                             }
                           >
@@ -378,3 +373,4 @@ const Round = () => {
 }
 
 export default Round
+
