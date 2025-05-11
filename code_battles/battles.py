@@ -1,29 +1,29 @@
 import asyncio
 import base64
-from dataclasses import dataclass
 import datetime
+import gzip
 import json
 import math
-import time
-from random import Random
 import sys
+import time
 import traceback
-import gzip
+import typing
+from dataclasses import dataclass
+from random import Random
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 from urllib.parse import quote
 
-from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar
-import typing
 from code_battles.utilities import (
     GameCanvas,
     console_log,
     download_image,
+    is_web,
     is_worker,
     navigate,
     set_results,
     show_alert,
     show_download,
     web_only,
-    is_web,
 )
 
 try:
@@ -358,12 +358,13 @@ class CodeBattles(
         await ff.load()
         document.fonts.add(ff)
 
-    def run_bot_method(self, player_index: int, method_name: str):
+    def run_bot_method(self, player_index: int, method_name: str) -> float:
         """
-        Runs the specifid method of the given player.
+        Runs the specified method of the given player and returns the time it took (in seconds).
 
         Upon exception, shows an alert (does not terminate the bot).
         """
+        start = time.time()
 
         assert player_index in self.active_players
 
@@ -391,6 +392,9 @@ class CodeBattles(
                 "red",
                 "fa-solid fa-exclamation",
             )
+
+        end = time.time()
+        return end - start
 
     def eliminate_player(self, player_index: int, reason=""):
         """Eliminate the specified player for the specified reason from the simulation."""
@@ -468,7 +472,7 @@ class CodeBattles(
 
         If ``force`` is set, will play the sound even if the simulation is not :attr:`verbose`.
         """
-        from js import window, Audio
+        from js import Audio, window
 
         if not force and not self.verbose:
             return
@@ -521,7 +525,7 @@ class CodeBattles(
 
     @web_only
     def _initialize(self):
-        from js import window, document
+        from js import document, window
         from pyscript.ffi import create_proxy
 
         window.addEventListener("resize", create_proxy(lambda _: self._resize_canvas()))
@@ -842,7 +846,7 @@ class CodeBattles(
         is_over_str: str,
         should_pause_str: str,
     ):
-        from js import window, document
+        from js import document, window
 
         now = time.time()
         decisions = base64.b64decode(str(decisions_str))

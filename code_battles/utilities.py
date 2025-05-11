@@ -3,9 +3,9 @@
 import asyncio
 import math
 import sys
-from typing import Callable, List, Union
 from enum import Enum
 from functools import wraps
+from typing import Callable, List, Union
 
 try:
     import js
