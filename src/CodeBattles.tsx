@@ -44,7 +44,6 @@ const CodeBattles: React.FC<Props> = ({ configuration, routes, blocks }) => {
             locale: configuration.dates?.locale ?? "en",
             firstDayOfWeek: configuration.dates?.firstDayOfWeek ?? 0,
             weekendDays: configuration.dates?.weekendDays ?? [],
-            timezone: configuration.dates?.timezone ?? "UTC",
           }}
         >
           <Router>
@@ -94,3 +93,4 @@ const CodeBattles: React.FC<Props> = ({ configuration, routes, blocks }) => {
 }
 
 export default CodeBattles
+

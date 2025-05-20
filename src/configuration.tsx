@@ -12,7 +12,6 @@ interface CodeBattlesDatesConfiguration {
   locale?: string
   firstDayOfWeek?: DayOfWeek
   weekendDays?: DayOfWeek[]
-  timezone?: string
 }
 
 interface CodeBattlesOptionalConfiguration {
