@@ -38,10 +38,7 @@ const App: React.FC<Props> = ({ routes, blocks }) => {
       <Routes>
         <Route path="/" element={<HomePage blocks={blocks} />} />
         <Route path="/view/:apiname" element={<ViewAPIPage />} />
-        <Route
-          path="/simulation/:map/:playerapis"
-          element={<SimulationPage />}
-        />
+        <Route path="/simulation/:playerapis" element={<SimulationPage />} />
         <Route path="/round" element={<RoundPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />

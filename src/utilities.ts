@@ -1,6 +1,6 @@
 export interface RoundInfo {
   players: string[]
-  map: string
+  parameters: Record<string, string>
 }
 
 export const getLocalStorage = (key: string, defaultValue = {}) => {
@@ -69,9 +69,11 @@ export const updatePointModifier = () => {
   for (const round of rounds) {
     if (
       results[round.players.join(", ")] &&
-      results[round.players.join(", ")][round.map]
+      results[round.players.join(", ")][JSON.stringify(round.parameters)]
     ) {
-      for (const result of results[round.players.join(", ")][round.map]) {
+      for (const result of results[round.players.join(", ")][
+        JSON.stringify(round.parameters)
+      ]) {
         const first = round.players[result[0]]
         const second = round.players[result[1]]
         if (!pointModifier[first]) {
@@ -112,7 +114,7 @@ export const zeroPad = (s: string, l: number) => {
 }
 
 export const runNoUI = (
-  map: string,
+  parameters: Record<string, string>,
   apis: Record<string, any>,
   playerBots: string[],
   seed: string,
@@ -122,7 +124,7 @@ export const runNoUI = (
   tryUntilSuccess(() =>
     // @ts-ignore
     window._startSimulation(
-      map,
+      parameters,
       players,
       playerBots,
       true,
@@ -155,3 +157,4 @@ export const downloadFile = (
   a.click()
   document.body.removeChild(a)
 }
+

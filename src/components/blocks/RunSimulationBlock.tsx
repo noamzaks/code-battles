@@ -1,4 +1,5 @@
 import { Button, NumberInput, Select } from "@mantine/core"
+import { Dropzone } from "@mantine/dropzone"
 import { notifications } from "@mantine/notifications"
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -12,15 +13,15 @@ import {
 } from "../../utilities"
 import Block from "./Block"
 import BotSelector from "./BotSelector"
-import { Dropzone } from "@mantine/dropzone"
 
 const RunSimulationBlock = () => {
   const [apis, loading] = useAPIs()
   const configuration = useConfiguration()
-  const [map, setMap] = useLocalStorage<string>({
-    key: "Map",
-    defaultValue: configuration.maps[0],
+  const [parameters, setParameters] = useLocalStorage<Record<string, string>>({
+    key: "Parameters",
+    defaultValue: {},
   })
+
   const [playerCount, setPlayerCount] = useLocalStorage<number>({
     key: "Player Count",
     defaultValue: 2,
@@ -42,25 +43,36 @@ const RunSimulationBlock = () => {
     remaining = Math.max(...Object.values(runningNoUIN))
   }
 
+  const getFullParameters = () => {
+    const result: Record<string, string> = {}
+    for (const key in configuration.parameters) {
+      result[key] = parameters[key] ?? configuration.parameters[key][0]
+    }
+    return result
+  }
+
   const run = () => {
     // @ts-ignore
     window._isSimulationFromFile = false
+    const params = getFullParameters()
     navigate(
-      `/simulation/${map.replaceAll(" ", "-")}/${playerBots.map(encodeURIComponent).join(",")}?seed=${
+      `/simulation/${playerBots.map(encodeURIComponent).join(",")}?seed=${
         seed === "-" ? "" : seed
-      }`,
+      }&${Object.keys(params)
+        .map((p) => `${p}=${encodeURIComponent(params[p])}`)
+        .join("&")}`,
     )
   }
 
   const startRunNoUI = () => {
     setRunningNoUI(true)
-    runNoUI(map, apis, playerBots, seed.toString(), false)
+    runNoUI(getFullParameters(), apis, playerBots, seed.toString(), false)
   }
 
   const startRunNoUIN = (n: number) => {
     setLocalStorage("Results", {})
     setRunningNoUIN({ [n.toString()]: n })
-    runNoUI(map, apis, playerBots, seed.toString(), false)
+    runNoUI(getFullParameters(), apis, playerBots, seed.toString(), false)
   }
 
   useEffect(() => {
@@ -91,7 +103,8 @@ const RunSimulationBlock = () => {
     for (const key in runningNoUIN) {
       if (runningNoUIN[key] == 0) {
         const results = getLocalStorage("Results")
-        const currentResults = results[playerBots.join(", ")][map]
+        const currentResults =
+          results[playerBots.join(", ")][JSON.stringify(getFullParameters())]
         const winCounts: Record<string, number> = {}
         for (const result of currentResults) {
           const winner = playerBots[result[0]]
@@ -121,24 +134,36 @@ const RunSimulationBlock = () => {
         })
         setLocalStorage("Results", {})
       } else {
-        runNoUI(map, apis, playerBots, seed.toString(), false)
+        runNoUI(getFullParameters(), apis, playerBots, seed.toString(), false)
       }
     }
   }, [runningNoUIN])
 
   return (
     <Block title="Run Simulation" logo="fa-solid fa-display">
-      <Select
-        leftSection={<i className="fa-solid fa-earth-americas" />}
-        label="Map"
-        data={configuration.maps}
-        value={map}
-        onChange={(s) => {
-          if (s) {
-            setMap(s)
-          }
-        }}
-      />
+      {Object.keys(configuration.parameters)
+        .sort()
+        .map((parameter, parameterIndex) => {
+          const icon = (configuration.parameterIcons ?? {})[parameter]
+          return (
+            <Select
+              mb="xs"
+              key={parameterIndex}
+              leftSection={icon ? <i className={icon} /> : undefined}
+              label={parameter[0].toUpperCase() + parameter.slice(1)}
+              data={configuration.parameters[parameter]}
+              value={
+                parameters[parameter] ?? configuration.parameters[parameter][0]
+              }
+              onChange={(s) =>
+                setParameters({
+                  ...parameters,
+                  [parameter]: s ?? configuration.parameters[parameter][0],
+                })
+              }
+            />
+          )
+        })}
       <BotSelector
         playerCount={playerCount}
         setPlayerCount={setPlayerCount}

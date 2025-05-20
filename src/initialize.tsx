@@ -45,17 +45,17 @@ const initialize = () => {
   window.setResults = (
     playerNames: string[],
     places: number[],
-    map: string,
+    parameters: Record<string, string>,
     verbose: boolean,
   ) => {
     const results = getLocalStorage("Results")
     if (!results[playerNames.join(", ")]) {
       results[playerNames.join(", ")] = {}
     }
-    if (!results[playerNames.join(", ")][map]) {
-      results[playerNames.join(", ")][map] = []
+    if (!results[playerNames.join(", ")][JSON.stringify(parameters)]) {
+      results[playerNames.join(", ")][JSON.stringify(parameters)] = []
     }
-    results[playerNames.join(", ")][map].push(places)
+    results[playerNames.join(", ")][JSON.stringify(parameters)].push(places)
     setLocalStorage("Results", results)
     updatePointModifier()
 
@@ -76,3 +76,4 @@ const initialize = () => {
 }
 
 export default initialize
+

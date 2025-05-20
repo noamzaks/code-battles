@@ -39,7 +39,7 @@ PlayerRequestsType = TypeVar("PlayerRequestsType")
 
 @dataclass
 class Simulation:
-    map: str
+    parameters: Dict[str, str]
     player_names: str
     game: str
     version: str
@@ -53,7 +53,7 @@ class Simulation:
             gzip.compress(
                 json.dumps(
                     {
-                        "map": self.map,
+                        "parameters": self.parameters,
                         "playerNames": self.player_names,
                         "game": self.game,
                         "version": self.version,
@@ -73,7 +73,9 @@ class Simulation:
     def load(file: str):
         contents: Dict[str, Any] = json.loads(gzip.decompress(base64.b64decode(file)))
         return Simulation(
-            contents["map"],
+            contents["parameters"]
+            if "parameters" in contents
+            else {"map": contents["map"]},
             contents["playerNames"],
             contents["game"],
             contents["version"],
@@ -105,6 +107,8 @@ class CodeBattles(
 
     player_names: List[str]
     """The name of the players. This is populated before any of the overridable methods run."""
+    parameters: Dict[str, str]
+    """The parameters of the simulation. This is populated before any of the overridable methods run."""
     map: str
     """The name of the map. This is populated before any of the overridable methods run."""
     map_image: "js.Image"
@@ -569,7 +573,7 @@ class CodeBattles(
 
     def _run_webworker_simulation(
         self,
-        map: str,
+        parameters: Dict[str, str],
         player_names_str: str,
         player_codes_str: str,
         seed: Optional[int] = None,
@@ -577,10 +581,12 @@ class CodeBattles(
         from pyscript import sync
 
         # JS to Python
+        parameters = json.loads(parameters)
         player_names = json.loads(player_names_str)
         player_codes = json.loads(player_codes_str)
 
-        self.map = map
+        self.parameters = parameters
+        self.map = parameters.get("map")
         self.player_names = player_names
         self.background = True
         self.console_visible = False
@@ -593,7 +599,10 @@ class CodeBattles(
             decisions = self._make_decisions()
             logs = self._logs
             alerts = self._alerts
+            log = self.log
+            self.log = lambda *args, **kwargs: None
             self.apply_decisions(decisions)
+            self.log = log
 
             sync.update_step(
                 base64.b64encode(decisions).decode(),
@@ -624,7 +633,8 @@ class CodeBattles(
                 contents = f.read()
             simulation = Simulation.load(contents)
             seed = simulation.seed
-            self.map = simulation.map
+            self.parameters = simulation.parameters
+            self.map = simulation.parameters.get("map")
             self.player_names = simulation.player_names
             decisions = simulation.decisions
             player_codes = ["" for _ in simulation.player_names]
@@ -688,12 +698,15 @@ class CodeBattles(
 
         try:
             simulation = Simulation.load(str(contents))
+            parameters = "&".join(
+                [f"{p}={quote(v)}" for p, v in simulation.parameters.items()]
+            )
             navigate(
-                f"/simulation/{simulation.map}/{','.join([quote(player_name) for player_name in simulation.player_names])}?seed={simulation.seed}"
+                f"/simulation/{','.join([quote(player_name) for player_name in simulation.player_names])}?seed={simulation.seed}&{parameters}"
             )
             self.alert(
                 "Loaded simulation file!",
-                f"{', '.join(simulation.player_names)} competed in {simulation.map} at {simulation.timestamp}",
+                f"{', '.join(simulation.player_names)} competed with {simulation.parameters} at {simulation.timestamp}",
                 "blue",
                 "fa-solid fa-file-code",
                 0,
@@ -717,9 +730,10 @@ class CodeBattles(
             while document.getElementById("loader") is None:
                 await asyncio.sleep(0.01)
             self._initialize()
-            self.map = simulation.map
+            self.parameters = simulation.parameters
+            self.map = self.parameters.get("map")
             self.map_image = await download_image(
-                self.configure_map_image_url(simulation.map)
+                self.configure_map_image_url(self.map)
             )
             self.player_names = simulation.player_names
             self.background = False
@@ -748,7 +762,7 @@ class CodeBattles(
     @web_only
     async def _start_simulation_async(
         self,
-        map: str,
+        parameters: Dict[str, str],
         player_codes: List[str],
         player_names: List[str],
         background: bool,
@@ -762,15 +776,19 @@ class CodeBattles(
         # JS to Python
         player_names = [str(x) for x in player_names]
         player_codes = [str(x) for x in player_codes]
+        parameters = parameters.to_py()
 
         try:
             render_status = document.getElementById("render-status")
             if render_status is not None:
                 render_status.textContent = "Rendering: Initializing..."
 
-            self.map = map
+            self.parameters = parameters
+            self.map = parameters.get("map")
             self.player_names = player_names
-            self.map_image = await download_image(self.configure_map_image_url(map))
+            self.map_image = await download_image(
+                self.configure_map_image_url(self.map)
+            )
             self.background = background
             self.console_visible = console_visible
             self.verbose = verbose
@@ -798,7 +816,10 @@ class CodeBattles(
             self._worker = await workers["worker"]
             self._worker.update_step = self._update_step
             self._worker._run_webworker_simulation(
-                map, json.dumps(player_names), json.dumps(player_codes), self._seed
+                json.dumps(parameters),
+                json.dumps(player_names),
+                json.dumps(player_codes),
+                self._seed,
             )
 
             if self.background:
@@ -828,7 +849,7 @@ class CodeBattles(
 
     def _get_simulation(self):
         return Simulation(
-            self.map,
+            self.parameters,
             self.player_names,
             self.__class__.__name__,
             self.configure_version(),
@@ -1024,7 +1045,7 @@ class CodeBattles(
             if len(self.active_players) == 1:
                 self._eliminated.append(self.active_players[0])
             set_results(
-                self.player_names, self._eliminated[::-1], self.map, self.verbose
+                self.player_names, self._eliminated[::-1], self.parameters, self.verbose
             )
             if not self.background:
                 self.render()

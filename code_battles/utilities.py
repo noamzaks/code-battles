@@ -5,7 +5,7 @@ import math
 import sys
 from enum import Enum
 from functools import wraps
-from typing import Callable, List, Union
+from typing import Callable, Dict, List, Union
 
 try:
     import js
@@ -73,12 +73,17 @@ def show_alert(
 
 
 @web_only
-def set_results(player_names: List[str], places: List[int], map: str, verbose: bool):
+def set_results(
+    player_names: List[str],
+    places: List[int],
+    parameters: Dict[str, str],
+    verbose: bool,
+):
     from js import window
 
     if hasattr(window, "setResults"):
         try:
-            window.setResults(player_names, places, map, verbose)
+            window.setResults(player_names, places, parameters, verbose)
         except Exception as e:
             print(e)
 

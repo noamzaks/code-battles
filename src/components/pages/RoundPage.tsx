@@ -16,7 +16,7 @@ import Block from "../blocks/Block"
 import BotSelector from "../blocks/BotSelector"
 import TournamentBlock from "../blocks/TournamentBlock"
 
-let currentMap: string
+let currentParameters: Record<string, string>
 let currentPlayers: string[]
 
 const Round = () => {
@@ -33,9 +33,9 @@ const Round = () => {
     key: "Player Bots",
     defaultValue: ["None", "None"],
   })
-  const [map, setMap] = useLocalStorage<string>({
-    key: "Map",
-    defaultValue: configuration.maps[0],
+  const [parameters, setParameters] = useLocalStorage<Record<string, string>>({
+    key: "Parameters",
+    defaultValue: {},
   })
   const [rounds, setRounds] = useLocalStorage<RoundInfo[]>({
     key: "Rounds",
@@ -81,9 +81,17 @@ const Round = () => {
 
   useEffect(() => {
     if (remaining > 0) {
-      runNoUI(currentMap, apis, currentPlayers, "", false)
+      runNoUI(currentParameters, apis, currentPlayers, "", false)
     }
   }, [remaining])
+
+  const getFullParameters = () => {
+    const result: Record<string, string> = {}
+    for (const key in configuration.parameters) {
+      result[key] = parameters[key] ?? configuration.parameters[key][0]
+    }
+    return result
+  }
 
   useEffect(updatePointModifier, [results])
 
@@ -101,7 +109,7 @@ const Round = () => {
             <table style={{ textAlign: "center" }}>
               <thead>
                 <tr>
-                  <th style={{ width: "25%" }}>Map</th>
+                  <th style={{ width: "25%" }}>Parameters</th>
                   <th style={{ width: "35%" }}>Players</th>
                   {roundIterations === 1 && (
                     <>
@@ -120,7 +128,9 @@ const Round = () => {
                   const winCounts: Record<string, number> = {}
                   if (results[round.players.join(", ")] !== undefined) {
                     const currentResults =
-                      results[round.players.join(", ")][round.map]
+                      results[round.players.join(", ")][
+                        JSON.stringify(round.parameters)
+                      ]
                     for (const result of currentResults) {
                       const winner = round.players[result[0]]
                       if (!winCounts[winner]) {
@@ -136,7 +146,15 @@ const Round = () => {
 
                   return (
                     <tr key={index}>
-                      <td>{round.map}</td>
+                      <td style={{ whiteSpace: "pre" }}>
+                        {Object.keys(round.parameters)
+                          .sort()
+                          .map(
+                            (p) =>
+                              `${p[0].toUpperCase()}${p.slice(1)}: ${round.parameters[p]}`,
+                          )
+                          .join("\n")}
+                      </td>
                       <td>
                         {round.players.map((player, index) => (
                           <img
@@ -151,12 +169,13 @@ const Round = () => {
                         <>
                           <td>
                             {results[round.players.join(", ")] !== undefined &&
-                              results[round.players.join(", ")][round.map] !==
-                                undefined && (
+                              results[round.players.join(", ")][
+                                JSON.stringify(round.parameters)
+                              ] !== undefined && (
                                 <img
                                   src={`/images/teams/${round.players[
                                     results[round.players.join(", ")][
-                                      round.map
+                                      JSON.stringify(round.parameters)
                                     ][0][0]
                                   ].toLowerCase()}.png`}
                                   width={30}
@@ -166,12 +185,13 @@ const Round = () => {
                           </td>
                           <td>
                             {results[round.players.join(", ")] !== undefined &&
-                              results[round.players.join(", ")][round.map] !==
-                                undefined && (
+                              results[round.players.join(", ")][
+                                JSON.stringify(round.parameters)
+                              ] !== undefined && (
                                 <img
                                   src={`/images/teams/${round.players[
                                     results[round.players.join(", ")][
-                                      round.map
+                                      JSON.stringify(round.parameters)
                                     ][0][1]
                                   ].toLowerCase()}.png`}
                                   width={30}
@@ -197,10 +217,14 @@ const Round = () => {
                             size="xs"
                             onClick={() =>
                               navigate(
-                                `/simulation/${round.map.replaceAll(
-                                  " ",
-                                  "-",
-                                )}/${round.players.map(encodeURIComponent).join(",")}?showcase=true`,
+                                `/simulation/${round.players.map(encodeURIComponent).join(",")}?showcase=true&${Object.keys(
+                                  round.parameters,
+                                )
+                                  .map(
+                                    (p) =>
+                                      `${p}=${encodeURIComponent(round.parameters[p])}`,
+                                  )
+                                  .join("&")}`,
                               )
                             }
                           >
@@ -212,14 +236,14 @@ const Round = () => {
                             onClick={() => {
                               if (roundIterations === 1) {
                                 runNoUI(
-                                  round.map,
+                                  round.parameters,
                                   apis,
                                   round.players,
                                   "",
                                   false,
                                 )
                               } else {
-                                currentMap = round.map
+                                currentParameters = round.parameters
                                 currentPlayers = round.players
                                 startRunNoUIN(roundIterations)
                               }
@@ -246,6 +270,7 @@ const Round = () => {
             {location.search.includes("edit") && (
               <>
                 <NumberInput
+                  mb="xs"
                   value={roundIterations}
                   onChange={(v) =>
                     setRoundIterations(parseInt(v.toString(), 10) ?? 1)
@@ -253,18 +278,31 @@ const Round = () => {
                   label="Round Iterations"
                   leftSection={<i className="fa-solid fa-hashtag" />}
                 />
-                <Select
-                  mt="xs"
-                  leftSection={<i className="fa-solid fa-map" />}
-                  label="Map"
-                  data={configuration.maps}
-                  value={map}
-                  onChange={(s) => {
-                    if (s) {
-                      setMap(s)
-                    }
-                  }}
-                />
+                {Object.keys(configuration.parameters)
+                  .sort()
+                  .map((parameter, parameterIndex) => {
+                    const icon = (configuration.parameterIcons ?? {})[parameter]
+                    return (
+                      <Select
+                        key={parameterIndex}
+                        mb="xs"
+                        leftSection={icon ? <i className={icon} /> : undefined}
+                        label={parameter[0].toUpperCase() + parameter.slice(1)}
+                        data={configuration.parameters[parameter]}
+                        value={
+                          parameters[parameter] ??
+                          configuration.parameters[parameter][0]
+                        }
+                        onChange={(s) =>
+                          setParameters({
+                            ...parameters,
+                            [parameter]:
+                              s ?? configuration.parameters[parameter][0],
+                          })
+                        }
+                      />
+                    )
+                  })}
                 <BotSelector
                   playerCount={playerCount}
                   setPlayerCount={setPlayerCount}
@@ -301,7 +339,10 @@ const Round = () => {
                   onClick={() => {
                     setRounds((rounds) => [
                       ...rounds,
-                      { players: playerBots, map },
+                      {
+                        players: playerBots,
+                        parameters: { ...getFullParameters() },
+                      },
                     ])
                   }}
                   style={{ width: "30%" }}
@@ -341,7 +382,7 @@ const Round = () => {
                 ]) {
                   setRounds((rounds) =>
                     rounds.map((round) => ({
-                      map: round.map,
+                      parameters: round.parameters,
                       players: shuffle(round.players),
                     })),
                   )

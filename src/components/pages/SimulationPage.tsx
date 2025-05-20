@@ -69,7 +69,7 @@ const PlayPauseButton = () => {
 const Simulation = () => {
   const admin = useAdmin()
   const [apis, loading] = useAPIs()
-  let { map, playerapis } = useParams()
+  let { playerapis } = useParams()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [winner, setWinner] = useState<string>()
@@ -111,7 +111,10 @@ const Simulation = () => {
     }
   }, [])
 
-  map = map?.split("&")[0].replaceAll("-", " ")
+  const parameters = Object.fromEntries(searchParams)
+  if (parameters.seed) {
+    delete parameters.seed
+  }
   playerapis = playerapis?.split("&")[0]
 
   const playerNames = playerapis?.split(",").map(decodeURIComponent) ?? []
@@ -130,7 +133,7 @@ const Simulation = () => {
       tryUntilSuccess(() =>
         // @ts-ignore
         window._startSimulation(
-          map,
+          parameters,
           players,
           playerNames,
           false,

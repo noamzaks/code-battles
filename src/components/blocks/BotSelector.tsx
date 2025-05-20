@@ -19,7 +19,6 @@ const BotSelector: React.FC<Props> = ({
   return (
     <>
       <NumberInput
-        mt="xs"
         label="Player Count"
         value={playerCount}
         min={1}
@@ -59,3 +58,4 @@ const BotSelector: React.FC<Props> = ({
 }
 
 export default BotSelector
+

@@ -5,7 +5,7 @@ import { createContext, useContext } from "react"
 
 interface CodeBattlesRequiredConfiguration {
   firebase: any
-  maps: string[]
+  parameters: Record<string, string[]>
 }
 
 interface CodeBattlesDatesConfiguration {
@@ -23,6 +23,7 @@ interface CodeBattlesOptionalConfiguration {
   authentication: Auth
   runningCountOptions?: number[]
   dates?: CodeBattlesDatesConfiguration
+  parameterIcons?: Record<string, string>
 }
 
 export interface CodeBattlesConfiguration
@@ -63,3 +64,4 @@ export const useConfiguration = () => {
   const configuration = useContext(ConfigurationContext)
   return configuration!
 }
+
