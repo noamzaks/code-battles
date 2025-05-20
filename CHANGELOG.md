@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.0] - 2025-05-20
+
+### Added
+
+- The `run_bot_method` now returns the runtime of that method.
+
+### Breaking Changes
+
+- The `map` has now been generalized to `parameters`. Previous Code Battles configuration must be updated.
+
 ## [1.6.4] - 2025-04-30
 
 ### Added
