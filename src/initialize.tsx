@@ -48,6 +48,9 @@ const initialize = () => {
     parameters: Record<string, string>,
     verbose: boolean,
   ) => {
+    // @ts-ignore
+    parameters = parameters.toJs()
+
     const results = getLocalStorage("Results")
     if (!results[playerNames.join(", ")]) {
       results[playerNames.join(", ")] = {}

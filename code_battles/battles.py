@@ -1136,3 +1136,5 @@ class CodeBattles(
                         0,
                     )
                 )
+            else:
+                await asyncio.sleep(0.0005)

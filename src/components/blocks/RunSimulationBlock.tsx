@@ -66,7 +66,7 @@ const RunSimulationBlock = () => {
 
   const startRunNoUI = () => {
     setRunningNoUI(true)
-    runNoUI(getFullParameters(), apis, playerBots, seed.toString(), false)
+    runNoUI(getFullParameters(), apis, playerBots, seed.toString(), true)
   }
 
   const startRunNoUIN = (n: number) => {
