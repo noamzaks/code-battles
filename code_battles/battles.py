@@ -10,7 +10,7 @@ import traceback
 import typing
 from dataclasses import dataclass
 from random import Random
-from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union
 from urllib.parse import quote
 
 from code_battles.utilities import (
@@ -234,6 +234,15 @@ class CodeBattles(
         """
 
         pass
+
+    def get_statistics(self) -> Dict[str, Union[int, float]]:
+        """
+        Optional method to return statistics, called after the game ends.
+
+        When running multiple no UI simulations, you can use this to view the simulations in a table.
+        """
+
+        return {}
 
     def configure_extra_width(self) -> int:
         """Optionally add extra height to the right of the boards. 0 by default."""
@@ -1045,7 +1054,12 @@ class CodeBattles(
             if len(self.active_players) == 1:
                 self._eliminated.append(self.active_players[0])
             set_results(
-                self.player_names, self._eliminated[::-1], self.parameters, self.verbose
+                self.player_names,
+                self._seed,
+                self._eliminated[::-1],
+                self.get_statistics(),
+                self.parameters,
+                self.verbose,
             )
             if not self.background:
                 self.render()

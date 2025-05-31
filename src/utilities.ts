@@ -74,8 +74,8 @@ export const updatePointModifier = () => {
       for (const result of results[round.players.join(", ")][
         JSON.stringify(round.parameters)
       ]) {
-        const first = round.players[result[0]]
-        const second = round.players[result[1]]
+        const first = round.players[result.places[0]]
+        const second = round.players[result.places[1]]
         if (!pointModifier[first]) {
           pointModifier[first] = 0
         }

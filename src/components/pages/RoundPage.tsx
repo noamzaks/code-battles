@@ -132,7 +132,7 @@ const Round = () => {
                         JSON.stringify(round.parameters)
                       ]
                     for (const result of currentResults) {
-                      const winner = round.players[result[0]]
+                      const winner = round.players[result.places[0]]
                       if (!winCounts[winner]) {
                         winCounts[winner] = 1
                       } else {

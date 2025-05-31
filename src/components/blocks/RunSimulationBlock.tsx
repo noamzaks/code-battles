@@ -107,7 +107,7 @@ const RunSimulationBlock = () => {
           results[playerBots.join(", ")][JSON.stringify(getFullParameters())]
         const winCounts: Record<string, number> = {}
         for (const result of currentResults) {
-          const winner = playerBots[result[0]]
+          const winner = playerBots[result.places[0]]
           if (!winCounts[winner]) {
             winCounts[winner] = 1
           } else {

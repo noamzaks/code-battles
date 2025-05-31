@@ -75,7 +75,9 @@ def show_alert(
 @web_only
 def set_results(
     player_names: List[str],
+    seed: int,
     places: List[int],
+    statistics: Dict[str, Union[float, int]],
     parameters: Dict[str, str],
     verbose: bool,
 ):
@@ -83,7 +85,9 @@ def set_results(
 
     if hasattr(window, "setResults"):
         try:
-            window.setResults(player_names, places, parameters, verbose)
+            window.setResults(
+                player_names, str(seed), places, statistics, parameters, verbose
+            )
         except Exception as e:
             print(e)
 

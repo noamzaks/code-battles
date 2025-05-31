@@ -44,12 +44,16 @@ const initialize = () => {
   // @ts-ignore
   window.setResults = (
     playerNames: string[],
+    seed: string,
     places: number[],
+    statistics: Record<string, number>,
     parameters: Record<string, string>,
     verbose: boolean,
   ) => {
     // @ts-ignore
     parameters = parameters.toJs()
+    // @ts-ignore
+    statistics = statistics.toJs()
 
     const results = getLocalStorage("Results")
     if (!results[playerNames.join(", ")]) {
@@ -58,7 +62,11 @@ const initialize = () => {
     if (!results[playerNames.join(", ")][JSON.stringify(parameters)]) {
       results[playerNames.join(", ")][JSON.stringify(parameters)] = []
     }
-    results[playerNames.join(", ")][JSON.stringify(parameters)].push(places)
+    results[playerNames.join(", ")][JSON.stringify(parameters)].push({
+      seed,
+      places,
+      statistics,
+    })
     setLocalStorage("Results", results)
     updatePointModifier()
 
