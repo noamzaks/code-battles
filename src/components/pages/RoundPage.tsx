@@ -9,12 +9,14 @@ import { useAPIs, useLocalStorage } from "../../hooks"
 import {
   RoundInfo,
   runNoUI,
+  setLocalStorage,
   shuffle,
   updatePointModifier,
 } from "../../utilities"
 import Block from "../blocks/Block"
 import BotSelector from "../blocks/BotSelector"
 import TournamentBlock from "../blocks/TournamentBlock"
+import ResultStatisticsTable from "../ResultStaticsTable"
 
 let currentParameters: Record<string, string>
 let currentPlayers: string[]
@@ -213,6 +215,17 @@ const Round = () => {
                       <td>
                         <Button.Group orientation="vertical">
                           <Button
+                            leftSection={
+                              <i className="fa-solid fa-hand-pointer" />
+                            }
+                            size="xs"
+                            onClick={() => {
+                              setLocalStorage("Current Round", index)
+                            }}
+                          >
+                            Select
+                          </Button>
+                          <Button
                             leftSection={<i className="fa-solid fa-play" />}
                             size="xs"
                             onClick={() =>
@@ -408,6 +421,7 @@ const Round = () => {
             />
           </div>
         </div>
+        <ResultStatisticsTable />
       </div>
     </>
   )
