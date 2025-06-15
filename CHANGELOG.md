@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Games can now set `configure_breakpoint_by_time` so that the breakpoint in the simulation page is measured in time and not in steps.
+
+### Fixed
+
+- The step button now works again.
+
 ## [1.7.2] - 2025-06-15
 
 ### Fixed

@@ -259,6 +259,11 @@ class CodeBattles(
 
         return 20
 
+    def configure_breakpoint_by_time(self) -> bool:
+        """Return whether the breakpoint value should be a time instead of steps (multiplied by `configure_steps_per_second`)."""
+
+        return False
+
     def configure_board_count(self) -> int:
         """The number of wanted boards for the game. 1 by default."""
 
@@ -547,7 +552,9 @@ class CodeBattles(
         )
         step_element = document.getElementById("step")
         if step_element is not None:
-            step_element.onclick = create_proxy(lambda _: self._step())
+            step_element.onclick = create_proxy(
+                lambda _: asyncio.get_event_loop().run_until_complete(self._step())
+            )
 
         # Start the simulation.
         document.getElementById("playpause").click()
@@ -1096,6 +1103,7 @@ class CodeBattles(
             return False
 
         if self.step == self._get_breakpoint():
+            self._ensure_paused()
             return False
 
         if self.step in self._breakpoints and self.console_visible:
@@ -1126,6 +1134,10 @@ class CodeBattles(
             return -1
 
         try:
+            if self.configure_breakpoint_by_time():
+                return int(
+                    float(breakpoint_element.value) * self.configure_steps_per_second()
+                )
             return int(breakpoint_element.value)
         except Exception:
             return -1
