@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.2] - 2025-06-15
+
+### Fixed
+
+- No UI simulations were broken when simulation took a while.
+- The round page could crash.
+
 ## [1.7.1] - 2025-06-03
 
 ### Added
