@@ -1024,15 +1024,13 @@ class CodeBattles(
             document.getElementById("playpause").click()
 
     @web_only
-    def _step(self):
-        from js import document, setTimeout
-        from pyscript.ffi import create_proxy
+    async def _step(self):
+        from js import document
 
         if not self.over:
             if len(self._decisions) == self._decision_index:
-                print("Warning: sleeping because decisions were not made yet!")
-                setTimeout(create_proxy(self._step), 100)
-                return
+                await asyncio.sleep(0.01)
+                return await self._step()
             else:
                 logs = self._logs[self._decision_index]
                 for log in logs:
@@ -1137,9 +1135,10 @@ class CodeBattles(
         while self._should_play():
             start = time.time()
             try:
-                self._step()
+                await self._step()
             except Exception:
                 traceback.print_exc()
+
             if not self.background:
                 await asyncio.sleep(
                     max(
@@ -1150,5 +1149,3 @@ class CodeBattles(
                         0,
                     )
                 )
-            else:
-                await asyncio.sleep(0.0005)

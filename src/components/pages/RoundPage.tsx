@@ -179,7 +179,7 @@ const Round = () => {
                                     results[round.players.join(", ")][
                                       JSON.stringify(round.parameters)
                                     ][0][0]
-                                  ].toLowerCase()}.png`}
+                                  ]?.toLowerCase()}.png`}
                                   width={30}
                                   style={{ marginInlineEnd: 10 }}
                                 />
@@ -195,7 +195,7 @@ const Round = () => {
                                     results[round.players.join(", ")][
                                       JSON.stringify(round.parameters)
                                     ][0][1]
-                                  ].toLowerCase()}.png`}
+                                  ]?.toLowerCase()}.png`}
                                   width={30}
                                   style={{ marginInlineEnd: 10 }}
                                 />
