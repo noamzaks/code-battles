@@ -58,24 +58,11 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
         setShowLogs={setShowLogs}
       />
 
-      <div
-        id="console"
-        style={{
-          whiteSpace: "pre",
-          fontFamily: "'Ubuntu Mono', 'Courier New', Courier, monospace",
-          backgroundColor: "#111",
-          borderRadius: 20,
-          width: "100%",
-          height: "95%",
-          maxHeight: "calc(100% - 80px)",
-          overflow: "auto",
-          padding: 10,
-        }}
-      >
+      <div id="console">
         {logs
           .filter((log) => log.playerIndex === -1 || showLogs[log.playerIndex])
           .map((log, index) => (
-            <p key={index} style={{ margin: 0, color: log.color }}>
+            <p key={index} color={log.color}>
               {log.text}
             </p>
           ))}

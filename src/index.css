@@ -14,3 +14,20 @@ h6,
 p {
   margin: 0;
 }
+
+#console {
+  white-space: pre;
+  font-family: "Ubuntu Mono", "Courier New", Courier, monospace;
+  background-color: #111;
+  border-radius: 20;
+  width: 100%;
+  height: 95%;
+  max-height: calc(100% - 80px);
+  overflow: auto;
+  padding: 10px;
+}
+
+#console > p {
+  margin: 0px;
+}
+
