@@ -1,8 +1,8 @@
 import React, { useEffect } from "react"
-import AutoScrollButton from "./AutoScrollButton"
-import ShowLogsButtons from "./ShowLogsButtons"
 import { useLocalStorage } from "../hooks"
 import { getLocalStorage } from "../utilities"
+import AutoScrollButton from "./AutoScrollButton"
+import ShowLogsButtons from "./ShowLogsButtons"
 
 interface Props {
   playerNames: string[]
@@ -62,7 +62,7 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
         id="console"
         style={{
           whiteSpace: "pre",
-          fontFamily: "Ubuntu Mono",
+          fontFamily: "'Ubuntu Mono', 'Courier New', Courier, monospace",
           backgroundColor: "#111",
           borderRadius: 20,
           width: "100%",
@@ -85,3 +85,4 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
 }
 
 export default LogViewer
+
