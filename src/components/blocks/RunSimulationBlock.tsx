@@ -5,12 +5,8 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useConfiguration } from "../../configuration"
 import { useAPIs, useLocalStorage } from "../../hooks"
-import {
-  getLocalStorage,
-  runNoUI,
-  setLocalStorage,
-  tryUntilSuccess,
-} from "../../utilities"
+import { runNoUI, setLocalStorage, tryUntilSuccess } from "../../utilities"
+import ResultWinnerChart from "../ResultWinnerChart"
 import Block from "./Block"
 import BotSelector from "./BotSelector"
 
@@ -37,6 +33,10 @@ const RunSimulationBlock = () => {
   const [runningNoUI, setRunningNoUI] = useState(false)
   const [runningNoUIN, setRunningNoUIN] = useState<Record<string, number>>({})
   const navigate = useNavigate()
+  const [results] = useLocalStorage<any>({
+    key: "Results",
+    defaultValue: {},
+  })
 
   let remaining = 0
   if (Object.keys(runningNoUIN).length === 1) {
@@ -99,12 +99,13 @@ const RunSimulationBlock = () => {
     }
   }, [])
 
+  const currentResults = ((results ?? {})[playerBots.join(", ")] ?? {})[
+    JSON.stringify(getFullParameters())
+  ]
+
   useEffect(() => {
     for (const key in runningNoUIN) {
       if (runningNoUIN[key] == 0) {
-        const results = getLocalStorage("Results")
-        const currentResults =
-          results[playerBots.join(", ")][JSON.stringify(getFullParameters())]
         const winCounts: Record<string, number> = {}
         for (const result of currentResults) {
           const winner = playerBots[result.places[0]]
@@ -224,6 +225,7 @@ const RunSimulationBlock = () => {
         style={{ textAlign: "center", display: "none", marginTop: 10 }}
         id="noui-progress"
       />
+      <ResultWinnerChart results={currentResults} />
       <Dropzone
         mt="xs"
         multiple={false}

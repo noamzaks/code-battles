@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] - 2025-06-18
+
+### Added
+
+- Running No UI simulations in the round page and in the main page now shows an updating graph of the winners!
+
+### Breaking Changes
+
+- Users must now add the `@mantine/charts` and `recharts@2` dependencies. You are encouraged to update your dependencies to the versions specified in `package.json`.
+
 ## [1.7.3] - 2025-06-17
 
 ### Added

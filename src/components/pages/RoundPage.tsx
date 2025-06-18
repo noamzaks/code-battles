@@ -17,6 +17,7 @@ import Block from "../blocks/Block"
 import BotSelector from "../blocks/BotSelector"
 import TournamentBlock from "../blocks/TournamentBlock"
 import ResultStatisticsTable from "../ResultStaticsTable"
+import ResultWinnerChart from "../ResultWinnerChart"
 
 let currentParameters: Record<string, string>
 let currentPlayers: string[]
@@ -108,6 +109,7 @@ const Round = () => {
       >
         <div style={{ width: 800, maxWidth: "95%", padding: 10 }}>
           <Block title="Round" logo="fa-solid fa-otter">
+            <ResultWinnerChart />
             <table style={{ textAlign: "center" }}>
               <thead>
                 <tr>

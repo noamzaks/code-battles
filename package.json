@@ -41,6 +41,8 @@
     "@mantine/dropzone": "^8.0.1",
     "@mantine/hooks": "^8.0.1",
     "@mantine/notifications": "^8.0.1",
+    "@mantine/charts": "^8.0.1",
+    "recharts": "^2.15.3",
     "dayjs": "^1.11.13",
     "firebase": "^11.7.3",
     "react": "^18.3.1",
