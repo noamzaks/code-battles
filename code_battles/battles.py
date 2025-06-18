@@ -1035,22 +1035,25 @@ class CodeBattles(
         from js import document
 
         if not self.over:
-            if len(self._decisions) == self._decision_index:
-                await asyncio.sleep(0.01)
-                return await self._step()
-            else:
-                logs = self._logs[self._decision_index]
-                for log in logs:
-                    console_log(
-                        -1 if log["player_index"] is None else log["player_index"],
-                        log["text"],
-                        log["color"],
-                    )
-                alerts = self._alerts[self._decision_index]
-                for alert in alerts:
-                    self.alert(**alert)
-                self.apply_decisions(self._decisions[self._decision_index])
-                self._decision_index += 1
+            # loop waiting for decisions to be ready then break.
+            while True:
+                if len(self._decisions) == self._decision_index:
+                    await asyncio.sleep(0.01)
+                    continue
+                else:
+                    logs = self._logs[self._decision_index]
+                    for log in logs:
+                        console_log(
+                            -1 if log["player_index"] is None else log["player_index"],
+                            log["text"],
+                            log["color"],
+                        )
+                    alerts = self._alerts[self._decision_index]
+                    for alert in alerts:
+                        self.alert(**alert)
+                    self.apply_decisions(self._decisions[self._decision_index])
+                    self._decision_index += 1
+                    break
 
         if not self.over:
             self.step += 1
