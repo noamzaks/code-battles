@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.5] - 2025-06-18
+
+### Fixed
+
+- The simulation would sometimes crash because of the `_step` being recursive.
+
 ## [1.7.4] - 2025-06-18
 
 ### Added
