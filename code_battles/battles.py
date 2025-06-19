@@ -556,9 +556,6 @@ class CodeBattles(
                 lambda _: asyncio.get_event_loop().run_until_complete(self._step())
             )
 
-        # Start the simulation.
-        document.getElementById("playpause").click()
-
     def _initialize_simulation(
         self, player_codes: List[str], seed: Optional[int] = None
     ):
