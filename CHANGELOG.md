@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Added
+
+- The "Tournament Bot" picker is now an autocomplete input instead of a select to make it easier to find the bot to pick.
+
 ## [1.7.5] - 2025-06-18
 
 ### Fixed
