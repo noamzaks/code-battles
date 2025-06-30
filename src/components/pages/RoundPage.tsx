@@ -16,7 +16,7 @@ import {
 import Block from "../blocks/Block"
 import BotSelector from "../blocks/BotSelector"
 import TournamentBlock from "../blocks/TournamentBlock"
-import ResultStatisticsTable from "../ResultStaticsTable"
+import ResultStatisticsTable from "../ResultStatisticsTable"
 import ResultWinnerChart from "../ResultWinnerChart"
 
 let currentParameters: Record<string, string>
