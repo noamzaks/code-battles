@@ -1,3 +1,7 @@
+"""Code Battles base class implementation."""
+
+from __future__ import annotations
+
 import asyncio
 import base64
 import datetime
@@ -919,8 +923,8 @@ class CodeBattles(
                 "player_api": None,
                 "context": context,
                 **self.get_api().__dict__,
+                **self.configure_bot_globals(player_index),
             }
-            | self.configure_bot_globals(player_index)
             for player_index, context in enumerate(contexts)
         ]
         for index, api_code in enumerate(player_codes):

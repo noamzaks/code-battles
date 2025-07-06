@@ -1,5 +1,7 @@
 """Generic useful utilities for creating games with PyScript."""
 
+from __future__ import annotations
+
 import asyncio
 import math
 import sys
