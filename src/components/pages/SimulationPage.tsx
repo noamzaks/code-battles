@@ -50,6 +50,9 @@ const PlayPauseButton = () => {
           window.mainAudio?.play()
         }
         setPlaying((p) => !p)
+
+        // @ts-ignore
+        window._playPause()
       }}
       leftSection={
         playing ? (
@@ -132,7 +135,7 @@ const Simulation = () => {
       const seed = searchParams.get("seed") ?? ""
       tryUntilSuccess(() =>
         // @ts-ignore
-        window._startSimulation.callPromising(
+        window._startSimulation(
           parameters,
           players,
           playerNames,
@@ -288,6 +291,8 @@ const Simulation = () => {
                         id="step"
                         mr="xs"
                         radius="20px"
+                        // @ts-ignore
+                        onClick={() => window._step()}
                       >
                         Step
                       </Button>

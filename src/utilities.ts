@@ -123,7 +123,7 @@ export const runNoUI = (
   const players = playerBots.map((api) => (api === "None" ? "" : apis[api]))
   tryUntilSuccess(() =>
     // @ts-ignore
-    window._startSimulation.callPromising(
+    window._startSimulation(
       parameters,
       players,
       playerBots,

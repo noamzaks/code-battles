@@ -17,6 +17,8 @@ def run_game(battles: CodeBattles):
         window._startSimulationFromFile = create_proxy(
             battles._start_simulation_from_file
         )
+        window._playPause = create_proxy(battles._play_pause)
+        window._step = create_proxy(battles._step)
     elif is_worker():
         setattr(
             sys.modules["__main__"],

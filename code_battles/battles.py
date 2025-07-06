@@ -543,18 +543,10 @@ class CodeBattles(
 
     @web_only
     def _initialize(self):
-        from js import document, window
+        from js import window
         from pyscript.ffi import create_proxy
 
         window.addEventListener("resize", create_proxy(lambda _: self._resize_canvas()))
-        document.getElementById("playpause").onclick = create_proxy(
-            lambda _: asyncio.get_event_loop().run_until_complete(self._play_pause())
-        )
-        step_element = document.getElementById("step")
-        if step_element is not None:
-            step_element.onclick = create_proxy(
-                lambda _: asyncio.get_event_loop().run_until_complete(self._step())
-            )
 
     def _initialize_simulation(
         self, player_codes: List[str], seed: Optional[int] = None
@@ -698,15 +690,7 @@ class CodeBattles(
             with open(output_file, "w") as f:
                 f.write(simulation_str)
 
-    def _start_simulation(self, *args, **kwargs):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._start_simulation_async(*args, **kwargs))
-
-    def _start_simulation_from_file(self, contents: str):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._start_simulation_from_file_async(contents))
-
-    async def _start_simulation_from_file_async(self, contents: str):
+    async def _start_simulation_from_file(self, contents: str):
         from js import document
 
         try:
@@ -773,7 +757,7 @@ class CodeBattles(
             print(e)
 
     @web_only
-    async def _start_simulation_async(
+    async def _start_simulation(
         self,
         parameters: Dict[str, str],
         player_codes: List[str],
