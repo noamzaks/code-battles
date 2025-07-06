@@ -132,7 +132,7 @@ const Simulation = () => {
       const seed = searchParams.get("seed") ?? ""
       tryUntilSuccess(() =>
         // @ts-ignore
-        window._startSimulation(
+        window._startSimulation.callPromising(
           parameters,
           players,
           playerNames,

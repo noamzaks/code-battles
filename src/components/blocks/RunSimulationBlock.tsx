@@ -243,7 +243,7 @@ const RunSimulationBlock = () => {
 
           tryUntilSuccess(() => {
             // @ts-ignore
-            window._startSimulationFromFile(text)
+            window._startSimulationFromFile.callPromising(text)
           })
         }}
         style={{
