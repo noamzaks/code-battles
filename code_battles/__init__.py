@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import sys
 
-from code_battles.battles import CodeBattles
-from code_battles.utilities import Alignment, GameCanvas, is_web, is_worker
+from battles import CodeBattles
+from utilities import Alignment, GameCanvas, is_web, is_worker
 
 
 def run_game(battles: CodeBattles):

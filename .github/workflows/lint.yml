@@ -8,10 +8,17 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff
-      - name: Run Ruff
+          pip install ruff mypy
+      - name: Run ruff
         run: ruff check --output-format=github code_battles
+      - name: Run mypy
+        uses: sasanquaneuf/mypy-github-action@releases/v1
+        with:
+          checkName: "mypy"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

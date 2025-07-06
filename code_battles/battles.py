@@ -12,12 +12,13 @@ import sys
 import time
 import traceback
 import typing
+from contextlib import contextmanager
 from dataclasses import dataclass
 from random import Random
 from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union
 from urllib.parse import quote
 
-from code_battles.utilities import (
+from utilities import (
     GameCanvas,
     console_log,
     download_image,
@@ -326,7 +327,7 @@ class CodeBattles(
     def download_image(self, url: str) -> "asyncio.Future[js.Image]":
         from js import Image
 
-        result = asyncio.Future()
+        result = asyncio.Future[Image]()
         image = Image.new()
         image.onload = lambda _: result.set_result(image)
         image.src = url
@@ -343,7 +344,7 @@ class CodeBattles(
         from js import Image
 
         remaining_images: List[str] = []
-        result = asyncio.Future()
+        result = asyncio.Future[Dict[str, Image]]()
 
         images: Dict[str, Image] = {}
         remaining = len(sources)
@@ -505,7 +506,7 @@ class CodeBattles(
         if sound not in self._sounds:
             self._sounds[sound] = Audio.new(self.configure_sound_url(sound))
 
-        volume = window.localStorage.getItem("Volume") or 0
+        volume = float(window.localStorage.getItem("Volume") or "0")
         s = self._sounds[sound].cloneNode(True)
         s.volume = volume
 
@@ -560,8 +561,8 @@ class CodeBattles(
     ):
         if seed is None:
             seed = Random().randint(0, 2**128)
-        self._logs = []
-        self._alerts = []
+        self._logs: List[Any] = []
+        self._alerts: List[Any] = []
         self._decisions = []
         self._breakpoints = set()
         self._decision_index = 0
@@ -585,7 +586,7 @@ class CodeBattles(
 
     def _run_webworker_simulation(
         self,
-        parameters: Dict[str, str],
+        parameters_str: str,
         player_names_str: str,
         player_codes_str: str,
         seed: Optional[int] = None,
@@ -593,12 +594,12 @@ class CodeBattles(
         from pyscript import sync
 
         # JS to Python
-        parameters = json.loads(parameters)
+        parameters: Dict[str, str] = json.loads(parameters_str)
         player_names = json.loads(player_names_str)
         player_codes = json.loads(player_codes_str)
 
         self.parameters = parameters
-        self.map = parameters.get("map")
+        self.map = parameters["map"]
         self.player_names = player_names
         self.background = True
         self.console_visible = False
@@ -611,10 +612,9 @@ class CodeBattles(
             decisions = self._make_decisions()
             logs = self._logs
             alerts = self._alerts
-            log = self.log
-            self.log = lambda *args, **kwargs: None
-            self.apply_decisions(decisions)
-            self.log = log
+
+            with self._without_log():
+                self.apply_decisions(decisions)
 
             sync.update_step(
                 base64.b64encode(decisions).decode(),
@@ -626,6 +626,17 @@ class CodeBattles(
 
             if not self.over:
                 self.step += 1
+
+    @contextmanager
+    def _without_log(self):
+        log = getattr(self, "log")
+
+        def do_nothing(*args, **kwargs):
+            pass
+
+        setattr(self, "log", do_nothing)
+        yield
+        setattr(self, "log", log)
 
     def _run_local_simulation(self):
         command = sys.argv[1]
@@ -741,7 +752,7 @@ class CodeBattles(
                 await asyncio.sleep(0.01)
             self._initialize()
             self.parameters = simulation.parameters
-            self.map = self.parameters.get("map")
+            self.map = self.parameters["map"]
             self.map_image = await download_image(
                 self.configure_map_image_url(self.map)
             )
@@ -787,7 +798,7 @@ class CodeBattles(
         # JS to Python
         player_names = [str(x) for x in player_names]
         player_codes = [str(x) for x in player_codes]
-        parameters = parameters.to_py()
+        parameters = parameters.to_py()  # type: ignore
 
         try:
             render_status = document.getElementById("render-status")
@@ -795,7 +806,7 @@ class CodeBattles(
                 render_status.textContent = "Rendering: Initializing..."
 
             self.parameters = parameters
-            self.map = parameters.get("map")
+            self.map = parameters["map"]
             self.player_names = player_names
             self.map_image = await download_image(
                 self.configure_map_image_url(self.map)
@@ -975,10 +986,12 @@ class CodeBattles(
                     else line
                     for line in api_code.splitlines()
                 ]
-                lines = "\n".join(lines)
-                lines = lines.replace("class MyBot", f"class Player{index}Bot")
+                player_code = "\n".join(lines)
+                player_code = player_code.replace(
+                    "class MyBot", f"class Player{index}Bot"
+                )
                 try:
-                    exec(lines, player_globals[index])
+                    exec(player_code, player_globals[index])
                     exec(
                         f"player_api = Player{index}Bot(context)",
                         player_globals[index],

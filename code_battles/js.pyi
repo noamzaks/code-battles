@@ -1,13 +1,14 @@
 """
-Basic type hints for JavaScript in PyOdide and PyScript.
+Basic type hints for JavaScript, used in Pyodide and PyScript.
 A lot of properties are missing.
 """
 
-from typing import Callable, List, Literal, Optional
+from typing import Any, Callable, List, Literal, Optional
 
-from pyodide.ffi import JsCallable
+class JsCallable:
+    pass
 
-class TwoDContext:
+class CanvasRenderingContext2D:
     textAlign: Literal["left", "right", "center", "start", "end"]
     textBaseline: Literal[
         "top", "hanging", "middle", "alphabetic", "ideographic", "bottom"
@@ -15,35 +16,37 @@ class TwoDContext:
     font: str
     fillStyle: str
     strokeStyle: str
-    lineWidth: int
+    lineWidth: float
 
     @staticmethod
     def beginPath(): ...
     @staticmethod
     def arc(
-        x: int,
-        y: int,
+        x: float,
+        y: float,
         radius: float,
         startAngle: float,
         endAngle: float,
         counterclockwise=False,
     ): ...
     @staticmethod
-    def moveTo(x: int, y: int): ...
+    def moveTo(x: float, y: float): ...
     @staticmethod
-    def lineTo(x: int, y: int): ...
+    def lineTo(x: float, y: float): ...
     @staticmethod
     def stroke(): ...
     @staticmethod
     def fill(): ...
     @staticmethod
-    def fillText(text: str, x: int, y: int): ...
+    def fillText(text: str, x: float, y: float): ...
     @staticmethod
-    def fillRect(x: int, y: int, width: int, height: int): ...
+    def fillRect(x: float, y: float, width: float, height: float): ...
     @staticmethod
-    def drawImage(image: "Image", x: int, y: int, width: int, height: int): ...
+    def drawImage(image: "Image", x: float, y: float, width: float, height: float): ...
     @staticmethod
-    def clearRect(startX: int, endX: int, width: int, height: int): ...
+    def clearRect(startX: float, endX: float, width: float, height: float): ...
+    @staticmethod
+    def rect(startX: float, endX: float, width: float, height: float): ...
     @staticmethod
     def save(): ...
     @staticmethod
@@ -66,12 +69,12 @@ class Element:
     onclick: JsCallable
     width: float
     height: float
-    clientWidth: Optional[int]
-    clientHeight: Optional[int]
+    clientWidth: Optional[float]
+    clientHeight: Optional[float]
     style: Styles
 
     @staticmethod
-    def getContext(dimensions: str) -> TwoDContext: ...
+    def getContext(dimensions: str) -> CanvasRenderingContext2D: ...
     @staticmethod
     def click(): ...
     @staticmethod
@@ -79,9 +82,14 @@ class Element:
 
 class document:
     body: Element
+    fonts: FontFaceSet
 
     @staticmethod
     def getElementById(id: str) -> Element: ...
+
+class FontFaceSet:
+    @staticmethod
+    def add(font: FontFace) -> FontFaceSet: ...
 
 class Matches:
     matches: bool
@@ -94,7 +102,7 @@ class LocalStorage:
     @staticmethod
     def setItem(key: str, value: str) -> None: ...
 
-class window:
+class window(Any):
     devicePixelRatio: float
     localStorage: LocalStorage
 
@@ -126,8 +134,8 @@ class Image(Element):
     onerror: Callable[[Event], None]
 
 def clearInterval(id: int) -> None: ...
-def setInterval(fn: JsCallable, period: int) -> int: ...
-def setTimeout(fn: JsCallable, period: int) -> None: ...
+def setInterval(fn: JsCallable, period: float) -> int: ...
+def setTimeout(fn: JsCallable, period: float) -> None: ...
 
 class FontFace:
     @staticmethod

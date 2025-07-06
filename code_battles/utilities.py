@@ -52,7 +52,7 @@ class Alignment(Enum):
 def download_image(src: str):
     from js import Image
 
-    result = asyncio.Future()
+    result = asyncio.Future[Image]()
     image = Image.new()
     image.onload = lambda _: result.set_result(image)
     image.src = src
@@ -173,8 +173,8 @@ class GameCanvas:
     def draw_element(
         self,
         image: "js.Image",
-        x: int,
-        y: int,
+        x: float,
+        y: float,
         width: int,
         board_index=0,
         direction: Union[float, None] = None,
@@ -252,10 +252,10 @@ class GameCanvas:
 
     def draw_rectangle(
         self,
-        start_x: int,
-        start_y: int,
-        width: int,
-        height: int,
+        start_x: float,
+        start_y: float,
+        width: float,
+        height: float,
         fill="black",
         stroke="transparent",
         stroke_width=2,
