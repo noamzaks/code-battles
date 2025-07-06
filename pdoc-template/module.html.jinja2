@@ -1,5 +1,5 @@
 {% extends "frame.html.jinja2" %}
-{% block title %}{{ module.modulename }} API documentation{% endblock %}
+{% block title %}API Documentation{% endblock %}
 {% block nav %}
     {% block module_list_link %}
         {% set parentmodule = ".".join(module.modulename.split(".")[:-1]) %}
@@ -91,7 +91,7 @@
                         <a class="pdoc-button git-button" href="{{ edit_url }}">{{ edit_text }}</a>
                     {% endif %}
                 {% endblock %}
-                <h1 class="modulename">Code Battles API</h1>
+                <h1 class="modulename">API Documentation</h1>
                 {{ docstring(module) }}
                 {{ view_source_state(module) }}
                 {{ view_source_button(module) }}
