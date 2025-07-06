@@ -12,6 +12,20 @@ import "prismjs/components/prism-python.js"
 import "prismjs/plugins/line-numbers/prism-line-numbers.js"
 
 const initialize = () => {
+  // Load the packed Python file of the project, on the main thread and on a web worker.
+  const mainThreadScript = document.createElement("script")
+  mainThreadScript.type = "py"
+  mainThreadScript.src = "/scripts/packed.py"
+  mainThreadScript.setAttribute("config", "/config.json")
+  document.body.appendChild(mainThreadScript)
+  const workerScript = document.createElement("script")
+  workerScript.type = "py"
+  workerScript.src = "/scripts/packed.py"
+  workerScript.setAttribute("config", "/config.json")
+  workerScript.toggleAttribute("worker", true)
+  workerScript.setAttribute("name", "worker")
+  document.body.appendChild(workerScript)
+
   // @ts-ignore
   window.showAlert = (
     title: string,
