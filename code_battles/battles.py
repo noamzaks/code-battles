@@ -45,6 +45,7 @@ class Simulation:
     version: str
     timestamp: datetime.datetime
     logs: list
+    alerts: list
     decisions: List[bytes]
     seed: int
 
@@ -59,6 +60,7 @@ class Simulation:
                         "version": self.version,
                         "timestamp": self.timestamp.isoformat(),
                         "logs": self.logs,
+                        "alerts": self.alerts,
                         "decisions": [
                             base64.b64encode(decision).decode()
                             for decision in self.decisions
@@ -81,6 +83,7 @@ class Simulation:
             contents["version"],
             datetime.datetime.fromisoformat(contents["timestamp"]),
             contents["logs"],
+            contents["alerts"],
             [base64.b64decode(decision) for decision in contents["decisions"]],
             contents["seed"],
         )
@@ -627,7 +630,8 @@ class CodeBattles(
         if command == "simulate":
             seed = None if sys.argv[2] == "None" else int(sys.argv[2])
             output_file = None if sys.argv[3] == "None" else sys.argv[3]
-            self.map = sys.argv[4]
+            self.parameters = json.loads(sys.argv[4])
+            self.map = self.parameters.get("map")
             self.player_names = sys.argv[5].split("-")
             player_codes = []
             for filename in sys.argv[6:]:
@@ -652,15 +656,19 @@ class CodeBattles(
         self._initialize_simulation(player_codes, seed)
 
         all_logs = []
+        all_alerts = []
         while not self.over:
             print("__CODE_BATTLES_ADVANCE_STEP")
             if len(decisions) != 0:
                 self.apply_decisions(decisions.pop(0))
             else:
                 self._logs = []
+                self._alerts = []
                 _decisions = self._make_decisions()
                 all_logs.append(self._logs)
+                all_alerts.append(self._alerts)
                 self._logs = []
+                self._alerts = []
                 if output_file is not None:
                     self._decisions.append(_decisions)
                 self.apply_decisions(_decisions)
@@ -668,6 +676,7 @@ class CodeBattles(
             if not self.over:
                 self.step += 1
         self._logs = all_logs
+        self._alerts = all_alerts
 
         print("--- SIMULATION FINISHED ---")
         print(
@@ -741,6 +750,7 @@ class CodeBattles(
             )
             self._decisions = simulation.decisions
             self._logs = simulation.logs
+            self._alerts = simulation.alerts
             self.canvas = GameCanvas(
                 document.getElementById("simulation"),
                 self.configure_board_count(),
@@ -852,6 +862,7 @@ class CodeBattles(
             self.configure_version(),
             datetime.datetime.now(),
             self._logs,
+            self._alerts,
             self._decisions,
             self._seed,
         )
