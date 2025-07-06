@@ -6,9 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Breaking Changes
+
+- Starting from `vite-plugin-code-battles@1.0.12`, you need to change your `index.html` to use the packed Python file instead of a custom configuration:
+  ```html
+  <script type="py" src="/scripts/packed.py"></script>
+  <script type="py" src="/scripts/packed.py" worker name="worker"></script>
+  ```
+
 ### Added
 
 - The "Tournament Bot" picker is now an autocomplete input instead of a select to make it easier to find the bot to pick.
+
+### Changed
+
+- Auto-play is now disabled, since it made it hard to inspect the first seconds of a simulation and it broke the main game sound.
+- The documentation template now looks a bit better.
 
 ## [1.7.5] - 2025-06-18
 
