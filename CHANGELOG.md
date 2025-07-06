@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.9] - 2025-07-06
+
+### Breaking Changes
+
+- You need to remove the Python `script` tags from the `index.html` file, they are automatically created with the library now!
+
 ## [1.7.8] - 2025-07-06
 
 ### Changed
