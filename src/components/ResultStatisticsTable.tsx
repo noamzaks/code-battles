@@ -1,4 +1,4 @@
-import { Button } from "@mantine/core"
+import {Button } from "@mantine/core"
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { useLocalStorage } from "../hooks"
@@ -38,7 +38,10 @@ const ResultStatisticsTable = () => {
   if (!roundResults) {
     return <></>
   }
-
+   const uniqueRoundResults = roundResults.filter(
+    (result: any, index: number, self: any[]) =>
+      self.findIndex((r) => r.seed === result.seed) === index
+  )
   return (
     <div
       style={{
@@ -52,7 +55,7 @@ const ResultStatisticsTable = () => {
         tableName="Results"
         data={{
           head: ["Seed"].concat(statistics),
-          body: roundResults.map((result: any) =>
+          body: uniqueRoundResults.map((result: any) =>
             [result.seed].concat(
               statistics.map((statistic) =>
                 (result?.statistics ?? {})[statistic].toString(),
@@ -64,22 +67,20 @@ const ResultStatisticsTable = () => {
           if (columnName === "Seed") {
             return (
               <Button
+                component="a"
                 leftSection={<i className="fa-solid fa-play" />}
-                onClick={() =>
-                  navigate(
-                    `/simulation/${round.players.map(encodeURIComponent).join(",")}?seed=${
-                      value
-                    }&${Object.keys(round.parameters)
-                      .map(
-                        (p) =>
-                          `${p}=${encodeURIComponent(round.parameters[p])}`,
-                      )
-                      .join("&")}`,
+                href={`/simulation/${round.players.map(encodeURIComponent).join(",")}?seed=${
+                  value
+                }&${Object.keys(round.parameters)
+                  .map(
+                  (p) =>
+                    `${p}=${encodeURIComponent(round.parameters[p])}`,
                   )
-                }
+                  .join("&")}`}
               >
                 Play
               </Button>
+
             )
           }
 
