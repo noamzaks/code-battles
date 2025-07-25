@@ -1,4 +1,4 @@
-import { Anchor, Button } from "@mantine/core"
+import {Button } from "@mantine/core"
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { useLocalStorage } from "../hooks"
