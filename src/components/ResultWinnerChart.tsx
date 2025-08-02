@@ -3,7 +3,13 @@ import React from "react"
 import { useLocalStorage } from "../hooks"
 import { RoundInfo } from "../utilities"
 
-const ResultWinnerChart = ({ results: currentResults }: { results?: any }) => {
+const ResultWinnerChart = ({
+  results: currentResults,
+  players,
+}: {
+  results?: any
+  players?: string[]
+}) => {
   const [results] = useLocalStorage<any>({
     key: "Results",
     defaultValue: {},
@@ -33,7 +39,7 @@ const ResultWinnerChart = ({ results: currentResults }: { results?: any }) => {
 
   const winCounts: Record<string, number> = {}
   for (const result of currentResults) {
-    const winner = round.players[result.places[0]]
+    const winner = (players ?? round.players)[result.places[0]]
     if (!winCounts[winner]) {
       winCounts[winner] = 1
     } else {

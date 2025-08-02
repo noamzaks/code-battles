@@ -225,7 +225,7 @@ const RunSimulationBlock = () => {
         style={{ textAlign: "center", display: "none", marginTop: 10 }}
         id="noui-progress"
       />
-      <ResultWinnerChart results={currentResults} />
+      <ResultWinnerChart results={currentResults} players={playerBots} />
       <Dropzone
         mt="xs"
         multiple={false}
