@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
-from battles import CodeBattles, Simulation
 from pytest import MonkeyPatch
+
+from code_battles.battles import CodeBattles, Simulation
 
 
 def snapshot_test(

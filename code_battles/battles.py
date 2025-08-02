@@ -18,7 +18,7 @@ from random import Random
 from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union
 from urllib.parse import quote
 
-from utilities import (
+from code_battles.utilities import (
     GameCanvas,
     console_log,
     download_image,
