@@ -133,7 +133,6 @@ const RunSimulationBlock = () => {
           icon: <i className="fa-solid fa-crown" />,
           autoClose: false,
         })
-        setLocalStorage("Results", {})
       } else {
         runNoUI(getFullParameters(), apis, playerBots, seed.toString(), false)
       }
