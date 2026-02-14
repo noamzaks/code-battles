@@ -8,6 +8,7 @@ from typing import Dict, List
 
 from pytest import MonkeyPatch
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from code_battles.battles import CodeBattles, Simulation
 
 
