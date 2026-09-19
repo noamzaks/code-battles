@@ -30,46 +30,45 @@
     "dev": "chokidar --silent \"src/**\" \"pdoc-template/**\" \"code_battles/**\" --initial -c \"rollup -c\""
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-free": "^7.3.1",
     "prismjs": "^1.30.0",
     "react-countdown": "^2.3.6",
     "react-firebase-hooks": "^5.1.1"
   },
   "peerDependencies": {
-    "@mantine/charts": "^8.1.2",
-    "@mantine/core": "^8.1.2",
-    "@mantine/dates": "^8.1.2",
-    "@mantine/dropzone": "^8.1.2",
-    "@mantine/hooks": "^8.1.2",
-    "@mantine/notifications": "^8.1.2",
-    "dayjs": "^1.11.13",
-    "firebase": "^11.10.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.3",
-    "recharts": "^2.15.4"
+    "@mantine/charts": "^9.6.1",
+    "@mantine/core": "^9.6.1",
+    "@mantine/dates": "^9.6.1",
+    "@mantine/dropzone": "^9.6.1",
+    "@mantine/hooks": "^9.6.1",
+    "@mantine/notifications": "^9.6.1",
+    "dayjs": "^1.11.23",
+    "firebase": "^12.19.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
-    "@pyscript/core": "^0.6.68",
-    "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "@types/prismjs": "^1.26.5",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
+    "@pyscript/core": "^0.7.31",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "chokidar-cli": "^3.0.0",
-    "prettier": "^3.6.2",
-    "rollup": "^4.44.2",
+    "prettier": "^3.9.8",
+    "rollup": "^4.63.4",
     "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-dts": "^6.2.1",
-    "rollup-plugin-import-css": "^4.0.1",
+    "rollup-plugin-dts": "^6.5.1",
+    "rollup-plugin-import-css": "^4.2.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "tslib": "^2.8.1",
-    "typescript": "^5.8.3"
+    "typescript": "~6.0.3"
   },
   "prettier": {
     "semi": false,
     "endOfLine": "crlf"
   }
 }
-
