@@ -53,6 +53,7 @@ class Simulation:
     alerts: list
     decisions: List[bytes]
     seed: int
+    highlights: Optional[list[int]] = None
 
     def dump(self):
         return base64.b64encode(
@@ -71,6 +72,7 @@ class Simulation:
                             for decision in self.decisions
                         ],
                         "seed": self.seed,
+                        "highlights": self.highlights,
                     }
                 ).encode()
             )
@@ -91,6 +93,7 @@ class Simulation:
             contents["alerts"],
             [base64.b64decode(decision) for decision in contents["decisions"]],
             contents["seed"],
+            contents.get("highlights", None),
         )
 
 
@@ -300,6 +303,22 @@ class CodeBattles(
         """
         return 1
 
+    def configure_highlight_slowdown(self, steps: int) -> float:
+        """
+        The factor by which to slow down playback to apply when there's a highlight the given amount of steps before/after the current step.
+        @param steps is positive when the highlight is yet to happen and negative when it already happened.
+        """
+        if 0 <= steps < 10:
+            return 3 * (10 - steps) / 9
+        elif -5 <= steps < 0:
+            return 3 * (6 - abs(steps)) / 5
+
+        return 1
+
+    def configure_highlight_on_player_eliminated(self) -> bool:
+        """Whether to add a highlight when a player is eliminated."""
+        return True
+
     def configure_bot_globals(self, player_index: int) -> Dict[str, Any]:
         """
         Configure additional available global items, such as libraries from the Python standard library, bots can use.
@@ -443,6 +462,9 @@ class CodeBattles(
             "white",
         )
 
+        if self.configure_highlight_on_player_eliminated():
+            self.highlight()
+
     def log(self, text: str, player_index: Optional[int] = None, color="white"):
         """
         Logs the given entry with the given color.
@@ -490,6 +512,17 @@ class CodeBattles(
             )
         else:
             show_alert(title, alert, color, icon, limit_time, is_code)
+
+    def highlight(self, step: Optional[int] = None) -> None:
+        """
+        Adds a highlight at the given step, or at the current one if it isn't specified.
+        """
+        self._highlights.append(step or self.step)
+        self.log(
+            f"[Battles {self.step + 1}] Highlight added at {self.step + 1}",
+            -1,
+            "white",
+        )
 
     @web_only
     def play_sound(self, sound: str, force=False):
@@ -563,6 +596,7 @@ class CodeBattles(
             seed = Random().randint(0, 2**128)
         self._logs: List[Any] = []
         self._alerts: List[Any] = []
+        self._highlights: list[int] = []
         self._decisions = []
         self._breakpoints = set()
         self._decision_index = 0
@@ -609,9 +643,11 @@ class CodeBattles(
             self._should_pause = False
             self._logs = []
             self._alerts = []
+            self._highlights = []
             decisions = self._make_decisions()
             logs = self._logs
             alerts = self._alerts
+            highlights = self._highlights
 
             with self._without_log():
                 self.apply_decisions(decisions)
@@ -620,6 +656,7 @@ class CodeBattles(
                 base64.b64encode(decisions).decode(),
                 json.dumps(logs),
                 json.dumps(alerts),
+                json.dumps(highlights),
                 "true" if self.over else "false",
                 "true" if self._should_pause else "false",
             )
@@ -766,6 +803,7 @@ class CodeBattles(
             self._decisions = simulation.decisions
             self._logs = simulation.logs
             self._alerts = simulation.alerts
+            self._highlights = simulation.highlights or []
             self.canvas = GameCanvas(
                 document.getElementById("simulation"),
                 self.configure_board_count(),
@@ -880,6 +918,7 @@ class CodeBattles(
             self._alerts,
             self._decisions,
             self._seed,
+            self._highlights,
         )
 
     def _update_step(
@@ -887,6 +926,7 @@ class CodeBattles(
         decisions_str: str,
         logs_str: str,
         alerts_str: str,
+        highlights_str: str,
         is_over_str: str,
         should_pause_str: str,
     ):
@@ -896,6 +936,7 @@ class CodeBattles(
         decisions = base64.b64decode(str(decisions_str))
         logs: list = json.loads(str(logs_str))
         alerts: list = json.loads(str(alerts_str))
+        highlights: list[int] = json.loads(str(highlights_str))
         is_over = str(is_over_str) == "true"
         should_pause = str(should_pause_str) == "true"
 
@@ -904,6 +945,7 @@ class CodeBattles(
         self._decisions.append(decisions)
         self._logs.append(logs)
         self._alerts.append(alerts)
+        self._highlights.extend(highlights)
 
         if is_over:
             try:
@@ -1130,11 +1172,24 @@ class CodeBattles(
     def _get_playback_speed(self):
         from js import document
 
-        return 2 ** float(
-            document.getElementById("timescale")
-            .getElementsByClassName("mantine-Slider-thumb")
-            .to_py()[0]
-            .ariaValueNow
+        highlight_slowdown = (
+            1.0
+            if len(self._highlights) == 0
+            else 1
+            / self.configure_highlight_slowdown(
+                min((x - self.step for x in self._highlights), key=abs)
+            )
+        )
+
+        return (
+            2
+            ** float(
+                document.getElementById("timescale")
+                .getElementsByClassName("mantine-Slider-thumb")
+                .to_py()[0]
+                .ariaValueNow
+            )
+            * highlight_slowdown
         )
 
     @web_only
