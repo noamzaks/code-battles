@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.14] - 2026-09-19
+
+### Added
+
+- Highlights can now slow down the playback speed before and after key moments of the match.
+- Games can call `highlight` to add a highlight to some step, override `configure_highlight_slowdown` to control the slowdown curve, and override `configure_highlight_on_player_eliminated` if they don't wish for a highlight to be added when a player is eliminated.
+
 ## [1.7.13] - 2026-02-14
 
 ### Fixed
