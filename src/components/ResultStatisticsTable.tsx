@@ -1,7 +1,6 @@
-import {Button } from "@mantine/core"
+import { Button } from "@mantine/core"
 import React from "react"
-import { useNavigate } from "react-router-dom"
-import { useLocalStorage } from "../hooks"
+import { useAdmin, useLocalStorage } from "../hooks"
 import { RoundInfo } from "../utilities"
 import DataTable from "./DataTable"
 
@@ -18,7 +17,7 @@ const ResultStatisticsTable = () => {
     key: "Current Round",
     defaultValue: 0,
   })
-  const navigate = useNavigate()
+  const admin = useAdmin()
 
   const round = rounds[currentRound]
 
@@ -38,9 +37,9 @@ const ResultStatisticsTable = () => {
   if (!roundResults) {
     return <></>
   }
-   const uniqueRoundResults = roundResults.filter(
+  const uniqueRoundResults = roundResults.filter(
     (result: any, index: number, self: any[]) =>
-      self.findIndex((r) => r.seed === result.seed) === index
+      self.findIndex((r) => r.seed === result.seed) === index,
   )
   return (
     <div
@@ -72,15 +71,11 @@ const ResultStatisticsTable = () => {
                 href={`/simulation/${round.players.map(encodeURIComponent).join(",")}?seed=${
                   value
                 }&${Object.keys(round.parameters)
-                  .map(
-                  (p) =>
-                    `${p}=${encodeURIComponent(round.parameters[p])}`,
-                  )
-                  .join("&")}`}
+                  .map((p) => `${p}=${encodeURIComponent(round.parameters[p])}`)
+                  .join("&")}${admin ? "&showcase=true" : ""}`}
               >
                 Play
               </Button>
-
             )
           }
 

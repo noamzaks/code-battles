@@ -1197,7 +1197,7 @@ class CodeBattles(
         from js import document
 
         breakpoint_element = document.getElementById("breakpoint")
-        if breakpoint_element is None or breakpoint_element.value == "":
+        if not breakpoint_element or breakpoint_element.value == "":
             return -1
 
         try:
