@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.15] - 2026-09-23
+
+### Fixed
+
+- The No UI simulations in the simulation page now work correctly rather than running two in parallel which could cause a myriad of issues.
+
 ## [1.7.14] - 2026-09-19
 
 ### Added
