@@ -62,7 +62,7 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
         {logs
           .filter((log) => log.playerIndex === -1 || showLogs[log.playerIndex])
           .map((log, index) => (
-            <p key={index} color={log.color}>
+            <p key={index} style={{ color: log.color }}>
               {log.text}
             </p>
           ))}

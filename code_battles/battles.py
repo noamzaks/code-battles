@@ -511,6 +511,7 @@ class CodeBattles(
                 }
             )
         else:
+            self.log(f"[Battles] {title} {alert}", color=color)
             show_alert(title, alert, color, icon, limit_time, is_code)
 
     def highlight(self, step: Optional[int] = None) -> None:
