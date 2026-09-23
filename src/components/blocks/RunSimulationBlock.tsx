@@ -72,7 +72,6 @@ const RunSimulationBlock = () => {
   const startRunNoUIN = (n: number) => {
     setLocalStorage("Results", {})
     setRunningNoUIN({ [n.toString()]: n })
-    runNoUI(getFullParameters(), apis, playerBots, seed.toString(), false)
   }
 
   useEffect(() => {
