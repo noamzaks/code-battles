@@ -70,6 +70,7 @@ const RunSimulationBlock = () => {
   }
 
   const startRunNoUIN = (n: number) => {
+    setLocalStorage("Rounds", [{ players: playerBots, parameters }])
     setLocalStorage("Results", {})
     setRunningNoUIN({ [n.toString()]: n })
   }
