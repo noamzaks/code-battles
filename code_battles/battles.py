@@ -455,12 +455,13 @@ class CodeBattles(
                 False,
             )
             self.play_sound("player_eliminated")
+        else:
+            self.log(
+                f"[Battles {self.step + 1}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
+                -1,
+                "white",
+            )
         self._eliminated.append(player_index)
-        self.log(
-            f"[Battles {self.step + 1}] Player #{player_index + 1} ({self.player_names[player_index]}) was eliminated: {reason}",
-            -1,
-            "white",
-        )
 
         if self.configure_highlight_on_player_eliminated():
             self.highlight()
