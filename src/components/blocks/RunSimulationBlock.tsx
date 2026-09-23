@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 import { useConfiguration } from "../../configuration"
 import { useAPIs, useLocalStorage } from "../../hooks"
 import { runNoUI, setLocalStorage, tryUntilSuccess } from "../../utilities"
+import ResultStatisticsTable from "../ResultStatisticsTable"
 import ResultWinnerChart from "../ResultWinnerChart"
 import Block from "./Block"
 import BotSelector from "./BotSelector"
@@ -70,7 +71,9 @@ const RunSimulationBlock = () => {
   }
 
   const startRunNoUIN = (n: number) => {
-    setLocalStorage("Rounds", [{ players: playerBots, parameters }])
+    setLocalStorage("Rounds", [
+      { players: playerBots, parameters: getFullParameters() },
+    ])
     setLocalStorage("Results", {})
     setRunningNoUIN({ [n.toString()]: n })
   }
@@ -225,6 +228,7 @@ const RunSimulationBlock = () => {
         id="noui-progress"
       />
       <ResultWinnerChart results={currentResults} players={playerBots} />
+      <ResultStatisticsTable />
       <Dropzone
         mt="xs"
         multiple={false}
