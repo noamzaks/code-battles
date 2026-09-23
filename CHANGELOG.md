@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.17] - 2026-09-23
+
+### Added
+
+- Alerts are now also logged to the console.
+- Users can now see the result statistics table in multiple no-UI simulations.
+
+### Fixed
+
+- Users can see the result winner chart in multiple no-UI simulations again.
+- The showcase page now succesfully runs a simulation.
+- Console logs are now colored correctly.
+- The round page now links to showcase simulation pages.
+
 ## [1.7.15] - 2026-09-23
 
 ### Fixed
