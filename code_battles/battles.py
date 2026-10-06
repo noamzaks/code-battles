@@ -744,6 +744,7 @@ class CodeBattles(
                     else None,
                     "steps": self.step,
                     "logs": [log for logs in self._logs for log in logs],
+                    "statistics": self.get_statistics(),
                 }
             )
         )
