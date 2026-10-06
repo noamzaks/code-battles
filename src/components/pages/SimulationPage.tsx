@@ -122,7 +122,9 @@ const Simulation = () => {
 
   const playerNames = playerapis?.split(",").map(decodeURIComponent) ?? []
 
-  const players = playerNames.map((api) => (api === "None" ? "" : apis[api]))
+  const players = playerNames.map((api) =>
+    api === "None" || !api ? "" : apis[api],
+  )
 
   useEffect(() => {
     if (

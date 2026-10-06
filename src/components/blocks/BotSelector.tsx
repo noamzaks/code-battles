@@ -1,4 +1,4 @@
-import { NumberInput, Select } from "@mantine/core"
+import { Autocomplete, NumberInput } from "@mantine/core"
 import React from "react"
 
 interface Props {
@@ -38,17 +38,15 @@ const BotSelector: React.FC<Props> = ({
       />
 
       {Array.from(Array(playerCount).keys()).map((_, index) => (
-        <Select
+        <Autocomplete
           key={index}
           mt="xs"
           leftSection={<i className="fa-solid fa-robot" />}
           label={`Player ${index + 1} Bot`}
           value={playerBots[index]}
           onChange={(api) => {
-            if (api) {
-              playerBots[index] = api
-              setPlayerBots([...playerBots])
-            }
+            playerBots[index] = api
+            setPlayerBots([...playerBots])
           }}
           data={["None", ...Object.keys(apis).sort()]}
         />

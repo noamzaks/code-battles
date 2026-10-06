@@ -1,4 +1,4 @@
-import { Button, Select } from "@mantine/core"
+import { Autocomplete, Button } from "@mantine/core"
 import { TimeInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
 import { Firestore, Timestamp, doc, getDoc, setDoc } from "firebase/firestore"
@@ -150,13 +150,12 @@ const AdminBlock = () => {
       >
         Save
       </Button>
-      <Select
+      <Autocomplete
         mt="xs"
         leftSection={<i className="fa-solid fa-robot" />}
         label="Bot"
         data={Object.keys(apis).sort()}
         value={chosenBot}
-        allowDeselect
         onChange={(e) => {
           if (e) {
             setChosenBot(e)
