@@ -308,12 +308,14 @@ class CodeBattles(
         The factor by which to slow down playback to apply when there's a highlight the given amount of steps before/after the current step.
         @param steps is positive when the highlight is yet to happen and negative when it already happened.
         """
-        if 0 <= steps < 10:
-            return 3 * (10 - steps) / 9
-        elif -5 <= steps < 0:
-            return 3 * (6 - abs(steps)) / 5
+        max_slowdown = 3
+        window_seconds = 1.5
+        seconds = abs(steps) / self.configure_steps_per_second()
+        if seconds >= window_seconds:
+            return 1
 
-        return 1
+        t = 1 - seconds / window_seconds
+        return 1 + (max_slowdown - 1) * t * t * (3 - 2 * t)
 
     def configure_highlight_on_player_eliminated(self) -> bool:
         """Whether to add a highlight when a player is eliminated."""
