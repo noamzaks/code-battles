@@ -647,12 +647,10 @@ class CodeBattles(
             self._alerts = []
             self._highlights = []
             decisions = self._make_decisions()
+            self.apply_decisions(decisions)
             logs = self._logs
             alerts = self._alerts
             highlights = self._highlights
-
-            with self._without_log():
-                self.apply_decisions(decisions)
 
             sync.update_step(
                 base64.b64encode(decisions).decode(),
@@ -713,19 +711,17 @@ class CodeBattles(
         all_alerts = []
         while not self.over:
             print("__CODE_BATTLES_ADVANCE_STEP")
+            self._logs = []
+            self._alerts = []
             if len(decisions) != 0:
                 self.apply_decisions(decisions.pop(0))
             else:
-                self._logs = []
-                self._alerts = []
                 _decisions = self._make_decisions()
-                all_logs.append(self._logs)
-                all_alerts.append(self._alerts)
-                self._logs = []
-                self._alerts = []
                 if output_file is not None:
                     self._decisions.append(_decisions)
                 self.apply_decisions(_decisions)
+            all_logs.append(self._logs)
+            all_alerts.append(self._alerts)
 
             if not self.over:
                 self.step += 1
@@ -743,7 +739,7 @@ class CodeBattles(
                     if len(self.active_players) > 0
                     else None,
                     "steps": self.step,
-                    "logs": [log for logs in self._logs for log in logs],
+                    "logs": [log for logs in all_logs for log in logs],
                     "statistics": self.get_statistics(),
                 }
             )
@@ -1105,7 +1101,9 @@ class CodeBattles(
                     alerts = self._alerts[self._decision_index]
                     for alert in alerts:
                         self.alert(**alert)
-                    self.apply_decisions(self._decisions[self._decision_index])
+                    # The stored logs already include the logs made while applying the decisions.
+                    with self._without_log():
+                        self.apply_decisions(self._decisions[self._decision_index])
                     self._decision_index += 1
                     break
 
