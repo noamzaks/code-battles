@@ -555,7 +555,9 @@ class CodeBattles(
                     f"Warning: couldn't play sound '{sound}'. Make sure the `sound` and `configure_sound_url` are correct."
                 )
 
-        asyncio.get_event_loop().run_until_complete(p())
+        # Don't wait for the sound: this is called from the middle of the game logic,
+        # which must never yield control (or fail) because of a sound.
+        asyncio.ensure_future(p())
 
     def pause(self):
         """
@@ -591,6 +593,10 @@ class CodeBattles(
         from js import window
         from pyscript.ffi import create_proxy
 
+        if getattr(self, "_initialized", False):
+            return
+        self._initialized = True
+
         window.addEventListener("resize", create_proxy(lambda _: self._resize_canvas()))
 
     def _initialize_simulation(
@@ -598,6 +604,8 @@ class CodeBattles(
     ):
         if seed is None:
             seed = Random().randint(0, 2**128)
+        # Identifies the current simulation, so leftovers of a previous one (worker updates, steps) are ignored.
+        self._simulation_id = getattr(self, "_simulation_id", 0) + 1
         self._logs: List[Any] = []
         self._alerts: List[Any] = []
         self._highlights: list[int] = []
@@ -628,6 +636,7 @@ class CodeBattles(
         player_names_str: str,
         player_codes_str: str,
         seed: Optional[int] = None,
+        simulation_id: int = 0,
     ):
         from pyscript import sync
 
@@ -654,14 +663,18 @@ class CodeBattles(
             alerts = self._alerts
             highlights = self._highlights
 
-            sync.update_step(
+            result = sync.update_step(
                 base64.b64encode(decisions).decode(),
                 json.dumps(logs),
                 json.dumps(alerts),
                 json.dumps(highlights),
                 "true" if self.over else "false",
                 "true" if self._should_pause else "false",
+                str(simulation_id),
             )
+            if str(result) == "stop":
+                # The main thread moved on to another simulation.
+                break
 
             if not self.over:
                 self.step += 1
@@ -674,8 +687,10 @@ class CodeBattles(
             pass
 
         setattr(self, "log", do_nothing)
-        yield
-        setattr(self, "log", log)
+        try:
+            yield
+        finally:
+            setattr(self, "log", log)
 
     def _run_local_simulation(self):
         command = sys.argv[1]
@@ -786,7 +801,7 @@ class CodeBattles(
                     "fa-solid fa-exclamation",
                     0,
                 )
-            while document.getElementById("loader") is None:
+            while not document.getElementById("loader"):
                 await asyncio.sleep(0.01)
             self._initialize()
             self.parameters = simulation.parameters
@@ -841,7 +856,7 @@ class CodeBattles(
 
         try:
             render_status = document.getElementById("render-status")
-            if render_status is not None:
+            if render_status:
                 render_status.textContent = "Rendering: Initializing..."
 
             self.parameters = parameters
@@ -854,6 +869,7 @@ class CodeBattles(
             self.console_visible = console_visible
             self.verbose = verbose
             self._initialize_simulation(player_codes, None if seed == "" else int(seed))
+            simulation_id = self._simulation_id
 
             if not self.background:
                 self.canvas = GameCanvas(
@@ -875,12 +891,16 @@ class CodeBattles(
                 self.render()
 
             self._worker = await workers["worker"]
+            if simulation_id != self._simulation_id:
+                # Another simulation was started in the meantime.
+                return
             self._worker.update_step = self._update_step
             self._worker._run_webworker_simulation(
                 json.dumps(parameters),
                 json.dumps(player_names),
                 json.dumps(player_codes),
                 self._seed,
+                simulation_id,
             )
 
             if self.background:
@@ -930,8 +950,13 @@ class CodeBattles(
         highlights_str: str,
         is_over_str: str,
         should_pause_str: str,
+        simulation_id_str: str,
     ):
         from js import document, window
+
+        if int(str(simulation_id_str)) != self._simulation_id:
+            # A leftover update of a previous simulation, tell the worker to stop it.
+            return "stop"
 
         now = time.time()
         decisions = base64.b64decode(str(decisions_str))
@@ -957,7 +982,7 @@ class CodeBattles(
                 print(e)
 
         render_status = document.getElementById("render-status")
-        if render_status is not None:
+        if render_status:
             render_status.textContent = (
                 f"Rendering: Complete! ({int(now - self._start_time)}s)"
                 if is_over
@@ -1078,17 +1103,22 @@ class CodeBattles(
     def _ensure_paused(self):
         from js import document
 
-        if "Pause" in document.getElementById("playpause").textContent:
+        playpause = document.getElementById("playpause")
+        if playpause and "Pause" in playpause.textContent:
             # Make it apparent that the game is stopped.
-            document.getElementById("playpause").click()
+            playpause.click()
 
     @web_only
     async def _step(self):
         from js import document
 
+        simulation_id = self._simulation_id
         if not self.over:
             # loop waiting for decisions to be ready then break.
             while True:
+                if simulation_id != self._simulation_id:
+                    # Another simulation was started while waiting.
+                    return
                 if len(self._decisions) == self._decision_index:
                     await asyncio.sleep(0.01)
                     continue
@@ -1156,7 +1186,7 @@ class CodeBattles(
             return True
 
         playpause = document.getElementById("playpause")
-        if playpause is None or "Pause" not in playpause.textContent:
+        if not playpause or "Pause" not in playpause.textContent:
             return False
 
         if self.step == self._get_breakpoint():
@@ -1213,8 +1243,9 @@ class CodeBattles(
             return -1
 
     async def _play_pause(self):
+        simulation_id = self._simulation_id
         await asyncio.sleep(0.05)
-        while self._should_play():
+        while simulation_id == self._simulation_id and self._should_play():
             start = time.time()
             try:
                 await self._step()
