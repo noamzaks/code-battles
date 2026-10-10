@@ -80,8 +80,20 @@ const Simulation = () => {
   const navigate = useNavigate()
   const colorScheme = useColorScheme()
   const showcaseMode = location.search.includes("showcase=true")
+  const [timescale, setTimescale] = useState(0)
+
+  const updateTimescale = (value: number) => {
+    // Stored synchronously so the simulation reads the up-to-date value before React re-renders.
+    // @ts-ignore
+    window.timescale = value
+    setTimescale(value)
+  }
 
   useEffect(() => {
+    updateTimescale(0)
+    // @ts-ignore
+    window.setTimescale = updateTimescale
+
     setLocalStorage("Logs", [])
 
     // @ts-ignore
@@ -328,7 +340,8 @@ const Simulation = () => {
                   w={500}
                   maw="85%"
                   min={-2}
-                  defaultValue={0}
+                  value={timescale}
+                  onChange={updateTimescale}
                   marks={[
                     { value: -2, label: "1/4" },
                     { value: -1, label: "1/2" },

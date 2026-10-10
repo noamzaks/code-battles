@@ -612,6 +612,7 @@ class CodeBattles(
         self._logs: List[Any] = []
         self._alerts: List[Any] = []
         self._highlights: list[int] = []
+        self._restore_playback_speed()
         self._decisions = []
         self._breakpoints = set()
         self._decision_index = 0
@@ -1148,18 +1149,33 @@ class CodeBattles(
         if self.over:
             if len(self.active_players) == 1:
                 self._eliminated.append(self.active_players[0])
+            statistics = self.get_statistics()
             set_results(
                 self.player_names,
                 self._seed,
                 self._eliminated[::-1],
-                self.get_statistics(),
+                statistics,
                 self.parameters,
                 self.verbose,
             )
+            if self.verbose and len(statistics) > 0:
+                self.log(
+                    "[Battles] Statistics\n"
+                    + "\n".join(
+                        f"{statistic}: {value}"
+                        for statistic, value in statistics.items()
+                    ),
+                    color="white",
+                )
             if not self.background:
                 self.render()
 
         if not self.background:
+            if self.over:
+                self._restore_playback_speed()
+            else:
+                self._update_highlight_playback_speed()
+
             if self._since_last_render >= self.configure_render_rate(
                 self._get_playback_speed()
             ):
@@ -1205,28 +1221,58 @@ class CodeBattles(
         return True
 
     @web_only
-    def _get_base_playback_speed(self):
-        from js import document
+    def _get_playback_speed(self) -> float:
+        from js import window
 
-        return 2 ** float(
-            document.getElementById("timescale")
-            .getElementsByClassName("mantine-Slider-thumb")
-            .to_py()[0]
-            .ariaValueNow
-        )
+        return 2 ** float(getattr(window, "timescale", 0))
 
     @web_only
-    def _get_playback_speed(self):
-        highlight_slowdown = (
-            1.0
+    def _set_playback_speed(self, speed: float):
+        from js import window
+
+        window.setTimescale(math.log2(speed))
+
+    def _get_base_playback_speed(self) -> float:
+        """The playback speed chosen by the user, before any highlight slowdown."""
+
+        if self._highlight_initial_speed is not None:
+            return self._highlight_initial_speed
+        return self._get_playback_speed()
+
+    def _update_highlight_playback_speed(self):
+        if self._highlight_initial_speed is not None and not math.isclose(
+            self._get_playback_speed(), self._highlight_speed
+        ):
+            # The user changed the playback speed during the highlight, so let them keep it.
+            self._highlight_initial_speed = None
+            self._highlight_overridden = True
+
+        slowdown = (
+            1
             if len(self._highlights) == 0
-            else 1
-            / self.configure_highlight_slowdown(
+            else self.configure_highlight_slowdown(
                 min((x - self.step for x in self._highlights), key=abs)
             )
         )
+        if slowdown <= 1:
+            self._restore_playback_speed()
+            return
+        if self._highlight_overridden:
+            return
 
-        return self._get_base_playback_speed() * highlight_slowdown
+        if self._highlight_initial_speed is None:
+            self._highlight_initial_speed = self._get_playback_speed()
+        self._highlight_speed = self._highlight_initial_speed / slowdown
+        self._set_playback_speed(self._highlight_speed)
+
+    def _restore_playback_speed(self):
+        initial_speed: Optional[float] = getattr(self, "_highlight_initial_speed", None)
+        if initial_speed is not None:
+            self._set_playback_speed(initial_speed)
+        self._highlight_initial_speed: Optional[float] = None
+        # The playback speed last set by the highlight, only meaningful while there's an initial speed.
+        self._highlight_speed = 0.0
+        self._highlight_overridden = False
 
     @web_only
     def _get_breakpoint(self):
