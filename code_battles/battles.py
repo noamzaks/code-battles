@@ -307,9 +307,12 @@ class CodeBattles(
         """
         The factor by which to slow down playback to apply when there's a highlight the given amount of steps before/after the current step.
         @param steps is positive when the highlight is yet to happen and negative when it already happened.
+
+        By default, slows down to 0.5x playback speed right at the highlight.
         """
-        max_slowdown = 3
-        window_seconds = 1.5
+        max_slowdown = max(self._get_base_playback_speed() / 0.5, 1)
+        window_seconds = 3
+
         seconds = abs(steps) / self.configure_steps_per_second()
         if seconds >= window_seconds:
             return 1
@@ -1202,9 +1205,18 @@ class CodeBattles(
         return True
 
     @web_only
-    def _get_playback_speed(self):
+    def _get_base_playback_speed(self):
         from js import document
 
+        return 2 ** float(
+            document.getElementById("timescale")
+            .getElementsByClassName("mantine-Slider-thumb")
+            .to_py()[0]
+            .ariaValueNow
+        )
+
+    @web_only
+    def _get_playback_speed(self):
         highlight_slowdown = (
             1.0
             if len(self._highlights) == 0
@@ -1214,16 +1226,7 @@ class CodeBattles(
             )
         )
 
-        return (
-            2
-            ** float(
-                document.getElementById("timescale")
-                .getElementsByClassName("mantine-Slider-thumb")
-                .to_py()[0]
-                .ariaValueNow
-            )
-            * highlight_slowdown
-        )
+        return self._get_base_playback_speed() * highlight_slowdown
 
     @web_only
     def _get_breakpoint(self):
