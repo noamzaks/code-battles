@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.18] - 2026-10-10
+
+### Added
+
+- Statistics are now dumped for local simulations.
+
+### Changed
+
+- The playback speed control is now animated when a highlight modifies it.
+- The higlight slowdown curve is improved.
+- The bot selectors now use autocomplete rather than a select.
+
+### Fixed
+
+- Properties of window are now cleaned up when components are unmounted.
+- Multiple simulations started in the website without refreshing no longer exhibit very weird behavior.
+- Logs of `apply_decisions` are now stored in local simulations.
+
 ## [1.7.17] - 2026-09-23
 
 ### Added
