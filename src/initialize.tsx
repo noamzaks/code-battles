@@ -85,7 +85,7 @@ const initialize = () => {
     updatePointModifier()
 
     // @ts-ignore
-    window.showWinner(playerNames[places[0]], verbose)
+    window.showWinner?.(playerNames[places[0]], verbose)
   }
 
   // @ts-ignore

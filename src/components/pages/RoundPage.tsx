@@ -64,8 +64,7 @@ const Round = () => {
   }
 
   useEffect(() => {
-    // @ts-ignore
-    window.showWinner = (winner: string, verbose: boolean) => {
+    const showWinner = (winner: string, verbose: boolean) => {
       setRunningNoUIN((runningNoUIN) => {
         const newRunningNoUIN: Record<string, number> = {}
         for (const key in runningNoUIN) {
@@ -74,6 +73,16 @@ const Round = () => {
 
         return newRunningNoUIN
       })
+    }
+    // @ts-ignore
+    window.showWinner = showWinner
+
+    return () => {
+      // @ts-ignore
+      if (window.showWinner === showWinner) {
+        // @ts-ignore
+        delete window.showWinner
+      }
     }
   }, [])
 

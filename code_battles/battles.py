@@ -1230,7 +1230,8 @@ class CodeBattles(
     def _set_playback_speed(self, speed: float):
         from js import window
 
-        window.setTimescale(math.log2(speed))
+        if hasattr(window, "setTimescale"):
+            window.setTimescale(math.log2(speed))
 
     def _get_base_playback_speed(self) -> float:
         """The playback speed chosen by the user, before any highlight slowdown."""

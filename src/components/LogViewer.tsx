@@ -29,12 +29,21 @@ const LogViewer: React.FC<Props> = ({ playerNames }) => {
   }, [playerNames])
 
   useEffect(() => {
-    // @ts-ignore
-    window.consoleLog = (playerIndex: number, text: string, color: string) => {
+    const consoleLog = (playerIndex: number, text: string, color: string) => {
       // @ts-ignore
       const con = document.getElementById("console")
       if (con) {
         setLogs((l) => [...l, { playerIndex, text, color }])
+      }
+    }
+    // @ts-ignore
+    window.consoleLog = consoleLog
+
+    return () => {
+      // @ts-ignore
+      if (window.consoleLog === consoleLog) {
+        // @ts-ignore
+        delete window.consoleLog
       }
     }
   }, [])

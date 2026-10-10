@@ -96,13 +96,13 @@ const Simulation = () => {
 
     setLocalStorage("Logs", [])
 
-    // @ts-ignore
-    window.showDownload = () => {
+    const showDownload = () => {
       setDownloadBytes(true)
     }
-
     // @ts-ignore
-    window.showWinner = (winner: string, verbose: boolean) => {
+    window.showDownload = showDownload
+
+    const showWinner = (winner: string, verbose: boolean) => {
       if (admin) {
         setWinner(winner)
         // @ts-ignore
@@ -122,6 +122,28 @@ const Simulation = () => {
           color: "green",
           icon: <i className="fa-solid fa-crown" />,
         })
+      }
+    }
+    // @ts-ignore
+    window.showWinner = showWinner
+
+    return () => {
+      // @ts-ignore
+      if (window.setTimescale === updateTimescale) {
+        // @ts-ignore
+        delete window.setTimescale
+        // @ts-ignore
+        delete window.timescale
+      }
+      // @ts-ignore
+      if (window.showDownload === showDownload) {
+        // @ts-ignore
+        delete window.showDownload
+      }
+      // @ts-ignore
+      if (window.showWinner === showWinner) {
+        // @ts-ignore
+        delete window.showWinner
       }
     }
   }, [])

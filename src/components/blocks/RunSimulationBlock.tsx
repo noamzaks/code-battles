@@ -79,8 +79,7 @@ const RunSimulationBlock = () => {
   }
 
   useEffect(() => {
-    // @ts-ignore
-    window.showWinner = (winner: string, verbose: boolean) => {
+    const showWinner = (winner: string, verbose: boolean) => {
       if (verbose) {
         notifications.show({
           title: `${winner} won!`,
@@ -98,6 +97,16 @@ const RunSimulationBlock = () => {
 
           return newRunningNoUIN
         })
+      }
+    }
+    // @ts-ignore
+    window.showWinner = showWinner
+
+    return () => {
+      // @ts-ignore
+      if (window.showWinner === showWinner) {
+        // @ts-ignore
+        delete window.showWinner
       }
     }
   }, [])
