@@ -155,6 +155,7 @@ class CodeBattles(
     _decisions: List[bytes]
     _breakpoints: Set[int]
     _since_last_render: int
+    _bot_time_usage: List[float]
 
     def render(self) -> None:
         """
@@ -343,6 +344,14 @@ class CodeBattles(
             "random": self.player_randoms[player_index],
         }
 
+    def configure_bot_time_limit(self) -> Optional[float]:
+        """
+        The total time (in seconds) each bot may spend in its method calls (via :func:`run_bot_method`) throughout the simulation.
+
+        Once a bot exceeds this limit, calling its methods no longer executes anything. None (no limit) by default.
+        """
+        return None
+
     def configure_version(self) -> str:
         """Configure the version of the game, which is stored in the simulation files."""
         return "1.0.0"
@@ -413,10 +422,17 @@ class CodeBattles(
         Runs the specified method of the given player and returns the time it took (in seconds).
 
         Upon exception, shows an alert (does not terminate the bot).
-        """
-        start = time.time()
 
+        If the bot has exceeded :func:`configure_bot_time_limit`, nothing is executed.
+        The time is added to the bot's usage (see :func:`get_bot_time_usage`).
+        """
         assert player_index in self.active_players
+
+        time_limit = self.configure_bot_time_limit()
+        if time_limit is not None and self._bot_time_usage[player_index] > time_limit:
+            return 0
+
+        start = time.perf_counter()
 
         try:
             exec(
@@ -443,8 +459,29 @@ class CodeBattles(
                 "fa-solid fa-exclamation",
             )
 
-        end = time.time()
-        return end - start
+        elapsed = time.perf_counter() - start
+        self._bot_time_usage[player_index] += elapsed
+
+        if time_limit is not None and self._bot_time_usage[player_index] > time_limit:
+            self.alert(
+                f"'Player {player_index + 1}' exceeded the time limit!",
+                f"Used {self._bot_time_usage[player_index]:.3f}s out of {time_limit:.3f}s, its methods will no longer run.",
+                "red",
+                "fa-solid fa-hourglass-end",
+                is_code=False,
+            )
+
+        return elapsed
+
+    def get_bot_time_usage(self, player_index: int) -> float:
+        """
+        Returns the total time (in seconds) the given player's bot spent in its method calls (via :func:`run_bot_method`).
+
+        .. warning::
+           The usage is only tracked where the bots run, i.e. in :func:`make_decisions`. To use it elsewhere (for instance in :func:`render`), serialize it into the decisions.
+        """
+
+        return self._bot_time_usage[player_index]
 
     def eliminate_player(self, player_index: int, reason=""):
         """Eliminate the specified player for the specified reason from the simulation."""
@@ -630,6 +667,7 @@ class CodeBattles(
             for i in range(len(self.player_names))
         ]
         self._eliminated = []
+        self._bot_time_usage = [0.0 for _ in self.player_names]
         self._player_globals = self._get_initial_player_globals(player_codes)
         self._since_last_render = 1
         self._start_time = time.time()
