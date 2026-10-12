@@ -143,7 +143,7 @@ const Round = () => {
                     const currentResults =
                       results[round.players.join(", ")][
                         JSON.stringify(round.parameters)
-                      ]
+                      ] ?? []
                     for (const result of currentResults) {
                       const winner = round.players[result.places[0]]
                       if (!winCounts[winner]) {
@@ -189,7 +189,7 @@ const Round = () => {
                                   src={`/images/teams/${round.players[
                                     results[round.players.join(", ")][
                                       JSON.stringify(round.parameters)
-                                    ][0][0]
+                                    ][0].places[0]
                                   ]?.toLowerCase()}.png`}
                                   width={30}
                                   style={{ marginInlineEnd: 10 }}
@@ -205,7 +205,7 @@ const Round = () => {
                                   src={`/images/teams/${round.players[
                                     results[round.players.join(", ")][
                                       JSON.stringify(round.parameters)
-                                    ][0][1]
+                                    ][0].places[1]
                                   ]?.toLowerCase()}.png`}
                                   width={30}
                                   style={{ marginInlineEnd: 10 }}
@@ -431,8 +431,8 @@ const Round = () => {
               pointModifier={pointModifier}
             />
           </div>
+          <ResultStatisticsTable />
         </div>
-        <ResultStatisticsTable />
       </div>
     </>
   )

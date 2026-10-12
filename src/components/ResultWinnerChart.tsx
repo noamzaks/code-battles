@@ -33,7 +33,7 @@ const ResultWinnerChart = ({
     JSON.stringify(round.parameters)
   ]
 
-  if (!currentResults) {
+  if (!currentResults || currentResults.length <= 1) {
     return <></>
   }
 

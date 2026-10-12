@@ -4,7 +4,7 @@ import { notifications } from "@mantine/notifications"
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useConfiguration } from "../../configuration"
-import { useAPIs, useLocalStorage } from "../../hooks"
+import { useAdmin, useAPIs, useLocalStorage } from "../../hooks"
 import { runNoUI, setLocalStorage, tryUntilSuccess } from "../../utilities"
 import ResultStatisticsTable from "../ResultStatisticsTable"
 import ResultWinnerChart from "../ResultWinnerChart"
@@ -34,6 +34,7 @@ const RunSimulationBlock = () => {
   const [runningNoUI, setRunningNoUI] = useState(false)
   const [runningNoUIN, setRunningNoUIN] = useState<Record<string, number>>({})
   const navigate = useNavigate()
+  const admin = useAdmin()
   const [results] = useLocalStorage<any>({
     key: "Results",
     defaultValue: {},
@@ -61,7 +62,7 @@ const RunSimulationBlock = () => {
         seed === "-" ? "" : seed
       }&${Object.keys(params)
         .map((p) => `${p}=${encodeURIComponent(params[p])}`)
-        .join("&")}`,
+        .join("&")}${admin ? "&showcase=true" : ""}`,
     )
   }
 
@@ -249,7 +250,8 @@ const RunSimulationBlock = () => {
           const file = files[0]
           const text = await file.text()
           // @ts-ignore
-          window._navigate = navigate
+          window._navigate = (route: string) =>
+            navigate(admin ? `${route}&showcase=true` : route)
           // @ts-ignore
           window._isSimulationFromFile = true
 

@@ -810,7 +810,7 @@ class CodeBattles(
                 f.write(simulation_str)
 
     async def _start_simulation_from_file(self, contents: str):
-        from js import document
+        from js import document, window
 
         try:
             simulation = Simulation.load(str(contents))
@@ -853,7 +853,7 @@ class CodeBattles(
             )
             self.player_names = simulation.player_names
             self.background = False
-            self.console_visible = True
+            self.console_visible = "showcase=true" not in window.location.search
             self.verbose = True
             self._initialize_simulation(
                 ["" for _ in simulation.player_names], simulation.seed

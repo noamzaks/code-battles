@@ -25,11 +25,6 @@ const ResultStatisticsTable = () => {
     return <></>
   }
 
-  const statistics = Object.keys(
-    (Object.values(Object.values(results ?? {})[0] ?? {})[0] ?? [])[0]
-      ?.statistics ?? {},
-  )
-
   const roundResults = ((results ?? {})[round.players.join(", ")] ?? {})[
     JSON.stringify(round.parameters)
   ]
@@ -37,6 +32,14 @@ const ResultStatisticsTable = () => {
   if (!roundResults) {
     return <></>
   }
+  const statistics = [
+    ...new Set(
+      roundResults.flatMap((result: any) =>
+        Object.keys(result?.statistics ?? {}),
+      ),
+    ),
+  ] as string[]
+
   const uniqueRoundResults = roundResults.filter(
     (result: any, index: number, self: any[]) =>
       self.findIndex((r) => r.seed === result.seed) === index,
@@ -57,7 +60,7 @@ const ResultStatisticsTable = () => {
           body: uniqueRoundResults.map((result: any) =>
             [result.seed].concat(
               statistics.map((statistic) =>
-                (result?.statistics ?? {})[statistic].toString(),
+                (result?.statistics ?? {})[statistic]?.toString() ?? "",
               ),
             ),
           ),
