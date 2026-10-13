@@ -1,5 +1,7 @@
 import { Button, NumberInput, Select } from "@mantine/core"
+import { Dropzone } from "@mantine/dropzone"
 import { useViewportSize } from "@mantine/hooks"
+import { notifications } from "@mantine/notifications"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -10,7 +12,6 @@ import {
   RoundInfo,
   runNoUI,
   setLocalStorage,
-  shuffle,
   updatePointModifier,
 } from "../../utilities"
 import Block from "../blocks/Block"
@@ -103,6 +104,38 @@ const Round = () => {
       result[key] = parameters[key] ?? configuration.parameters[key][0]
     }
     return result
+  }
+
+  const loadRoundsFromFile = async (file: File) => {
+    try {
+      const fileRounds: {
+        parameters?: Record<string, string>
+        bots: string[]
+      }[] = JSON.parse(await file.text())
+      setRounds(
+        fileRounds.map((round) => {
+          const roundParameters: Record<string, string> = {}
+          for (const key in configuration.parameters) {
+            roundParameters[key] =
+              round.parameters?.[key] ?? configuration.parameters[key][0]
+          }
+          return { players: round.bots, parameters: roundParameters }
+        }),
+      )
+      notifications.show({
+        title: "Rounds loaded",
+        message: `Loaded ${fileRounds.length} rounds from ${file.name}.`,
+        color: "green",
+        icon: <i className="fa-solid fa-check" />,
+      })
+    } catch (e) {
+      notifications.show({
+        title: "Failed to load rounds",
+        message: `${e}`,
+        color: "red",
+        icon: <i className="fa-solid fa-xmark" />,
+      })
+    }
   }
 
   useEffect(updatePointModifier, [results])
@@ -373,6 +406,32 @@ const Round = () => {
                 >
                   Add
                 </Button>
+                <Dropzone
+                  mt="xs"
+                  multiple={false}
+                  accept={["application/json"]}
+                  onDrop={(files) => {
+                    if (files.length === 1) {
+                      loadRoundsFromFile(files[0])
+                    }
+                  }}
+                  style={{
+                    textAlign: "center",
+                    paddingTop: 20,
+                    paddingBottom: 20,
+                    paddingLeft: 10,
+                    paddingRight: 10,
+                  }}
+                >
+                  <span>
+                    <i
+                      className="fa-solid fa-file-code"
+                      style={{ marginRight: 10 }}
+                    />
+                    Drag a JSON file here or click to select a file to set the
+                    rounds
+                  </span>
+                </Dropzone>
 
                 <Button
                   leftSection={<i className="fa-solid fa-save" />}
@@ -393,29 +452,6 @@ const Round = () => {
                 </Button>
               </>
             )}
-            <Button
-              leftSection={<i className="fa-solid fa-dice" />}
-              mt="xs"
-              fullWidth
-              variant="white"
-              onClick={async () => {
-                for (const timeout of [
-                  400, 300, 300, 200, 200, 200, 200, 200, 100, 100, 100, 100,
-                  100, 100, 100, 100, 100, 100, 100, 80, 80, 80, 80, 80, 80, 80,
-                  80, 80, 80, 80,
-                ]) {
-                  setRounds((rounds) =>
-                    rounds.map((round) => ({
-                      parameters: round.parameters,
-                      players: shuffle(round.players),
-                    })),
-                  )
-                  await new Promise((resolve) => setTimeout(resolve, timeout))
-                }
-              }}
-            >
-              Shuffle
-            </Button>
           </Block>
           <div
             style={{
@@ -439,4 +475,3 @@ const Round = () => {
 }
 
 export default Round
-
