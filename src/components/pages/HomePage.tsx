@@ -4,6 +4,7 @@ import { useAdmin } from "../../hooks"
 import TimerAndVolume from "../TimerAndVolume"
 import AdminBlock from "../blocks/AdminBlock"
 import PickBotBlock from "../blocks/PickBotBlock"
+import RoundBlock from "../blocks/RoundBlock"
 import RunSimulationBlock from "../blocks/RunSimulationBlock"
 import TournamentBlock from "../blocks/TournamentBlock"
 import UploadBlock from "../blocks/UploadBlock"
@@ -36,6 +37,7 @@ const HomePage: React.FC<Props> = ({ blocks }) => {
       {blocks}
       {!admin && <PickBotBlock />}
       <TournamentBlock />
+      <RoundBlock />
     </div>
   )
 }

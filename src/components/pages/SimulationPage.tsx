@@ -8,6 +8,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom"
+import { useConfiguration } from "../../configuration"
 import { useAPIs, useAdmin, useLocalStorage } from "../../hooks"
 import {
   downloadFile,
@@ -71,6 +72,7 @@ const PlayPauseButton = () => {
 
 const Simulation = () => {
   const admin = useAdmin()
+  const configuration = useConfiguration()
   const [apis, loading] = useAPIs()
   let { playerapis } = useParams()
   const location = useLocation()
@@ -148,9 +150,11 @@ const Simulation = () => {
     }
   }, [])
 
-  const parameters = Object.fromEntries(searchParams)
-  if (parameters.seed) {
-    delete parameters.seed
+  // Only take the game's parameters from the URL (not seed, showcase, etc.), in
+  // the same order as elsewhere, since results are keyed by the parameters
+  const parameters: Record<string, string> = {}
+  for (const key in configuration.parameters) {
+    parameters[key] = searchParams.get(key) ?? configuration.parameters[key][0]
   }
   playerapis = playerapis?.split("&")[0]
 
@@ -419,4 +423,3 @@ const Simulation = () => {
 }
 
 export default Simulation
-

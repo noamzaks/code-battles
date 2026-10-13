@@ -2,7 +2,7 @@ import { Button, NumberInput, Select } from "@mantine/core"
 import { Dropzone } from "@mantine/dropzone"
 import { useViewportSize } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { doc, getDoc, setDoc } from "firebase/firestore"
+import { deleteField, doc, getDoc, setDoc, updateDoc } from "firebase/firestore"
 import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useConfiguration, useFirestore } from "../../configuration"
@@ -19,6 +19,7 @@ import BotSelector from "../blocks/BotSelector"
 import TournamentBlock from "../blocks/TournamentBlock"
 import ResultStatisticsTable from "../ResultStatisticsTable"
 import ResultWinnerChart from "../ResultWinnerChart"
+import RoundsTable from "../RoundsTable"
 
 let currentParameters: Record<string, string>
 let currentPlayers: string[]
@@ -152,169 +153,63 @@ const Round = () => {
         <div style={{ width: 800, maxWidth: "95%", padding: 10 }}>
           <Block title="Round" logo="fa-solid fa-otter">
             <ResultWinnerChart />
-            <table style={{ textAlign: "center" }}>
-              <thead>
-                <tr>
-                  <th style={{ width: "25%" }}>Parameters</th>
-                  <th style={{ width: "35%" }}>Players</th>
-                  {roundIterations === 1 && (
-                    <>
-                      <th style={{ width: "17.5%" }}>1st Place</th>
-                      <th style={{ width: "17.5%" }}>2nd Place</th>
-                    </>
-                  )}
-                  {roundIterations !== 1 && (
-                    <th style={{ width: "35%" }}>Results</th>
-                  )}
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rounds.map((round, index) => {
-                  const winCounts: Record<string, number> = {}
-                  if (results[round.players.join(", ")] !== undefined) {
-                    const currentResults =
-                      results[round.players.join(", ")][
-                        JSON.stringify(round.parameters)
-                      ] ?? []
-                    for (const result of currentResults) {
-                      const winner = round.players[result.places[0]]
-                      if (!winCounts[winner]) {
-                        winCounts[winner] = 1
-                      } else {
-                        winCounts[winner]++
-                      }
-                    }
-                  }
-                  const winners = Object.keys(winCounts).sort(
-                    (a, b) => winCounts[b] - winCounts[a],
-                  )
-
-                  return (
-                    <tr key={index}>
-                      <td style={{ whiteSpace: "pre" }}>
-                        {Object.keys(round.parameters)
-                          .sort()
+            <RoundsTable
+              rounds={rounds}
+              results={results}
+              roundIterations={roundIterations}
+              actions={(round, index) => (
+                <Button.Group orientation="vertical">
+                  <Button
+                    leftSection={<i className="fa-solid fa-hand-pointer" />}
+                    size="xs"
+                    onClick={() => {
+                      setLocalStorage("Current Round", index)
+                    }}
+                  >
+                    Select
+                  </Button>
+                  <Button
+                    leftSection={<i className="fa-solid fa-play" />}
+                    size="xs"
+                    onClick={() =>
+                      navigate(
+                        `/simulation/${round.players.map(encodeURIComponent).join(",")}?showcase=true&${Object.keys(
+                          round.parameters,
+                        )
                           .map(
                             (p) =>
-                              `${p[0].toUpperCase()}${p.slice(1)}: ${round.parameters[p]}`,
+                              `${p}=${encodeURIComponent(round.parameters[p])}`,
                           )
-                          .join("\n")}
-                      </td>
-                      <td>
-                        {round.players.map((player, index) => (
-                          <img
-                            key={index}
-                            src={`/images/teams/${player.toLowerCase()}.png`}
-                            width={30}
-                            style={{ marginInlineEnd: 10 }}
-                          />
-                        ))}
-                      </td>
-                      {roundIterations === 1 && (
-                        <>
-                          <td>
-                            {results[round.players.join(", ")] !== undefined &&
-                              results[round.players.join(", ")][
-                                JSON.stringify(round.parameters)
-                              ] !== undefined && (
-                                <img
-                                  src={`/images/teams/${round.players[
-                                    results[round.players.join(", ")][
-                                      JSON.stringify(round.parameters)
-                                    ][0].places[0]
-                                  ]?.toLowerCase()}.png`}
-                                  width={30}
-                                  style={{ marginInlineEnd: 10 }}
-                                />
-                              )}
-                          </td>
-                          <td>
-                            {results[round.players.join(", ")] !== undefined &&
-                              results[round.players.join(", ")][
-                                JSON.stringify(round.parameters)
-                              ] !== undefined && (
-                                <img
-                                  src={`/images/teams/${round.players[
-                                    results[round.players.join(", ")][
-                                      JSON.stringify(round.parameters)
-                                    ][0].places[1]
-                                  ]?.toLowerCase()}.png`}
-                                  width={30}
-                                  style={{ marginInlineEnd: 10 }}
-                                />
-                              )}
-                          </td>
-                        </>
-                      )}
-                      {roundIterations !== 1 && (
-                        <td>
-                          {winners.map((winner, index) => (
-                            <p key={index}>
-                              {winner}: {winCounts[winner]}
-                            </p>
-                          ))}
-                        </td>
-                      )}
-                      <td>
-                        <Button.Group orientation="vertical">
-                          <Button
-                            leftSection={
-                              <i className="fa-solid fa-hand-pointer" />
-                            }
-                            size="xs"
-                            onClick={() => {
-                              setLocalStorage("Current Round", index)
-                            }}
-                          >
-                            Select
-                          </Button>
-                          <Button
-                            leftSection={<i className="fa-solid fa-play" />}
-                            size="xs"
-                            onClick={() =>
-                              navigate(
-                                `/simulation/${round.players.map(encodeURIComponent).join(",")}?showcase=true&${Object.keys(
-                                  round.parameters,
-                                )
-                                  .map(
-                                    (p) =>
-                                      `${p}=${encodeURIComponent(round.parameters[p])}`,
-                                  )
-                                  .join("&")}`,
-                              )
-                            }
-                          >
-                            Simulate
-                          </Button>
-                          <Button
-                            leftSection={<i className="fa-solid fa-forward" />}
-                            size="xs"
-                            onClick={() => {
-                              if (roundIterations === 1) {
-                                runNoUI(
-                                  round.parameters,
-                                  apis,
-                                  round.players,
-                                  "",
-                                  false,
-                                )
-                              } else {
-                                currentParameters = round.parameters
-                                currentPlayers = round.players
-                                startRunNoUIN(roundIterations)
-                              }
-                            }}
-                          >
-                            Simulate (No UI)
-                          </Button>
-                        </Button.Group>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                          .join("&")}`,
+                      )
+                    }
+                  >
+                    Simulate
+                  </Button>
+                  <Button
+                    leftSection={<i className="fa-solid fa-forward" />}
+                    size="xs"
+                    onClick={() => {
+                      if (roundIterations === 1) {
+                        runNoUI(
+                          round.parameters,
+                          apis,
+                          round.players,
+                          "",
+                          false,
+                        )
+                      } else {
+                        currentParameters = round.parameters
+                        currentPlayers = round.players
+                        startRunNoUIN(roundIterations)
+                      }
+                    }}
+                  >
+                    Simulate (No UI)
+                  </Button>
+                </Button.Group>
+              )}
+            />
             <p
               style={{ textAlign: "center", display: "none" }}
               id="noui-progress"
@@ -449,6 +344,47 @@ const Round = () => {
                   }}
                 >
                   Save Scores
+                </Button>
+                <Button
+                  leftSection={<i className="fa-solid fa-cloud-arrow-up" />}
+                  mt="xs"
+                  onClick={async () => {
+                    await updateDoc(doc(firestore, "/tournament/info"), {
+                      round: {
+                        rounds: JSON.stringify(rounds),
+                        results: JSON.stringify(results),
+                        roundIterations,
+                      },
+                    })
+                    notifications.show({
+                      title: "Round published",
+                      message: "Everyone can now see the round.",
+                      color: "green",
+                      icon: <i className="fa-solid fa-check" />,
+                    })
+                  }}
+                  style={{ width: "47.5%", marginRight: "5%" }}
+                >
+                  Publish Round
+                </Button>
+                <Button
+                  color="red"
+                  leftSection={<i className="fa-solid fa-cloud" />}
+                  mt="xs"
+                  onClick={async () => {
+                    await updateDoc(doc(firestore, "/tournament/info"), {
+                      round: deleteField(),
+                    })
+                    notifications.show({
+                      title: "Round unpublished",
+                      message: "The round is no longer visible.",
+                      color: "green",
+                      icon: <i className="fa-solid fa-check" />,
+                    })
+                  }}
+                  style={{ width: "47.5%" }}
+                >
+                  Unpublish Round
                 </Button>
               </>
             )}
